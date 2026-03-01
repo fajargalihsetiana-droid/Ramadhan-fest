@@ -223,9 +223,15 @@ client.on("interactionCreate", async interaction=>{
 
   if(interaction.isChatInputCommand()){
 
-    if(interaction.commandName==="quiz"){
-      await sendQuiz();
-      return interaction.reply({content:"Soal dimunculkan.",ephemeral:true});
+    if (interaction.commandName === "quiz") {
+
+  await interaction.reply({
+    content: "⏳ Mengirim soal...",
+    ephemeral: true
+  });
+
+  await sendQuiz();
+
     }
 
     if(interaction.commandName==="addpoin"){
@@ -276,3 +282,4 @@ client.once("clientReady", async ()=>{
 });
 
 client.login(process.env.TOKEN);
+
