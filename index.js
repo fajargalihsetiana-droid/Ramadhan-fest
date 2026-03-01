@@ -33,7 +33,9 @@ function saveData() {
 
 function getToday() {
   const now = new Date();
-  return new Date(now.toLocaleString("en-US", { timeZone: "Asia/Jakarta" }))
+  return new Date(
+    now.toLocaleString("en-US", { timeZone: "Asia/Jakarta" })
+  )
     .toISOString()
     .split("T")[0];
 }
@@ -44,6 +46,10 @@ function getUser(id) {
       points: 0,
       daily: { date: getToday(), earned: 0 }
     };
+  }
+
+  if (!data[id].daily) {
+    data[id].daily = { date: getToday(), earned: 0 };
   }
 
   if (data[id].daily.date !== getToday()) {
@@ -70,7 +76,7 @@ function calculateDailyCap(totalPoints) {
   return 60;
 }
 
-/* ================= HISTORY LOG ================= */
+/* ================= HISTORY ================= */
 
 async function logPoint(guild, userId, amount) {
   const channel = guild.channels.cache.get(process.env.HISTORY_CHANNEL_ID);
@@ -85,7 +91,9 @@ async function logPoint(guild, userId, amount) {
       iconURL: member.user.displayAvatarURL()
     })
     .setTitle("🌙 Update Poin Ramadhan Fest")
-    .setDescription(`➕ +${amount} poin\n📌 Menang Quiz\n🏆 Total: ${user.points}`)
+    .setDescription(
+      `➕ +${amount} poin\n📌 Menang Quiz\n🏆 Total: ${user.points}`
+    )
     .setColor("Gold")
     .setTimestamp();
 
@@ -112,7 +120,7 @@ while(questions.length < 250){
   add(pick.question + " (variasi)", pick.options, pick.answer);
 }
 
-/* ================= QUIZ SYSTEM ================= */
+/* ================= QUIZ ================= */
 
 let activeQuiz = null;
 
@@ -150,10 +158,7 @@ async function sendQuiz(){
     allowedMentions: { roles: [ROLE_ID] }
   });
 
-  activeQuiz = {
-    correct: q.answer,
-    answered: []
-  };
+  activeQuiz = { correct: q.answer, answered: [] };
 
   setTimeout(async ()=>{
     if(!activeQuiz) return;
@@ -163,7 +168,7 @@ async function sendQuiz(){
   },60*60*1000);
 }
 
-/* ================= AUTO 10x SEHARI ================= */
+/* ================= AUTO ================= */
 
 function scheduleDaily(){
   for(let i=0;i<10;i++){
@@ -173,11 +178,10 @@ function scheduleDaily(){
 }
 setInterval(scheduleDaily,24*60*60*1000);
 
-/* ================= INTERACTION HANDLER ================= */
+/* ================= INTERACTION ================= */
 
 client.on("interactionCreate", async interaction=>{
 
-  // BUTTON
   if(interaction.isButton()){
 
     if(!activeQuiz)
@@ -191,18 +195,17 @@ client.on("interactionCreate", async interaction=>{
     if(parseInt(interaction.customId)===activeQuiz.correct){
 
       const user = getUser(interaction.user.id);
-
       let reward = calculateReward(user.points);
       const cap = calculateDailyCap(user.points);
 
-      if (user.daily.earned >= cap) {
+      if(user.daily.earned >= cap){
         return interaction.reply({
-          content: `⚠ Kamu sudah mencapai limit ${cap} poin hari ini.`,
-          ephemeral: true
+          content:`⚠ Kamu sudah mencapai limit ${cap} poin hari ini.`,
+          ephemeral:true
         });
       }
 
-      if (user.daily.earned + reward > cap) {
+      if(user.daily.earned + reward > cap){
         reward = cap - user.daily.earned;
       }
 
@@ -213,13 +216,11 @@ client.on("interactionCreate", async interaction=>{
       await logPoint(interaction.guild,interaction.user.id,reward);
 
       return interaction.reply({content:`🔥 Benar! +${reward} poin`,ephemeral:true});
-
-    }else{
-      return interaction.reply({content:"❌ Salah!",ephemeral:true});
     }
+
+    return interaction.reply({content:"❌ Salah!",ephemeral:true});
   }
 
-  // SLASH COMMAND
   if(interaction.isChatInputCommand()){
 
     if(interaction.commandName==="quiz"){
@@ -235,14 +236,14 @@ client.on("interactionCreate", async interaction=>{
       user.points += jumlah;
       saveData();
 
-      return interaction.reply("Poin ditambahkan.");
+      return interaction.reply({content:"Poin ditambahkan.",ephemeral:true});
     }
   }
 });
 
 /* ================= READY ================= */
 
-client.once("ready", async ()=>{
+client.once("clientReady", async ()=>{
   console.log("BOT ONLINE");
   scheduleDaily();
 
@@ -250,18 +251,27 @@ client.once("ready", async ()=>{
     new SlashCommandBuilder()
       .setName("quiz")
       .setDescription("Munculkan soal sekarang"),
+
     new SlashCommandBuilder()
       .setName("addpoin")
       .setDescription("Tambah poin manual")
-      .addUserOption(o=>o.setName("user").setRequired(true))
-      .addIntegerOption(o=>o.setName("jumlah").setRequired(true))
+      .addUserOption(o=>
+        o.setName("user")
+         .setDescription("User target")
+         .setRequired(true)
+      )
+      .addIntegerOption(o=>
+        o.setName("jumlah")
+         .setDescription("Jumlah poin")
+         .setRequired(true)
+      )
   ].map(c=>c.toJSON());
 
-  const rest = new REST({ version: "10" }).setToken(process.env.TOKEN);
+  const rest = new REST({version:"10"}).setToken(process.env.TOKEN);
 
   await rest.put(
     Routes.applicationGuildCommands(client.user.id, process.env.GUILD_ID),
-    { body: commands }
+    {body:commands}
   );
 });
 
