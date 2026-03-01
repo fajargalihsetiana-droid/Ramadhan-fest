@@ -12,9 +12,12 @@ const {
 } = require("discord.js");
 const fs = require("fs");
 
+const ROLE_ID = "1476291125227815210";
+
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMessages,
     GatewayIntentBits.GuildMembers
   ]
 });
@@ -24,58 +27,52 @@ let data = fs.existsSync(DATA_FILE)
   ? JSON.parse(fs.readFileSync(DATA_FILE))
   : {};
 
-let leaderboardMessageId = null;
-let activeQuiz = null;
-
-/* ================= UTIL ================= */
-
 function saveData() {
   fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
 }
 
+function getToday() {
+  const now = new Date();
+  return new Date(now.toLocaleString("en-US", { timeZone: "Asia/Jakarta" }))
+    .toISOString()
+    .split("T")[0];
+}
+
 function getUser(id) {
-  if (!data[id]) data[id] = { points: 0 };
+  if (!data[id]) {
+    data[id] = {
+      points: 0,
+      daily: { date: getToday(), earned: 0 }
+    };
+  }
+
+  if (data[id].daily.date !== getToday()) {
+    data[id].daily.date = getToday();
+    data[id].daily.earned = 0;
+  }
+
   return data[id];
 }
 
-/* ================= LEADERBOARD ================= */
+/* ================= REWARD SYSTEM ================= */
 
-async function updateLeaderboard() {
-  const channel = client.channels.cache.get(process.env.LEADERBOARD_CHANNEL_ID);
-  if (!channel) return;
-
-  const sorted = Object.entries(data)
-    .sort((a,b)=>b[1].points - a[1].points)
-    .slice(0,10);
-
-  let text="";
-  sorted.forEach((u,i)=>{
-    text += `**${i+1}.** <@${u[0]}> — ${u[1].points} poin\n`;
-  });
-
-  const embed = new EmbedBuilder()
-    .setTitle("🏆 Leaderboard Ramadhan Fest")
-    .setDescription(text || "Belum ada data")
-    .setColor("Gold")
-    .setTimestamp();
-
-  if(!leaderboardMessageId){
-    const msg = await channel.send({embeds:[embed]});
-    leaderboardMessageId = msg.id;
-  }else{
-    try{
-      const msg = await channel.messages.fetch(leaderboardMessageId);
-      await msg.edit({embeds:[embed]});
-    }catch{
-      const msg = await channel.send({embeds:[embed]});
-      leaderboardMessageId = msg.id;
-    }
-  }
+function calculateReward(totalPoints) {
+  if (totalPoints >= 1000) return 10;
+  if (totalPoints >= 500) return 12;
+  if (totalPoints >= 200) return 15;
+  return 20;
 }
 
-/* ================= HISTORY ================= */
+function calculateDailyCap(totalPoints) {
+  if (totalPoints >= 1000) return 40;
+  if (totalPoints >= 500) return 45;
+  if (totalPoints >= 200) return 50;
+  return 60;
+}
 
-async function logPoint(guild, userId, amount, source="Menang Quiz") {
+/* ================= HISTORY LOG ================= */
+
+async function logPoint(guild, userId, amount) {
   const channel = guild.channels.cache.get(process.env.HISTORY_CHANNEL_ID);
   if (!channel) return;
 
@@ -88,31 +85,36 @@ async function logPoint(guild, userId, amount, source="Menang Quiz") {
       iconURL: member.user.displayAvatarURL()
     })
     .setTitle("🌙 Update Poin Ramadhan Fest")
-    .setDescription(`➕ +${amount} poin\n📌 ${source}\n🏆 Total: ${user.points}`)
+    .setDescription(`➕ +${amount} poin\n📌 Menang Quiz\n🏆 Total: ${user.points}`)
     .setColor("Gold")
     .setTimestamp();
 
-  channel.send({embeds:[embed]});
+  channel.send({ embeds: [embed] });
 }
 
-/* ================= 250 SOAL ================= */
+/* ================= QUESTIONS ================= */
 
-const questions=[];
-function add(q,o,a){questions.push({question:q,options:o,answer:a});}
+const questions = [];
+function add(q,o,a){ questions.push({question:q,options:o,answer:a}); }
 
-for(let i=1;i<=125;i++){
-  add(`${i}+${i+2}=?`,
-    [String(i+i+2),String(i+i+1),String(i+i+3),String(i+i+4)],
+for(let i=1;i<=100;i++){
+  add(`${i} + ${i+5} = ?`,
+    [String(i+i+5),String(i+i+4),String(i+i+6),String(i+i+7)],
     0);
 }
 
-for(let i=10;i<=134;i++){
-  add(`${i}x2=?`,
-    [String(i*2),String(i*2+2),String(i*2-2),String(i*2+4)],
-    0);
+add("Ibukota Indonesia?",["Bandung","Jakarta","Medan","Surabaya"],1);
+add("Planet terbesar?",["Mars","Venus","Jupiter","Bumi"],2);
+add("Jumlah rukun Islam?",["4","5","6","7"],1);
+
+while(questions.length < 250){
+  const pick = questions[Math.floor(Math.random()*questions.length)];
+  add(pick.question + " (variasi)", pick.options, pick.answer);
 }
 
-/* ================= QUIZ ================= */
+/* ================= QUIZ SYSTEM ================= */
+
+let activeQuiz = null;
 
 async function sendQuiz(){
   if(activeQuiz) return;
@@ -130,7 +132,7 @@ async function sendQuiz(){
       `B. ${q.options[1]}\n`+
       `C. ${q.options[2]}\n`+
       `D. ${q.options[3]}\n\n`+
-      `⏳ 5 menit`
+      `⏳ 1 jam`
     )
     .setColor("Gold");
 
@@ -141,32 +143,43 @@ async function sendQuiz(){
     new ButtonBuilder().setCustomId("3").setLabel("D").setStyle(ButtonStyle.Primary)
   );
 
-  const msg = await channel.send({embeds:[embed],components:[row]});
+  const msg = await channel.send({
+    content: `<@&${ROLE_ID}> 📢 Quiz baru sudah muncul!`,
+    embeds:[embed],
+    components:[row],
+    allowedMentions: { roles: [ROLE_ID] }
+  });
 
-  activeQuiz = {correct:q.answer,answered:[]};
+  activeQuiz = {
+    correct: q.answer,
+    answered: []
+  };
 
   setTimeout(async ()=>{
     if(!activeQuiz) return;
     await msg.edit({components:[]});
     channel.send("⏰ Waktu habis! Soal hangus.");
     activeQuiz=null;
-  },5*60*1000);
+  },60*60*1000);
 }
 
-/* ================= SCHEDULER ================= */
+/* ================= AUTO 10x SEHARI ================= */
 
 function scheduleDaily(){
   for(let i=0;i<10;i++){
-    const delay=Math.floor(Math.random()*24*60*60*1000);
+    const delay = Math.floor(Math.random()*24*60*60*1000);
     setTimeout(sendQuiz,delay);
   }
 }
 setInterval(scheduleDaily,24*60*60*1000);
 
-/* ================= INTERACTION ================= */
+/* ================= INTERACTION HANDLER ================= */
 
 client.on("interactionCreate", async interaction=>{
+
+  // BUTTON
   if(interaction.isButton()){
+
     if(!activeQuiz)
       return interaction.reply({content:"Soal sudah selesai.",ephemeral:true});
 
@@ -177,75 +190,79 @@ client.on("interactionCreate", async interaction=>{
 
     if(parseInt(interaction.customId)===activeQuiz.correct){
 
-      const user=getUser(interaction.user.id);
-      user.points+=10;
+      const user = getUser(interaction.user.id);
+
+      let reward = calculateReward(user.points);
+      const cap = calculateDailyCap(user.points);
+
+      if (user.daily.earned >= cap) {
+        return interaction.reply({
+          content: `⚠ Kamu sudah mencapai limit ${cap} poin hari ini.`,
+          ephemeral: true
+        });
+      }
+
+      if (user.daily.earned + reward > cap) {
+        reward = cap - user.daily.earned;
+      }
+
+      user.points += reward;
+      user.daily.earned += reward;
+
       saveData();
+      await logPoint(interaction.guild,interaction.user.id,reward);
 
-      await logPoint(interaction.guild,interaction.user.id,10);
-      await updateLeaderboard();
+      return interaction.reply({content:`🔥 Benar! +${reward} poin`,ephemeral:true});
 
-      return interaction.reply({content:"🔥 Benar! +10 poin",ephemeral:true});
     }else{
       return interaction.reply({content:"❌ Salah!",ephemeral:true});
     }
   }
 
+  // SLASH COMMAND
   if(interaction.isChatInputCommand()){
 
-    if(interaction.commandName==="soal"){
-      if(interaction.user.id!==process.env.OWNER_ID)
-        return interaction.reply({content:"Tidak punya izin.",ephemeral:true});
-
+    if(interaction.commandName==="quiz"){
       await sendQuiz();
-      return interaction.reply({content:"Soal dikirim.",ephemeral:true});
+      return interaction.reply({content:"Soal dimunculkan.",ephemeral:true});
     }
 
     if(interaction.commandName==="addpoin"){
-      if(interaction.user.id!==process.env.OWNER_ID)
-        return interaction.reply({content:"Tidak punya izin.",ephemeral:true});
+      const target = interaction.options.getUser("user");
+      const jumlah = interaction.options.getInteger("jumlah");
 
-      const userTarget=interaction.options.getUser("user");
-      const jumlah=interaction.options.getInteger("jumlah");
-
-      const user=getUser(userTarget.id);
-      user.points+=jumlah;
+      const user = getUser(target.id);
+      user.points += jumlah;
       saveData();
 
-      await logPoint(interaction.guild,userTarget.id,jumlah,"Manual");
-      await updateLeaderboard();
-
-      return interaction.reply("Poin berhasil ditambahkan.");
+      return interaction.reply("Poin ditambahkan.");
     }
   }
 });
 
-/* ================= REGISTER COMMAND ================= */
+/* ================= READY ================= */
 
 client.once("ready", async ()=>{
   console.log("BOT ONLINE");
+  scheduleDaily();
 
-  const commands=[
+  const commands = [
     new SlashCommandBuilder()
-      .setName("soal")
-      .setDescription("Kirim soal sekarang (Owner)"),
-
+      .setName("quiz")
+      .setDescription("Munculkan soal sekarang"),
     new SlashCommandBuilder()
       .setName("addpoin")
       .setDescription("Tambah poin manual")
-      .addUserOption(o=>o.setName("user").setDescription("User").setRequired(true))
-      .addIntegerOption(o=>o.setName("jumlah").setDescription("Jumlah").setRequired(true))
+      .addUserOption(o=>o.setName("user").setRequired(true))
+      .addIntegerOption(o=>o.setName("jumlah").setRequired(true))
   ].map(c=>c.toJSON());
 
-  const rest=new REST({version:"10"}).setToken(process.env.TOKEN);
+  const rest = new REST({ version: "10" }).setToken(process.env.TOKEN);
 
   await rest.put(
-  Routes.applicationGuildCommands(client.user.id, process.env.GUILD_ID),
-  {body:commands}
-);
-
-  scheduleDaily();
-  updateLeaderboard();
+    Routes.applicationGuildCommands(client.user.id, process.env.GUILD_ID),
+    { body: commands }
+  );
 });
 
 client.login(process.env.TOKEN);
-
