@@ -27,6 +27,11 @@ let data = fs.existsSync(DATA_FILE)
   ? JSON.parse(fs.readFileSync(DATA_FILE))
   : {};
 
+let activeQuiz = null;
+let leaderboardMessage = null;
+
+/* ================= BASIC ================= */
+
 function saveData() {
   fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
 }
@@ -76,6 +81,45 @@ function calculateDailyCap(totalPoints) {
   return 60;
 }
 
+/* ================= LEADERBOARD ================= */
+
+async function updateLeaderboard(guild) {
+  const channel = guild.channels.cache.get(process.env.LEADERBOARD_CHANNEL_ID);
+  if (!channel) return;
+
+  const sorted = Object.entries(data)
+    .sort((a, b) => b[1].points - a[1].points)
+    .slice(0, 10);
+
+  let desc = "";
+
+  sorted.forEach((entry, index) => {
+    const userId = entry[0];
+    const points = entry[1].points;
+
+    let rankDisplay;
+
+    if (index === 0) rankDisplay = "🥇";
+    else if (index === 1) rankDisplay = "🥈";
+    else if (index === 2) rankDisplay = "🥉";
+    else rankDisplay = `**${index + 1}.**`;
+
+    desc += `${rankDisplay} <@${userId}> — **${points} poin**\n`;
+  });
+
+  const embed = new EmbedBuilder()
+    .setTitle("🏆 Leaderboard Ramadhan Fest")
+    .setDescription(desc || "Belum ada data.")
+    .setColor("Gold")
+    .setTimestamp();
+
+  if (!leaderboardMessage) {
+    leaderboardMessage = await channel.send({ embeds: [embed] });
+  } else {
+    await leaderboardMessage.edit({ embeds: [embed] });
+  }
+}
+
 /* ================= HISTORY ================= */
 
 async function logPoint(guild, userId, amount) {
@@ -121,8 +165,6 @@ while(questions.length < 250){
 }
 
 /* ================= QUIZ ================= */
-
-let activeQuiz = null;
 
 async function sendQuiz(){
   if(activeQuiz) return;
@@ -200,7 +242,7 @@ client.on("interactionCreate", async interaction=>{
 
       if(user.daily.earned >= cap){
         return interaction.reply({
-          content:`⚠ Kamu sudah mencapai limit ${cap} poin hari ini.`,
+          content:`⚠ Limit harian ${cap} poin tercapai.`,
           ephemeral:true
         });
       }
@@ -214,6 +256,7 @@ client.on("interactionCreate", async interaction=>{
 
       saveData();
       await logPoint(interaction.guild,interaction.user.id,reward);
+      await updateLeaderboard(interaction.guild);
 
       return interaction.reply({content:`🔥 Benar! +${reward} poin`,ephemeral:true});
     }
@@ -223,15 +266,9 @@ client.on("interactionCreate", async interaction=>{
 
   if(interaction.isChatInputCommand()){
 
-    if (interaction.commandName === "quiz") {
-
-  await interaction.reply({
-    content: "⏳ Mengirim soal...",
-    ephemeral: true
-  });
-
-  await sendQuiz();
-
+    if(interaction.commandName==="quiz"){
+      await interaction.reply({content:"⏳ Mengirim soal...",ephemeral:true});
+      await sendQuiz();
     }
 
     if(interaction.commandName==="addpoin"){
@@ -240,7 +277,9 @@ client.on("interactionCreate", async interaction=>{
 
       const user = getUser(target.id);
       user.points += jumlah;
+
       saveData();
+      await updateLeaderboard(interaction.guild);
 
       return interaction.reply({content:"Poin ditambahkan.",ephemeral:true});
     }
@@ -282,4 +321,3 @@ client.once("clientReady", async ()=>{
 });
 
 client.login(process.env.TOKEN);
-
