@@ -98,7 +98,7 @@ async function updateLeaderboard(guild) {
 
   if (first) {
     desc += `🥇 **CALON JUARA #1**\n`;
-    desc += `<@${first[0]}> 🪙\n`;
+    desc += `<@${first[0]}> \n`;
     desc += `📊 **${first[1].points} poin**\n`;
 
     if (second) {
@@ -113,7 +113,7 @@ async function updateLeaderboard(guild) {
     const gap = first[1].points - second[1].points;
 
     desc += `🥈 **CALON JUARA #2**\n`;
-    desc += `<@${second[0]}> 💎\n`;
+    desc += `<@${second[0]}> \n`;
     desc += `📊 **${second[1].points} poin**\n`;
     desc += `📉 Tertinggal **${gap} poin** dari posisi 1\n\n`;
   }
