@@ -73,6 +73,10 @@ async function logPoint(guild, userId, amount, reason) {
 
 /* ================= LEADERBOARD ================= */
 
+let lastRanking = [];
+let lastZonaPanas = 0;
+const ZONA_COOLDOWN = 5 * 60 * 1000; // 5 menit
+
 let leaderboardMessage = null;
 
 async function updateLeaderboard(guild) {
@@ -83,26 +87,87 @@ async function updateLeaderboard(guild) {
     .sort((a, b) => b[1].points - a[1].points)
     .slice(0, 10);
 
+  if (sorted.length === 0) return;
+
+  const currentRanking = sorted.map(e => e[0]);
+
+  /* ================= PERGESERAN RANK ================= */
+
+  if (lastRanking.length > 0) {
+    currentRanking.forEach((userId, newIndex) => {
+      const oldIndex = lastRanking.indexOf(userId);
+
+      if (oldIndex !== -1 && oldIndex > newIndex) {
+
+        if (newIndex === 0) {
+          channel.send(
+            `👑🔥 **TAHTA TERGUNCANG!**\n<@${userId}> berhasil merebut posisi #1!`
+          );
+        } else {
+          channel.send(
+            `🚀 **PERGESERAN RANK!**\n<@${userId}> naik dari posisi ${oldIndex + 1} ➜ ${newIndex + 1}`
+          );
+        }
+      }
+    });
+  }
+
+  lastRanking = currentRanking;
+
+  /* ================= ZONA PANAS ================= */
+
+  const first = sorted[0];
+  const second = sorted[1];
+
+  if (second) {
+    const selisih = first[1].points - second[1].points;
+    const now = Date.now();
+
+    if (selisih <= 50 && now - lastZonaPanas > ZONA_COOLDOWN) {
+      channel.send(
+        `⚠️ **ZONA PANAS!**\nSelisih antara posisi #1 dan #2 hanya **${selisih} poin!** 🔥`
+      );
+      lastZonaPanas = now;
+    }
+  }
+
+  /* ================= EMBED ================= */
+
   let desc = "";
 
-  sorted.forEach((entry, index) => {
-    const userId = entry[0];
-    const points = entry[1].points;
+  const firstUser = await guild.members.fetch(first[0]).catch(() => null);
+  const selisih = second ? first[1].points - second[1].points : 0;
 
-    let rank;
-    if (index === 0) rank = "🥇";
-    else if (index === 1) rank = "🥈";
-    else if (index === 2) rank = "🥉";
-    else rank = `**${index + 1}.**`;
+  desc += `🥇 **CALON JUARA #1**\n`;
+  desc += `<@${first[0]}>\n`;
+  desc += `📊 **${first[1].points} poin**\n`;
+  if (second)
+    desc += `📈 Unggul **${selisih} poin** dari posisi 2\n\n`;
 
-    desc += `${rank} <@${userId}> — **${points} poin**\n`;
+  if (second) {
+    desc += `🥈 **CALON JUARA #2**\n`;
+    desc += `<@${second[0]}>\n`;
+    desc += `📊 **${second[1].points} poin**\n`;
+    desc += `📉 Tertinggal **${selisih} poin** dari posisi 1\n\n`;
+  }
+
+  desc += `━━━━━━━━━━━━━━━━━━\n`;
+
+  sorted.slice(2).forEach((entry, index) => {
+    desc += `**${index + 3}.** <@${entry[0]}> — ${entry[1].points} poin\n`;
   });
 
   const embed = new EmbedBuilder()
-    .setTitle("🏆 Leaderboard Ramadhan Fest")
-    .setDescription(desc || "Belum ada data.")
+    .setTitle("🏆 RAMADHAN FEST — LIVE RANKING")
+    .setDescription(
+      "🔥 **2 posisi teratas berpeluang menjadi juara**\n\n" + desc
+    )
     .setColor("Gold")
+    .setFooter({ text: "Persaingan makin panas..." })
     .setTimestamp();
+
+  if (firstUser)
+    embed.setThumbnail(firstUser.user.displayAvatarURL({ dynamic: true }));
 
   if (!leaderboardMessage)
     leaderboardMessage = await channel.send({ embeds: [embed] });
