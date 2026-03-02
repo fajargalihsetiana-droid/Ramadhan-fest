@@ -44,7 +44,13 @@ function getUser(id) {
   return data[id];
 }
 
-/* ================= GAP BALANCING ================= */
+/* ================= ERROR PROTECTION ================= */
+
+process.on("unhandledRejection", error => {
+  console.error("UNHANDLED REJECTION:", error);
+});
+
+/* ================= GAP BALANCE ================= */
 
 function applyGapBalance(userId, baseReward) {
 
@@ -53,26 +59,23 @@ function applyGapBalance(userId, baseReward) {
 
   if (sorted.length < 3) return baseReward;
 
-  const firstPoints = sorted[0][1].points;
-  const thirdPoints = sorted[2][1].points;
+  const first = sorted[0][1].points;
+  const third = sorted[2][1].points;
 
-  const gap = firstPoints - thirdPoints;
+  const gap = first - third;
   const rankIndex = sorted.findIndex(e => e[0] === userId);
 
   if (gap > 1500) {
     if (rankIndex === 0) return Math.floor(baseReward * 0.6);
     if (rankIndex === 1) return Math.floor(baseReward * 0.75);
-    if (rankIndex >= 2 && rankIndex <= 5)
-      return Math.floor(baseReward * 1.4);
-    if (rankIndex >= 6)
-      return Math.floor(baseReward * 1.6);
+    if (rankIndex >= 2 && rankIndex <= 5) return Math.floor(baseReward * 1.4);
+    if (rankIndex >= 6) return Math.floor(baseReward * 1.6);
   }
 
   if (gap > 800) {
     if (rankIndex === 0) return Math.floor(baseReward * 0.75);
     if (rankIndex === 1) return Math.floor(baseReward * 0.85);
-    if (rankIndex >= 2 && rankIndex <= 5)
-      return Math.floor(baseReward * 1.2);
+    if (rankIndex >= 2 && rankIndex <= 5) return Math.floor(baseReward * 1.2);
   }
 
   return baseReward;
@@ -83,6 +86,7 @@ function applyGapBalance(userId, baseReward) {
 let leaderboardMessage = null;
 
 async function updateLeaderboard(guild) {
+
   const channel = guild.channels.cache.get(process.env.LEADERBOARD_CHANNEL_ID);
   if (!channel) return;
 
@@ -98,10 +102,7 @@ async function updateLeaderboard(guild) {
   let desc = "";
 
   if (first) {
-    desc += `🥇 **CALON JUARA #1**\n`;
-    desc += `<@${first[0]}>\n`;
-    desc += `📊 **${first[1].points} poin**\n`;
-
+    desc += `🥇 **CALON JUARA #1**\n<@${first[0]}>\n📊 **${first[1].points} poin**\n`;
     if (second) {
       const gap = first[1].points - second[1].points;
       desc += `📈 Unggul **${gap} poin** dari posisi 2\n\n`;
@@ -110,9 +111,7 @@ async function updateLeaderboard(guild) {
 
   if (second) {
     const gap = first[1].points - second[1].points;
-    desc += `🥈 **CALON JUARA #2**\n`;
-    desc += `<@${second[0]}>\n`;
-    desc += `📊 **${second[1].points} poin**\n`;
+    desc += `🥈 **CALON JUARA #2**\n<@${second[0]}>\n📊 **${second[1].points} poin**\n`;
     desc += `📉 Tertinggal **${gap} poin** dari posisi 1\n\n`;
   }
 
@@ -137,6 +136,58 @@ async function updateLeaderboard(guild) {
   else
     await leaderboardMessage.edit({ embeds: [embed] });
 }
+
+/* ================= KEYWORD FARM ================= */
+
+const keywordCooldown = {
+  sahur: 30 * 60 * 1000,
+  buka: 30 * 60 * 1000,
+  tarawih: 45 * 60 * 1000,
+  tadarus: 50 * 60 * 1000,
+  sedekah: 60 * 60 * 1000
+};
+
+const quotes = [
+  "🌙 Ramadhan penuh berkah!",
+  "✨ Ibadah kecil, pahala besar!",
+  "🤲 Semoga amalmu diterima!",
+  "🌟 Terus kumpulkan kebaikan!"
+];
+
+client.on("messageCreate", async message => {
+
+  if (message.author.bot) return;
+  if (message.channel.id !== process.env.KEYWORD_CHANNEL_ID) return;
+
+  const content = message.content.toLowerCase().trim();
+  if (!keywordCooldown[content]) return;
+
+  const user = getUser(message.author.id);
+  const now = Date.now();
+
+  if (!user.keywordCooldowns[content])
+    user.keywordCooldowns[content] = 0;
+
+  if (now < user.keywordCooldowns[content]) {
+    const remain = Math.ceil((user.keywordCooldowns[content] - now) / 60000);
+    return message.reply(`⏳ Tunggu ${remain} menit lagi.`);
+  }
+
+  let reward = Math.floor(Math.random() * 10) + 10;
+  reward = applyGapBalance(message.author.id, reward);
+
+  user.points += reward;
+  user.keywordCooldowns[content] = now + keywordCooldown[content];
+
+  saveData();
+  await updateLeaderboard(message.guild);
+
+  const q = quotes[Math.floor(Math.random()*quotes.length)];
+
+  message.channel.send(
+    `${q}\n\n📈 +${reward} poin\n🏆 Total: **${user.points} poin**`
+  );
+});
 
 /* ================= QUIZ ================= */
 
@@ -206,38 +257,12 @@ function scheduleDaily(){
   }
 }
 
-setInterval(scheduleDaily,24*60*60*1000);
-
-/* ================= INTERACTION ================= */
-
-client.on("interactionCreate", async interaction => {
-
-  if(interaction.isButton()){
-    if(!activeQuiz) return interaction.reply({content:"Soal selesai.",ephemeral:true});
-    if(activeQuiz.answered.includes(interaction.user.id))
-      return interaction.reply({content:"Kamu sudah menjawab.",ephemeral:true});
-
-    activeQuiz.answered.push(interaction.user.id);
-
-    if(parseInt(interaction.customId)===activeQuiz.correct){
-      const user=getUser(interaction.user.id);
-      let reward=Math.floor(Math.random()*3)+10; // 10-12 poin
-      reward=applyGapBalance(interaction.user.id,reward);
-      user.points+=reward;
-      saveData();
-      await updateLeaderboard(interaction.guild);
-      return interaction.reply({content:`🔥 Benar! +${reward} poin`,ephemeral:true});
-    }
-
-    return interaction.reply({content:"❌ Salah!",ephemeral:true});
-  }
-});
-
-/* ================= READY ================= */
-
-client.once("clientReady", async () => {
-  console.log("BOT ONLINE - QUIZ RANDOM ACTIVE");
+client.once("clientReady", ()=>{
+  console.log("BOT ONLINE - FULL SYSTEM ACTIVE");
   scheduleDaily();
+  setInterval(scheduleDaily,24*60*60*1000);
 });
+
+/* ================= START ================= */
 
 client.login(process.env.TOKEN);
