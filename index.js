@@ -99,15 +99,26 @@ async function updateLeaderboard(guild) {
 
       if (oldIndex !== -1 && oldIndex > newIndex) {
 
-        if (newIndex === 0) {
-          channel.send(
-            `👑🔥 **TAHTA TERGUNCANG!**\n<@${userId}> berhasil merebut posisi #1!`
-          );
-        } else {
-          channel.send(
-            `🚀 **PERGESERAN RANK!**\n<@${userId}> naik dari posisi ${oldIndex + 1} ➜ ${newIndex + 1}`
-          );
-        }
+      if (newIndex === 0) {
+
+  const msg = await channel.send(
+    `👑🔥 **PUNCAK BERGESER!**\n<@${userId}> kini memimpin leaderboard!`
+  );
+
+  setTimeout(() => {
+    msg.delete().catch(() => {});
+  }, 15000);
+
+} else {
+
+  const shiftMsg = await channel.send(
+    `🚀 **RANK NAIK!**\n<@${userId}> naik dari posisi ${oldIndex + 1} ➜ ${newIndex + 1}`
+  );
+
+  setTimeout(() => {
+    shiftMsg.delete().catch(() => {});
+  }, 10000);
+}
       }
     });
   }
@@ -124,11 +135,17 @@ async function updateLeaderboard(guild) {
     const now = Date.now();
 
     if (selisih <= 50 && now - lastZonaPanas > ZONA_COOLDOWN) {
-      channel.send(
-        `⚠️ **ZONA PANAS!**\nSelisih antara posisi #1 dan #2 hanya **${selisih} poin!** 🔥`
-      );
-      lastZonaPanas = now;
-    }
+
+  const zonaMsg = await channel.send(
+    `⚔️🔥 **PERSAINGAN MEMANAS!**\nRank #1 dan #2 cuma beda **${selisih} poin!**`
+  );
+
+  setTimeout(() => {
+    zonaMsg.delete().catch(() => {});
+  }, 20000);
+
+  lastZonaPanas = now;
+}
   }
 
   /* ================= EMBED ================= */
