@@ -199,6 +199,33 @@ function random(min,max){
   return Math.floor(Math.random()*(max-min+1))+min;
 }
 
+function calculateReward(totalPoints, keyword){
+
+  const tier1 = totalPoints < 2000;
+  const tier2 = totalPoints >= 2000 && totalPoints < 4000;
+
+  function rand(min,max){
+    return Math.floor(Math.random()*(max-min+1))+min;
+  }
+
+  if(keyword === "sedekah"){
+    if(tier1) return rand(30,45);
+    if(tier2) return rand(18,25);
+    return rand(10,15);
+  }
+
+  if(keyword === "tarawih" || keyword === "tadarus"){
+    if(tier1) return rand(20,30);
+    if(tier2) return rand(10,18);
+    return rand(6,10);
+  }
+
+  // sahur & buka
+  if(tier1) return rand(18,28);
+  if(tier2) return rand(8,15);
+  return rand(4,8);
+}
+
 client.on("messageCreate",async message=>{
   if(message.author.bot) return;
   if(message.channel.id!==process.env.KEYWORD_CHANNEL_ID) return;
@@ -217,7 +244,7 @@ client.on("messageCreate",async message=>{
     return message.reply(`⏳ Tunggu ${remain} menit lagi.`);
   }
 
-  const reward=random(15,40);
+  const reward = calculateReward(user.points, content);
   user.points+=reward;
   user.keywordCooldowns[content]=now+keywordCooldown[content];
 
