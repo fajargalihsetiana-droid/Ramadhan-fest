@@ -18,7 +18,8 @@ const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.GuildMembers
+    GatewayIntentBits.GuildMembers,
+    GatewayIntentBits.MessageContent
   ]
 });
 
@@ -49,13 +50,16 @@ function getUser(id) {
   if (!data[id]) {
     data[id] = {
       points: 0,
-      daily: { date: getToday(), earned: 0 }
+      daily: { date: getToday(), earned: 0 },
+      keywordCooldowns: {}
     };
   }
 
-  if (!data[id].daily) {
+  if (!data[id].daily)
     data[id].daily = { date: getToday(), earned: 0 };
-  }
+
+  if (!data[id].keywordCooldowns)
+    data[id].keywordCooldowns = {};
 
   if (data[id].daily.date !== getToday()) {
     data[id].daily.date = getToday();
@@ -63,22 +67,6 @@ function getUser(id) {
   }
 
   return data[id];
-}
-
-/* ================= REWARD SYSTEM ================= */
-
-function calculateReward(totalPoints) {
-  if (totalPoints >= 1000) return 10;
-  if (totalPoints >= 500) return 12;
-  if (totalPoints >= 200) return 15;
-  return 20;
-}
-
-function calculateDailyCap(totalPoints) {
-  if (totalPoints >= 1000) return 40;
-  if (totalPoints >= 500) return 45;
-  if (totalPoints >= 200) return 50;
-  return 60;
 }
 
 /* ================= LEADERBOARD ================= */
@@ -98,7 +86,6 @@ async function updateLeaderboard(guild) {
     const points = entry[1].points;
 
     let rankDisplay;
-
     if (index === 0) rankDisplay = "🥇";
     else if (index === 1) rankDisplay = "🥈";
     else if (index === 2) rankDisplay = "🥉";
@@ -113,11 +100,10 @@ async function updateLeaderboard(guild) {
     .setColor("Gold")
     .setTimestamp();
 
-  if (!leaderboardMessage) {
+  if (!leaderboardMessage)
     leaderboardMessage = await channel.send({ embeds: [embed] });
-  } else {
+  else
     await leaderboardMessage.edit({ embeds: [embed] });
-  }
 }
 
 /* ================= HISTORY ================= */
@@ -135,36 +121,31 @@ async function logPoint(guild, userId, amount) {
       iconURL: member.user.displayAvatarURL()
     })
     .setTitle("🌙 Update Poin Ramadhan Fest")
-    .setDescription(
-      `➕ +${amount} poin\n📌 Menang Quiz\n🏆 Total: ${user.points}`
-    )
+    .setDescription(`➕ +${amount} poin\n🏆 Total: ${user.points}`)
     .setColor("Gold")
     .setTimestamp();
 
   channel.send({ embeds: [embed] });
 }
 
-/* ================= QUESTIONS ================= */
-
-const questions = [];
-function add(q,o,a){ questions.push({question:q,options:o,answer:a}); }
-
-for(let i=1;i<=100;i++){
-  add(`${i} + ${i+5} = ?`,
-    [String(i+i+5),String(i+i+4),String(i+i+6),String(i+i+7)],
-    0);
-}
-
-add("Ibukota Indonesia?",["Bandung","Jakarta","Medan","Surabaya"],1);
-add("Planet terbesar?",["Mars","Venus","Jupiter","Bumi"],2);
-add("Jumlah rukun Islam?",["4","5","6","7"],1);
-
-while(questions.length < 250){
-  const pick = questions[Math.floor(Math.random()*questions.length)];
-  add(pick.question + " (variasi)", pick.options, pick.answer);
-}
-
 /* ================= QUIZ ================= */
+
+const questions = [
+  { question: "Ibukota Indonesia?", correct: "Jakarta", options: ["Bandung","Jakarta","Medan","Surabaya"] },
+  { question: "Jumlah rukun Islam?", correct: "5", options: ["4","5","6","7"] },
+  { question: "Planet terbesar?", correct: "Jupiter", options: ["Mars","Venus","Jupiter","Bumi"] },
+  { question: "Bulan puasa disebut?", correct: "Ramadhan", options: ["Rajab","Ramadhan","Syawal","Muharram"] },
+  { question: "Sholat wajib sehari ada berapa?", correct: "5", options: ["4","5","6","7"] },
+  { question: "Lambang negara Indonesia?", correct: "Garuda", options: ["Elang","Garuda","Rajawali","Merpati"] }
+];
+
+function shuffle(array){
+  for(let i=array.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [array[i],array[j]]=[array[j],array[i]];
+  }
+  return array;
+}
 
 async function sendQuiz(){
   if(activeQuiz) return;
@@ -173,16 +154,17 @@ async function sendQuiz(){
   if(!channel) return;
 
   const q = questions[Math.floor(Math.random()*questions.length)];
+  const shuffled = shuffle([...q.options]);
+  const correctIndex = shuffled.indexOf(q.correct);
 
   const embed = new EmbedBuilder()
     .setTitle("🌙 QUIZ RAMADHAN FEST")
     .setDescription(
       `**${q.question}**\n\n`+
-      `A. ${q.options[0]}\n`+
-      `B. ${q.options[1]}\n`+
-      `C. ${q.options[2]}\n`+
-      `D. ${q.options[3]}\n\n`+
-      `⏳ 1 jam`
+      `A. ${shuffled[0]}\n`+
+      `B. ${shuffled[1]}\n`+
+      `C. ${shuffled[2]}\n`+
+      `D. ${shuffled[3]}\n\n⏳ 1 jam`
     )
     .setColor("Gold");
 
@@ -197,10 +179,10 @@ async function sendQuiz(){
     content: `<@&${ROLE_ID}> 📢 Quiz baru sudah muncul!`,
     embeds:[embed],
     components:[row],
-    allowedMentions: { roles: [ROLE_ID] }
+    allowedMentions:{roles:[ROLE_ID]}
   });
 
-  activeQuiz = { correct: q.answer, answered: [] };
+  activeQuiz = { correct: correctIndex, answered: [] };
 
   setTimeout(async ()=>{
     if(!activeQuiz) return;
@@ -210,22 +192,75 @@ async function sendQuiz(){
   },60*60*1000);
 }
 
-/* ================= AUTO ================= */
+/* ================= KEYWORD SYSTEM ================= */
 
-function scheduleDaily(){
-  for(let i=0;i<10;i++){
-    const delay = Math.floor(Math.random()*24*60*60*1000);
-    setTimeout(sendQuiz,delay);
-  }
+const keywordCooldown = {
+  sahur: 30*60*1000,
+  buka: 30*60*1000,
+  tarawih: 45*60*1000,
+  tadarus: 50*60*1000,
+  sedekah: 60*60*1000
+};
+
+function random(min,max){
+  return Math.floor(Math.random()*(max-min+1))+min;
 }
-setInterval(scheduleDaily,24*60*60*1000);
+
+function calculateKeywordReward(total, key){
+  const low = total < 2000;
+
+  if(key==="sedekah") return low? random(35,60):random(15,25);
+  if(key==="tarawih"||key==="tadarus") return low? random(25,40):random(10,18);
+  return low? random(20,35):random(8,15);
+}
+
+const ramadhanTexts=[
+"♡ ꒰￤Langkah kecilmu di bulan suci membawa cahaya besar.",
+"♡ ꒰￤Doa malam ini terangkat perlahan penuh keberkahan.",
+"♡ ꒰￤Ramadhan mengajarkan hati untuk lebih bersyukur.",
+"♡ ꒰￤Kebaikan hari ini menjadi cahaya di akhirat.",
+"♡ ꒰￤Suasana ibadah membuat jiwa terasa damai."
+];
+
+client.on("messageCreate", async message=>{
+  if(message.author.bot) return;
+  if(message.channel.id!==process.env.KEYWORD_CHANNEL_ID) return;
+
+  const content=message.content.toLowerCase().trim();
+  if(!keywordCooldown[content]) return;
+
+  const user=getUser(message.author.id);
+  const now=Date.now();
+
+  if(!user.keywordCooldowns[content])
+    user.keywordCooldowns[content]=0;
+
+  if(now<user.keywordCooldowns[content]){
+    const remain=Math.ceil((user.keywordCooldowns[content]-now)/60000);
+    return message.reply(`⏳ Tunggu ${remain} menit lagi.`);
+  }
+
+  const reward=calculateKeywordReward(user.points,content);
+  user.points+=reward;
+  user.keywordCooldowns[content]=now+keywordCooldown[content];
+
+  saveData();
+  await logPoint(message.guild,message.author.id,reward);
+  await updateLeaderboard(message.guild);
+
+  const text=ramadhanTexts[Math.floor(Math.random()*ramadhanTexts.length)];
+
+  message.channel.send(`${text}
+
+✨ Kamu mendapatkan **+${reward} poin**
+🏆 Total poin sekarang: **${user.points}**`);
+});
 
 /* ================= INTERACTION ================= */
 
 client.on("interactionCreate", async interaction=>{
 
   if(interaction.isButton()){
-
     if(!activeQuiz)
       return interaction.reply({content:"Soal sudah selesai.",ephemeral:true});
 
@@ -235,30 +270,12 @@ client.on("interactionCreate", async interaction=>{
     activeQuiz.answered.push(interaction.user.id);
 
     if(parseInt(interaction.customId)===activeQuiz.correct){
-
-      const user = getUser(interaction.user.id);
-      let reward = calculateReward(user.points);
-      const cap = calculateDailyCap(user.points);
-
-      if(user.daily.earned >= cap){
-        return interaction.reply({
-          content:`⚠ Limit harian ${cap} poin tercapai.`,
-          ephemeral:true
-        });
-      }
-
-      if(user.daily.earned + reward > cap){
-        reward = cap - user.daily.earned;
-      }
-
-      user.points += reward;
-      user.daily.earned += reward;
-
+      const user=getUser(interaction.user.id);
+      user.points+=20;
       saveData();
-      await logPoint(interaction.guild,interaction.user.id,reward);
+      await logPoint(interaction.guild,interaction.user.id,20);
       await updateLeaderboard(interaction.guild);
-
-      return interaction.reply({content:`🔥 Benar! +${reward} poin`,ephemeral:true});
+      return interaction.reply({content:"🔥 Benar! +20 poin",ephemeral:true});
     }
 
     return interaction.reply({content:"❌ Salah!",ephemeral:true});
@@ -272,50 +289,55 @@ client.on("interactionCreate", async interaction=>{
     }
 
     if(interaction.commandName==="addpoin"){
-      const target = interaction.options.getUser("user");
-      const jumlah = interaction.options.getInteger("jumlah");
-
-      const user = getUser(target.id);
-      user.points += jumlah;
-
+      const target=interaction.options.getUser("user");
+      const jumlah=interaction.options.getInteger("jumlah");
+      const user=getUser(target.id);
+      user.points+=jumlah;
       saveData();
       await updateLeaderboard(interaction.guild);
-
       return interaction.reply({content:"Poin ditambahkan.",ephemeral:true});
+    }
+
+    if(interaction.commandName==="cooldown"){
+      const user=getUser(interaction.user.id);
+      const now=Date.now();
+      let text="⏳ Status Cooldown:\n";
+
+      for(const key in keywordCooldown){
+        const cd=user.keywordCooldowns[key]||0;
+        if(now>=cd) text+=`• ${key} : siap ✅\n`;
+        else{
+          const min=Math.ceil((cd-now)/60000);
+          text+=`• ${key} : ${min} menit\n`;
+        }
+      }
+
+      return interaction.reply({content:text,ephemeral:true});
     }
   }
 });
 
 /* ================= READY ================= */
 
-client.once("clientReady", async ()=>{
+client.once("clientReady", async()=>{
   console.log("BOT ONLINE");
-  scheduleDaily();
 
-  const commands = [
-    new SlashCommandBuilder()
-      .setName("quiz")
-      .setDescription("Munculkan soal sekarang"),
-
+  const commands=[
+    new SlashCommandBuilder().setName("quiz").setDescription("Munculkan soal"),
     new SlashCommandBuilder()
       .setName("addpoin")
       .setDescription("Tambah poin manual")
-      .addUserOption(o=>
-        o.setName("user")
-         .setDescription("User target")
-         .setRequired(true)
-      )
-      .addIntegerOption(o=>
-        o.setName("jumlah")
-         .setDescription("Jumlah poin")
-         .setRequired(true)
-      )
+      .addUserOption(o=>o.setName("user").setDescription("User").setRequired(true))
+      .addIntegerOption(o=>o.setName("jumlah").setDescription("Jumlah").setRequired(true)),
+    new SlashCommandBuilder()
+      .setName("cooldown")
+      .setDescription("Cek cooldown keyword")
   ].map(c=>c.toJSON());
 
-  const rest = new REST({version:"10"}).setToken(process.env.TOKEN);
+  const rest=new REST({version:"10"}).setToken(process.env.TOKEN);
 
   await rest.put(
-    Routes.applicationGuildCommands(client.user.id, process.env.GUILD_ID),
+    Routes.applicationGuildCommands(client.user.id,process.env.GUILD_ID),
     {body:commands}
   );
 });
