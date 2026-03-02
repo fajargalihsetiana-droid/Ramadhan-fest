@@ -13,7 +13,7 @@ const {
 const fs = require("fs");
 
 const ROLE_ID = "1476291125227815210";
-const OWNER_ID = "1004034354919506011"; // GANTI DENGAN ID KAMU
+const OWNER_ID = "1004034354919506011";
 
 const client = new Client({
   intents: [
@@ -24,7 +24,8 @@ const client = new Client({
   ]
 });
 
-/* ================= DATA FILE (PAKAI VOLUME) ================= */
+/* ================= DATA FILE (VOLUME) ================= */
+
 const DATA_FILE = "/data/data.json";
 
 if (!fs.existsSync("/data")) {
@@ -49,6 +50,25 @@ function getUser(id) {
   if (!data[id].keywordCooldowns)
     data[id].keywordCooldowns = {};
   return data[id];
+}
+
+/* ================= HISTORY ================= */
+
+async function logPoint(guild, userId, amount, reason) {
+  const channel = guild.channels.cache.get(process.env.HISTORY_CHANNEL_ID);
+  if (!channel) return;
+
+  const embed = new EmbedBuilder()
+    .setTitle("📜 Update Poin Ramadhan Fest")
+    .setDescription(
+      `👤 <@${userId}>\n` +
+      `➕ +${amount} poin\n` +
+      `📌 Sumber: ${reason}`
+    )
+    .setColor("Gold")
+    .setTimestamp();
+
+  channel.send({ embeds: [embed] });
 }
 
 /* ================= LEADERBOARD ================= */
@@ -156,7 +176,7 @@ async function sendQuiz(){
   },60*60*1000);
 }
 
-/* AUTO 10x RANDOM */
+/* AUTO RANDOM 10x */
 function scheduleDaily(){
   for(let i=0;i<10;i++){
     const delay=Math.floor(Math.random()*24*60*60*1000);
@@ -165,7 +185,7 @@ function scheduleDaily(){
 }
 setInterval(scheduleDaily,24*60*60*1000);
 
-/* ================= KEYWORD ================= */
+/* ================= KEYWORD FARM ================= */
 
 const keywordCooldown={
   sahur:30*60*1000,
@@ -203,15 +223,49 @@ client.on("messageCreate",async message=>{
 
   saveData();
   await updateLeaderboard(message.guild);
+  await logPoint(message.guild, message.author.id, reward, "Ramadhan Farm");
 
   message.channel.send(`✨ Kamu mendapatkan **+${reward} poin**
 🏆 Total sekarang: **${user.points}**`);
 });
 
-/* ================= SLASH COMMAND ================= */
+/* ================= INTERACTION ================= */
 
 client.on("interactionCreate", async interaction => {
 
+  /* BUTTON QUIZ */
+  if (interaction.isButton()) {
+
+    if (!activeQuiz)
+      return interaction.reply({ content: "Soal sudah selesai.", ephemeral: true });
+
+    if (activeQuiz.answered.includes(interaction.user.id))
+      return interaction.reply({ content: "Kamu sudah menjawab.", ephemeral: true });
+
+    activeQuiz.answered.push(interaction.user.id);
+
+    if (parseInt(interaction.customId) === activeQuiz.correct) {
+
+      const user = getUser(interaction.user.id);
+      user.points += 20;
+
+      saveData();
+      await updateLeaderboard(interaction.guild);
+      await logPoint(interaction.guild, interaction.user.id, 20, "Quiz");
+
+      return interaction.reply({
+        content: "🔥 Benar! +20 poin",
+        ephemeral: true
+      });
+    }
+
+    return interaction.reply({
+      content: "❌ Salah!",
+      ephemeral: true
+    });
+  }
+
+  /* SLASH COMMAND */
   if (!interaction.isChatInputCommand()) return;
 
   if (interaction.commandName === "quiz") {
@@ -253,6 +307,7 @@ client.on("interactionCreate", async interaction => {
 
     saveData();
     await updateLeaderboard(interaction.guild);
+    await logPoint(interaction.guild, target.id, jumlah, "Manual Add Poin");
 
     return interaction.reply({
       content: `✅ ${jumlah} poin berhasil ditambahkan ke ${target.username}`,
