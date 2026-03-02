@@ -286,31 +286,52 @@ function applyBalance(userId, baseReward) {
   const sorted = Object.entries(data)
     .sort((a, b) => b[1].points - a[1].points);
 
-  if (sorted.length < 3) return baseReward;
+  if (sorted.length < 5) return baseReward;
 
-  const first = sorted[0];
-  const third = sorted[2];
+  const topFive = sorted.slice(0, 5);
 
-  const gap = first[1].points - third[1].points;
+  const totalTopFive = topFive.reduce((sum, entry) => {
+    return sum + entry[1].points;
+  }, 0);
+
+  const averageTopFive = totalTopFive / 5;
+
+  const firstPoints = sorted[0][1].points;
+  const gap = firstPoints - averageTopFive;
 
   const rankIndex = sorted.findIndex(e => e[0] === userId);
 
-  // Mode Ketat
-  if (gap > 1200) {
+  const ramadhanStart = new Date("2026-02-18"); 
+  const lebaran = new Date("2026-03-20");
+  const now = new Date();
 
-    if (rankIndex === 0) return Math.floor(baseReward * 0.65);
-    if (rankIndex >= 2 && rankIndex <= 7)
-      return Math.floor(baseReward * 1.2);
+  const totalRamadhan = lebaran - ramadhanStart;
+  const elapsed = now - ramadhanStart;
 
+  let progress = elapsed / totalRamadhan;
+
+  if (progress < 0) progress = 0;
+  if (progress > 1) progress = 1;
+
+  const ketatThreshold = 1100 - (progress * 300);
+  const ringanThreshold = 700 - (progress * 200);
+
+  if (gap > ketatThreshold) {
+
+    if (rankIndex === 0)
+      return Math.floor(baseReward * (0.8 - progress * 0.1));
+
+    if (rankIndex >= 1 && rankIndex <= 5)
+      return Math.floor(baseReward * (1.1 + progress * 0.1));
   }
 
-  // Mode Balance Ringan
-  if (gap > 800) {
+  if (gap > ringanThreshold) {
 
-    if (rankIndex === 0) return Math.floor(baseReward * 0.8);
-    if (rankIndex >= 2 && rankIndex <= 5)
-      return Math.floor(baseReward * 1.15);
+    if (rankIndex === 0)
+      return Math.floor(baseReward * 0.9);
 
+    if (rankIndex >= 1 && rankIndex <= 5)
+      return Math.floor(baseReward * 1.08);
   }
 
   return baseReward;
