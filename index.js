@@ -24,7 +24,7 @@ const client = new Client({
   ]
 });
 
-/* ================= DATA FILE (VOLUME) ================= */
+/* ================= DATA ================= */
 
 const DATA_FILE = "/data/data.json";
 
@@ -42,10 +42,7 @@ function saveData() {
 
 function getUser(id) {
   if (!data[id]) {
-    data[id] = {
-      points: 0,
-      keywordCooldowns: {}
-    };
+    data[id] = { points: 0, keywordCooldowns: {} };
   }
   if (!data[id].keywordCooldowns)
     data[id].keywordCooldowns = {};
@@ -61,9 +58,7 @@ async function logPoint(guild, userId, amount, reason) {
   const embed = new EmbedBuilder()
     .setTitle("📜 Update Poin Ramadhan Fest")
     .setDescription(
-      `👤 <@${userId}>\n` +
-      `➕ +${amount} poin\n` +
-      `📌 Sumber: ${reason}`
+      `👤 <@${userId}>\n➕ +${amount} poin\n📌 Sumber: ${reason}`
     )
     .setColor("Gold")
     .setTimestamp();
@@ -75,11 +70,12 @@ async function logPoint(guild, userId, amount, reason) {
 
 let lastRanking = [];
 let lastZonaPanas = 0;
-const ZONA_COOLDOWN = 5 * 60 * 1000; // 5 menit
+const ZONA_COOLDOWN = 5 * 60 * 1000;
 
 let leaderboardMessage = null;
 
 async function updateLeaderboard(guild) {
+
   const channel = guild.channels.cache.get(process.env.LEADERBOARD_CHANNEL_ID);
   if (!channel) return;
 
@@ -87,100 +83,88 @@ async function updateLeaderboard(guild) {
     .sort((a, b) => b[1].points - a[1].points)
     .slice(0, 10);
 
-  if (sorted.length === 0) return;
+  if (!sorted.length) return;
 
   const currentRanking = sorted.map(e => e[0]);
 
-  /* ================= PERGESERAN RANK ================= */
+  /* ===== PERGESERAN RANK ===== */
 
   if (lastRanking.length > 0) {
-    currentRanking.forEach((userId, newIndex) => {
+    for (const [newIndex, userId] of currentRanking.entries()) {
+
       const oldIndex = lastRanking.indexOf(userId);
 
       if (oldIndex !== -1 && oldIndex > newIndex) {
 
-      if (newIndex === 0) {
+        if (newIndex === 0) {
 
-  const msg = await channel.send(
-    `👑🔥 **PUNCAK BERGESER!**\n<@${userId}> kini memimpin leaderboard!`
-  );
+          const msg = await channel.send(
+            `👑🔥 **PUNCAK BERGESER!**\n<@${userId}> kini memimpin leaderboard!`
+          );
 
-  setTimeout(() => {
-    msg.delete().catch(() => {});
-  }, 15000);
+          setTimeout(() => msg.delete().catch(() => {}), 15000);
 
-} else {
+        } else {
 
-  const shiftMsg = await channel.send(
-    `🚀 **RANK NAIK!**\n<@${userId}> naik dari posisi ${oldIndex + 1} ➜ ${newIndex + 1}`
-  );
+          const shiftMsg = await channel.send(
+            `🚀 **RANK NAIK!**\n<@${userId}> naik dari posisi ${oldIndex + 1} ➜ ${newIndex + 1}`
+          );
 
-  setTimeout(() => {
-    shiftMsg.delete().catch(() => {});
-  }, 10000);
-}
+          setTimeout(() => shiftMsg.delete().catch(() => {}), 10000);
+        }
       }
-    });
+    }
   }
 
   lastRanking = currentRanking;
 
-  /* ================= ZONA PANAS ================= */
+  /* ===== ZONA PANAS ===== */
 
   const first = sorted[0];
   const second = sorted[1];
 
   if (second) {
+
     const selisih = first[1].points - second[1].points;
     const now = Date.now();
 
     if (selisih <= 50 && now - lastZonaPanas > ZONA_COOLDOWN) {
 
-  const zonaMsg = await channel.send(
-    `⚔️🔥 **PERSAINGAN MEMANAS!**\nRank #1 dan #2 cuma beda **${selisih} poin!**`
-  );
+      const zonaMsg = await channel.send(
+        `⚔️🔥 **PERSAINGAN MEMANAS!**\nRank #1 & #2 beda ${selisih} poin!`
+      );
 
-  setTimeout(() => {
-    zonaMsg.delete().catch(() => {});
-  }, 20000);
-
-  lastZonaPanas = now;
-}
+      setTimeout(() => zonaMsg.delete().catch(() => {}), 20000);
+      lastZonaPanas = now;
+    }
   }
 
-  /* ================= EMBED ================= */
+  /* ===== EMBED ===== */
 
   let desc = "";
 
   const firstUser = await guild.members.fetch(first[0]).catch(() => null);
   const selisih = second ? first[1].points - second[1].points : 0;
 
-  desc += `🥇 **CALON JUARA #1**\n`;
-  desc += `<@${first[0]}>\n`;
-  desc += `📊 **${first[1].points} poin**\n`;
+  desc += `🥇 **CALON JUARA #1**\n<@${first[0]}>\n📊 ${first[1].points} poin\n`;
   if (second)
-    desc += `📈 Unggul **${selisih} poin** dari posisi 2\n\n`;
+    desc += `📈 Unggul ${selisih} poin\n\n`;
 
   if (second) {
-    desc += `🥈 **CALON JUARA #2**\n`;
-    desc += `<@${second[0]}>\n`;
-    desc += `📊 **${second[1].points} poin**\n`;
-    desc += `📉 Tertinggal **${selisih} poin** dari posisi 1\n\n`;
+    desc += `🥈 **CALON JUARA #2**\n<@${second[0]}>\n📊 ${second[1].points} poin\n`;
+    desc += `📉 Tertinggal ${selisih} poin\n\n`;
   }
 
   desc += `━━━━━━━━━━━━━━━━━━\n`;
 
   sorted.slice(2).forEach((entry, index) => {
-    desc += `**${index + 3}.** <@${entry[0]}> — ${entry[1].points} poin\n`;
+    desc += `${index + 3}. <@${entry[0]}> — ${entry[1].points} poin\n`;
   });
 
   const embed = new EmbedBuilder()
     .setTitle("🏆 RAMADHAN FEST — LIVE RANKING")
-    .setDescription(
-      "🔥 **2 posisi teratas berpeluang menjadi juara**\n\n" + desc
-    )
+    .setDescription("🔥 2 posisi teratas berpeluang juara\n\n" + desc)
     .setColor("Gold")
-    .setFooter({ text: "Persaingan makin panas..." })
     .setTimestamp();
 
   if (firstUser)
@@ -192,94 +176,7 @@ async function updateLeaderboard(guild) {
     await leaderboardMessage.edit({ embeds: [embed] });
 }
 
-/* ================= QUIZ ================= */
-
-let activeQuiz = null;
-
-const questions = [
-  { question: "Ibukota Indonesia?", correct: "Jakarta", options: ["Bandung","Jakarta","Medan","Surabaya"] },
-  { question: "Jumlah rukun Islam?", correct: "5", options: ["4","5","6","7"] },
-  { question: "Planet terbesar?", correct: "Jupiter", options: ["Mars","Venus","Jupiter","Bumi"] },
-  { question: "Bulan puasa disebut?", correct: "Ramadhan", options: ["Rajab","Ramadhan","Syawal","Muharram"] },
-  { question: "Sholat wajib sehari ada berapa?", correct: "5", options: ["4","5","6","7"] },
-  { question: "Lambang negara Indonesia?", correct: "Garuda", options: ["Elang","Garuda","Rajawali","Merpati"] }
-];
-
-function shuffle(arr){
-  for(let i=arr.length-1;i>0;i--){
-    const j=Math.floor(Math.random()*(i+1));
-    [arr[i],arr[j]]=[arr[j],arr[i]];
-  }
-  return arr;
-}
-
-async function sendQuiz(){
-  if(activeQuiz) return;
-
-  const channel = client.channels.cache.get(process.env.QUIZ_CHANNEL_ID);
-  if(!channel) return;
-
-  const q = questions[Math.floor(Math.random()*questions.length)];
-  const shuffled = shuffle([...q.options]);
-  const correctIndex = shuffled.indexOf(q.correct);
-
-  const embed = new EmbedBuilder()
-    .setTitle("🌙 QUIZ RAMADHAN FEST")
-    .setDescription(
-      `**${q.question}**\n\n`+
-      `A. ${shuffled[0]}\n`+
-      `B. ${shuffled[1]}\n`+
-      `C. ${shuffled[2]}\n`+
-      `D. ${shuffled[3]}\n\n⏳ 1 jam`
-    )
-    .setColor("Gold");
-
-  const row = new ActionRowBuilder().addComponents(
-    new ButtonBuilder().setCustomId("0").setLabel("A").setStyle(ButtonStyle.Primary),
-    new ButtonBuilder().setCustomId("1").setLabel("B").setStyle(ButtonStyle.Primary),
-    new ButtonBuilder().setCustomId("2").setLabel("C").setStyle(ButtonStyle.Primary),
-    new ButtonBuilder().setCustomId("3").setLabel("D").setStyle(ButtonStyle.Primary)
-  );
-
-  const msg = await channel.send({
-    content:`<@&${ROLE_ID}> 📢 Quiz baru sudah muncul!`,
-    embeds:[embed],
-    components:[row],
-    allowedMentions:{roles:[ROLE_ID]}
-  });
-
-  activeQuiz = { correct: correctIndex, answered: [] };
-
-  setTimeout(async ()=>{
-    if(!activeQuiz) return;
-    await msg.edit({components:[]});
-    channel.send("⏰ Waktu habis! Soal hangus.");
-    activeQuiz=null;
-  },60*60*1000);
-}
-
-/* AUTO RANDOM 10x */
-function scheduleDaily(){
-  for(let i=0;i<10;i++){
-    const delay=Math.floor(Math.random()*24*60*60*1000);
-    setTimeout(()=>sendQuiz(),delay);
-  }
-}
-setInterval(scheduleDaily,24*60*60*1000);
-
-/* ================= KEYWORD FARM ================= */
-
-const keywordCooldown={
-  sahur:30*60*1000,
-  buka:30*60*1000,
-  tarawih:45*60*1000,
-  tadarus:50*60*1000,
-  sedekah:60*60*1000
-};
-
-function random(min,max){
-  return Math.floor(Math.random()*(max-min+1))+min;
-}
+/* ================= GAP SYSTEM ================= */
 
 function applyBalance(userId, baseReward) {
 
@@ -289,226 +186,37 @@ function applyBalance(userId, baseReward) {
   if (sorted.length < 5) return baseReward;
 
   const topFive = sorted.slice(0, 5);
-
-  const totalTopFive = topFive.reduce((sum, entry) => {
-    return sum + entry[1].points;
-  }, 0);
-
-  const averageTopFive = totalTopFive / 5;
+  const avg = topFive.reduce((s, e) => s + e[1].points, 0) / 5;
 
   const firstPoints = sorted[0][1].points;
-  const gap = firstPoints - averageTopFive;
+  const gap = firstPoints - avg;
 
   const rankIndex = sorted.findIndex(e => e[0] === userId);
 
-  const ramadhanStart = new Date("2026-02-18"); 
+  const ramadhanStart = new Date("2026-02-18");
   const lebaran = new Date("2026-03-20");
-  const now = new Date();
+  const progress = Math.min(Math.max((Date.now() - ramadhanStart) / (lebaran - ramadhanStart), 0), 1);
 
-  const totalRamadhan = lebaran - ramadhanStart;
-  const elapsed = now - ramadhanStart;
+  const ketat = 1100 - (progress * 300);
+  const ringan = 700 - (progress * 200);
 
-  let progress = elapsed / totalRamadhan;
-
-  if (progress < 0) progress = 0;
-  if (progress > 1) progress = 1;
-
-  const ketatThreshold = 1100 - (progress * 300);
-  const ringanThreshold = 700 - (progress * 200);
-
-  if (gap > ketatThreshold) {
-
-    if (rankIndex === 0)
-      return Math.floor(baseReward * (0.8 - progress * 0.1));
-
-    if (rankIndex >= 1 && rankIndex <= 5)
-      return Math.floor(baseReward * (1.1 + progress * 0.1));
+  if (gap > ketat) {
+    if (rankIndex === 0) return Math.floor(baseReward * (0.8 - progress * 0.1));
+    if (rankIndex <= 5) return Math.floor(baseReward * (1.1 + progress * 0.1));
   }
 
-  if (gap > ringanThreshold) {
-
-    if (rankIndex === 0)
-      return Math.floor(baseReward * 0.9);
-
-    if (rankIndex >= 1 && rankIndex <= 5)
-      return Math.floor(baseReward * 1.08);
+  if (gap > ringan) {
+    if (rankIndex === 0) return Math.floor(baseReward * 0.9);
+    if (rankIndex <= 5) return Math.floor(baseReward * 1.08);
   }
 
   return baseReward;
 }
 
-function calculateReward(totalPoints, keyword){
-
-  const tier1 = totalPoints < 2000;
-  const tier2 = totalPoints >= 2000 && totalPoints < 4000;
-
-  function rand(min,max){
-    return Math.floor(Math.random()*(max-min+1))+min;
-  }
-
-  if(keyword === "sedekah"){
-    if(tier1) return rand(30,45);
-    if(tier2) return rand(18,25);
-    return rand(10,15);
-  }
-
-  if(keyword === "tarawih" || keyword === "tadarus"){
-    if(tier1) return rand(20,30);
-    if(tier2) return rand(10,18);
-    return rand(6,10);
-  }
-
-  // sahur & buka
-  if(tier1) return rand(18,28);
-  if(tier2) return rand(8,15);
-  return rand(4,8);
-}
-
-client.on("messageCreate",async message=>{
-  if(message.author.bot) return;
-  if(message.channel.id!==process.env.KEYWORD_CHANNEL_ID) return;
-
-  const content=message.content.toLowerCase().trim();
-  if(!keywordCooldown[content]) return;
-
-  const user=getUser(message.author.id);
-  const now=Date.now();
-
-  if(!user.keywordCooldowns[content])
-    user.keywordCooldowns[content]=0;
-
-  if(now<user.keywordCooldowns[content]){
-    const remain=Math.ceil((user.keywordCooldowns[content]-now)/60000);
-    return message.reply(`⏳ Tunggu ${remain} menit lagi.`);
-  }
-
-  let reward = calculateReward(user.points, content);
-reward = applyBalance(message.author.id, reward);
-  user.points+=reward;
-  user.keywordCooldowns[content]=now+keywordCooldown[content];
-
-  saveData();
-  await updateLeaderboard(message.guild);
-  await logPoint(message.guild, message.author.id, reward, "Ramadhan Farm");
-
-  message.channel.send(`✨ Kamu mendapatkan **+${reward} poin**
-🏆 Total sekarang: **${user.points}**`);
-});
-
-/* ================= INTERACTION ================= */
-
-client.on("interactionCreate", async interaction => {
-
-  /* BUTTON QUIZ */
-  if (interaction.isButton()) {
-
-    if (!activeQuiz)
-      return interaction.reply({ content: "Soal sudah selesai.", ephemeral: true });
-
-    if (activeQuiz.answered.includes(interaction.user.id))
-      return interaction.reply({ content: "Kamu sudah menjawab.", ephemeral: true });
-
-    activeQuiz.answered.push(interaction.user.id);
-
-    if (parseInt(interaction.customId) === activeQuiz.correct) {
-
-  const user = getUser(interaction.user.id);
-
-  let reward = applyBalance(interaction.user.id, 20);
-  user.points += reward;
-
-  saveData();
-  await updateLeaderboard(interaction.guild);
-  await logPoint(interaction.guild, interaction.user.id, reward, "Quiz");
-
-  return interaction.reply({
-    content: `🔥 Benar! +${reward} poin`,
-    ephemeral: true
-  });
-}
-
-    return interaction.reply({
-      content: "❌ Salah!",
-      ephemeral: true
-    });
-  }
-
-  /* SLASH COMMAND */
-  if (!interaction.isChatInputCommand()) return;
-
-  if (interaction.commandName === "quiz") {
-    await interaction.reply({ content: "⏳ Mengirim soal...", ephemeral: true });
-    await sendQuiz();
-  }
-
-  if (interaction.commandName === "cooldown") {
-    const user = getUser(interaction.user.id);
-    const now = Date.now();
-    let text = "⏳ Status Cooldown:\n";
-
-    for (const key in keywordCooldown) {
-      const cd = user.keywordCooldowns[key] || 0;
-      if (now >= cd) text += `• ${key} : siap ✅\n`;
-      else {
-        const min = Math.ceil((cd - now) / 60000);
-        text += `• ${key} : ${min} menit\n`;
-      }
-    }
-
-    return interaction.reply({ content: text, ephemeral: true });
-  }
-
-  if (interaction.commandName === "addpoin") {
-
-    if (interaction.user.id !== OWNER_ID) {
-      return interaction.reply({
-        content: "❌ Kamu tidak punya akses.",
-        ephemeral: true
-      });
-    }
-
-    const target = interaction.options.getUser("user");
-    const jumlah = interaction.options.getInteger("jumlah");
-
-    const user = getUser(target.id);
-    user.points += jumlah;
-
-    saveData();
-    await updateLeaderboard(interaction.guild);
-    await logPoint(interaction.guild, target.id, jumlah, "Manual Add Poin");
-
-    return interaction.reply({
-      content: `✅ ${jumlah} poin berhasil ditambahkan ke ${target.username}`,
-      ephemeral: true
-    });
-  }
-
-});
-
 /* ================= READY ================= */
 
-client.once("clientReady", async()=>{
+client.once("clientReady", async () => {
   console.log("BOT ONLINE");
-  scheduleDaily();
-
-  const commands=[
-    new SlashCommandBuilder().setName("quiz").setDescription("Munculkan soal"),
-    new SlashCommandBuilder()
-      .setName("cooldown")
-      .setDescription("Cek cooldown keyword"),
-    new SlashCommandBuilder()
-      .setName("addpoin")
-      .setDescription("Tambah poin manual (Owner Only)")
-      .addUserOption(o=>o.setName("user").setDescription("User").setRequired(true))
-      .addIntegerOption(o=>o.setName("jumlah").setDescription("Jumlah poin").setRequired(true))
-  ].map(c=>c.toJSON());
-
-  const rest=new REST({version:"10"}).setToken(process.env.TOKEN);
-
-  await rest.put(
-    Routes.applicationGuildCommands(client.user.id,process.env.GUILD_ID),
-    {body:commands}
-  );
 });
 
 client.login(process.env.TOKEN);
