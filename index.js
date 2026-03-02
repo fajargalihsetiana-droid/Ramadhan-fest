@@ -264,6 +264,41 @@ function random(min,max){
   return Math.floor(Math.random()*(max-min+1))+min;
 }
 
+function applyBalance(userId, baseReward) {
+
+  const sorted = Object.entries(data)
+    .sort((a, b) => b[1].points - a[1].points);
+
+  if (sorted.length < 3) return baseReward;
+
+  const first = sorted[0];
+  const third = sorted[2];
+
+  const gap = first[1].points - third[1].points;
+
+  const rankIndex = sorted.findIndex(e => e[0] === userId);
+
+  // Mode Ketat
+  if (gap > 1200) {
+
+    if (rankIndex === 0) return Math.floor(baseReward * 0.65);
+    if (rankIndex >= 2 && rankIndex <= 7)
+      return Math.floor(baseReward * 1.2);
+
+  }
+
+  // Mode Balance Ringan
+  if (gap > 800) {
+
+    if (rankIndex === 0) return Math.floor(baseReward * 0.8);
+    if (rankIndex >= 2 && rankIndex <= 5)
+      return Math.floor(baseReward * 1.15);
+
+  }
+
+  return baseReward;
+}
+
 function calculateReward(totalPoints, keyword){
 
   const tier1 = totalPoints < 2000;
@@ -309,7 +344,8 @@ client.on("messageCreate",async message=>{
     return message.reply(`⏳ Tunggu ${remain} menit lagi.`);
   }
 
-  const reward = calculateReward(user.points, content);
+  let reward = calculateReward(user.points, content);
+reward = applyBalance(message.author.id, reward);
   user.points+=reward;
   user.keywordCooldowns[content]=now+keywordCooldown[content];
 
@@ -338,18 +374,20 @@ client.on("interactionCreate", async interaction => {
 
     if (parseInt(interaction.customId) === activeQuiz.correct) {
 
-      const user = getUser(interaction.user.id);
-      user.points += 20;
+  const user = getUser(interaction.user.id);
 
-      saveData();
-      await updateLeaderboard(interaction.guild);
-      await logPoint(interaction.guild, interaction.user.id, 20, "Quiz");
+  let reward = applyBalance(interaction.user.id, 20);
+  user.points += reward;
 
-      return interaction.reply({
-        content: "🔥 Benar! +20 poin",
-        ephemeral: true
-      });
-    }
+  saveData();
+  await updateLeaderboard(interaction.guild);
+  await logPoint(interaction.guild, interaction.user.id, reward, "Quiz");
+
+  return interaction.reply({
+    content: `🔥 Benar! +${reward} poin`,
+    ephemeral: true
+  });
+}
 
     return interaction.reply({
       content: "❌ Salah!",
