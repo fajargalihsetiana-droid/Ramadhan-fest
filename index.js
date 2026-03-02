@@ -13,6 +13,7 @@ const {
 const fs = require("fs");
 
 const ROLE_ID = "1476291125227815210";
+const OWNER_ID = "1004034354919506011"; // GANTI DENGAN ID KAMU
 
 const client = new Client({
   intents: [
@@ -24,48 +25,15 @@ const client = new Client({
 });
 
 /* ================= DATA FILE (PAKAI VOLUME) ================= */
-/* ================= DATA SYSTEM (ANTI RESET) ================= */
+const DATA_FILE = "/data/data.json";
 
-const GITHUB_DATA = "./data.json";
-const VOLUME_PATH = "/data";
-const VOLUME_DATA = "/data/data.json";
-
-if (!fs.existsSync(VOLUME_PATH)) {
-  fs.mkdirSync(VOLUME_PATH);
+if (!fs.existsSync("/data")) {
+  fs.mkdirSync("/data");
 }
 
-if (!fs.existsSync(VOLUME_DATA)) {
-  console.log("Volume kosong. Mengambil data dari GitHub...");
-
-  if (fs.existsSync(GITHUB_DATA)) {
-    const githubRaw = fs.readFileSync(GITHUB_DATA);
-    fs.writeFileSync(VOLUME_DATA, githubRaw);
-    console.log("Data berhasil dipindahkan ke volume.");
-  } else {
-    fs.writeFileSync(VOLUME_DATA, "{}");
-    console.log("Tidak ada data lama. Membuat file baru.");
-  }
-}
-
-const DATA_FILE = VOLUME_DATA;
-
-let data = JSON.parse(fs.readFileSync(DATA_FILE));
-
-function saveData() {
-  fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
-}
-
-function getUser(id) {
-  if (!data[id]) {
-    data[id] = {
-      points: 0,
-      keywordCooldowns: {}
-    };
-  }
-  if (!data[id].keywordCooldowns)
-    data[id].keywordCooldowns = {};
-  return data[id];
-}
+let data = fs.existsSync(DATA_FILE)
+  ? JSON.parse(fs.readFileSync(DATA_FILE))
+  : {};
 
 function saveData() {
   fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
@@ -188,7 +156,7 @@ async function sendQuiz(){
   },60*60*1000);
 }
 
-/* AUTO 10x RANDOM LIAR */
+/* AUTO 10x RANDOM */
 function scheduleDaily(){
   for(let i=0;i<10;i++){
     const delay=Math.floor(Math.random()*24*60*60*1000);
@@ -240,7 +208,61 @@ client.on("messageCreate",async message=>{
 🏆 Total sekarang: **${user.points}**`);
 });
 
-/* ================= COMMAND ================= */
+/* ================= SLASH COMMAND ================= */
+
+client.on("interactionCreate", async interaction => {
+
+  if (!interaction.isChatInputCommand()) return;
+
+  if (interaction.commandName === "quiz") {
+    await interaction.reply({ content: "⏳ Mengirim soal...", ephemeral: true });
+    await sendQuiz();
+  }
+
+  if (interaction.commandName === "cooldown") {
+    const user = getUser(interaction.user.id);
+    const now = Date.now();
+    let text = "⏳ Status Cooldown:\n";
+
+    for (const key in keywordCooldown) {
+      const cd = user.keywordCooldowns[key] || 0;
+      if (now >= cd) text += `• ${key} : siap ✅\n`;
+      else {
+        const min = Math.ceil((cd - now) / 60000);
+        text += `• ${key} : ${min} menit\n`;
+      }
+    }
+
+    return interaction.reply({ content: text, ephemeral: true });
+  }
+
+  if (interaction.commandName === "addpoin") {
+
+    if (interaction.user.id !== OWNER_ID) {
+      return interaction.reply({
+        content: "❌ Kamu tidak punya akses.",
+        ephemeral: true
+      });
+    }
+
+    const target = interaction.options.getUser("user");
+    const jumlah = interaction.options.getInteger("jumlah");
+
+    const user = getUser(target.id);
+    user.points += jumlah;
+
+    saveData();
+    await updateLeaderboard(interaction.guild);
+
+    return interaction.reply({
+      content: `✅ ${jumlah} poin berhasil ditambahkan ke ${target.username}`,
+      ephemeral: true
+    });
+  }
+
+});
+
+/* ================= READY ================= */
 
 client.once("clientReady", async()=>{
   console.log("BOT ONLINE");
@@ -250,10 +272,16 @@ client.once("clientReady", async()=>{
     new SlashCommandBuilder().setName("quiz").setDescription("Munculkan soal"),
     new SlashCommandBuilder()
       .setName("cooldown")
-      .setDescription("Cek cooldown keyword")
+      .setDescription("Cek cooldown keyword"),
+    new SlashCommandBuilder()
+      .setName("addpoin")
+      .setDescription("Tambah poin manual (Owner Only)")
+      .addUserOption(o=>o.setName("user").setDescription("User").setRequired(true))
+      .addIntegerOption(o=>o.setName("jumlah").setDescription("Jumlah poin").setRequired(true))
   ].map(c=>c.toJSON());
 
   const rest=new REST({version:"10"}).setToken(process.env.TOKEN);
+
   await rest.put(
     Routes.applicationGuildCommands(client.user.id,process.env.GUILD_ID),
     {body:commands}
