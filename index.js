@@ -3,9 +3,6 @@ const {
   Client,
   GatewayIntentBits,
   EmbedBuilder,
-  ActionRowBuilder,
-  ButtonBuilder,
-  ButtonStyle,
   SlashCommandBuilder,
   REST,
   Routes
@@ -13,6 +10,8 @@ const {
 const fs = require("fs");
 
 /* ================= CONFIG ================= */
+
+const OWNER_ID = process.env.OWNER_ID;
 
 const client = new Client({
   intents: [
@@ -26,7 +25,6 @@ const client = new Client({
 /* ================= DATA ================= */
 
 const DATA_FILE = "/data/data.json";
-
 if (!fs.existsSync("/data")) fs.mkdirSync("/data");
 
 let data = fs.existsSync(DATA_FILE)
@@ -41,6 +39,81 @@ function getUser(id) {
   if (!data[id]) data[id] = { points: 0, keywordCooldowns: {} };
   if (!data[id].keywordCooldowns) data[id].keywordCooldowns = {};
   return data[id];
+}
+
+/* ================= GAP BALANCING ================= */
+
+function applyGapBalance(userId, baseReward) {
+
+  const sorted = Object.entries(data)
+    .sort((a, b) => b[1].points - a[1].points);
+
+  if (sorted.length < 3) return baseReward;
+
+  const firstPoints = sorted[0][1].points;
+  const thirdPoints = sorted[2][1].points;
+
+  const gap = firstPoints - thirdPoints;
+  const rankIndex = sorted.findIndex(e => e[0] === userId);
+
+  if (gap > 1500) {
+    if (rankIndex === 0) return Math.floor(baseReward * 0.6);
+    if (rankIndex === 1) return Math.floor(baseReward * 0.75);
+    if (rankIndex >= 2 && rankIndex <= 5)
+      return Math.floor(baseReward * 1.4);
+    if (rankIndex >= 6)
+      return Math.floor(baseReward * 1.6);
+  }
+
+  if (gap > 800) {
+    if (rankIndex === 0) return Math.floor(baseReward * 0.75);
+    if (rankIndex === 1) return Math.floor(baseReward * 0.85);
+    if (rankIndex >= 2 && rankIndex <= 5)
+      return Math.floor(baseReward * 1.2);
+  }
+
+  return baseReward;
+}
+
+/* ================= LEADERBOARD ================= */
+
+let leaderboardMessage = null;
+
+async function updateLeaderboard(guild) {
+  const channel = guild.channels.cache.get(process.env.LEADERBOARD_CHANNEL_ID);
+  if (!channel) return;
+
+  const sorted = Object.entries(data)
+    .sort((a, b) => b[1].points - a[1].points)
+    .slice(0, 10);
+
+  if (!sorted.length) return;
+
+  let desc = "";
+
+  sorted.forEach((entry, index) => {
+    const medal =
+      index === 0 ? "🥇" :
+      index === 1 ? "🥈" :
+      index === 2 ? "🥉" : `**${index + 1}.**`;
+
+    desc += `${medal} <@${entry[0]}> — **${entry[1].points} poin**\n`;
+  });
+
+  const embed = new EmbedBuilder()
+    .setTitle("🏆 RAMADHAN FEST — LIVE LEADERBOARD")
+    .setDescription(desc)
+    .setColor("Gold")
+    .setTimestamp();
+
+  const firstUser = await guild.members.fetch(sorted[0][0]).catch(() => null);
+  if (firstUser)
+    embed.setThumbnail(firstUser.user.displayAvatarURL({ dynamic: true }));
+
+  if (!leaderboardMessage)
+    leaderboardMessage = await channel.send({ embeds: [embed] });
+  else
+    await leaderboardMessage.edit({ embeds: [embed] });
 }
 
 /* ================= HISTORY ================= */
@@ -60,173 +133,122 @@ async function logPoint(guild, userId, amount, reason) {
   channel.send({ embeds: [embed] });
 }
 
-/* ================= QUIZ ================= */
+/* ================= KEYWORD FARM ================= */
 
-let activeQuiz = null;
-
-const questions = [
-  { question: "Ibukota Indonesia?", correct: "Jakarta", options: ["Bandung","Jakarta","Medan","Surabaya"] },
-  { question: "Jumlah rukun Islam?", correct: "5", options: ["4","5","6","7"] },
-  { question: "Planet terbesar?", correct: "Jupiter", options: ["Mars","Venus","Jupiter","Bumi"] }
-];
-
-function shuffle(arr){
-  for(let i=arr.length-1;i>0;i--){
-    const j=Math.floor(Math.random()*(i+1));
-    [arr[i],arr[j]]=[arr[j],arr[i]];
-  }
-  return arr;
-}
-
-async function sendQuiz(){
-  if(activeQuiz) return;
-
-  const channel = client.channels.cache.get(process.env.QUIZ_CHANNEL_ID);
-  if(!channel) return;
-
-  const q = questions[Math.floor(Math.random()*questions.length)];
-  const shuffled = shuffle([...q.options]);
-  const correctIndex = shuffled.indexOf(q.correct);
-
-  const embed = new EmbedBuilder()
-    .setTitle("🌙 QUIZ RAMADHAN FEST")
-    .setDescription(
-      `**${q.question}**\n\n`+
-      `A. ${shuffled[0]}\n`+
-      `B. ${shuffled[1]}\n`+
-      `C. ${shuffled[2]}\n`+
-      `D. ${shuffled[3]}\n\n⏳ 1 jam`
-    )
-    .setColor("Gold");
-
-  const row = new ActionRowBuilder().addComponents(
-    new ButtonBuilder().setCustomId("0").setLabel("A").setStyle(ButtonStyle.Primary),
-    new ButtonBuilder().setCustomId("1").setLabel("B").setStyle(ButtonStyle.Primary),
-    new ButtonBuilder().setCustomId("2").setLabel("C").setStyle(ButtonStyle.Primary),
-    new ButtonBuilder().setCustomId("3").setLabel("D").setStyle(ButtonStyle.Primary)
-  );
-
-  const msg = await channel.send({
-    embeds:[embed],
-    components:[row]
-  });
-
-  activeQuiz = { correct: correctIndex, answered: [] };
-
-  setTimeout(async ()=>{
-    if(!activeQuiz) return;
-    await msg.edit({components:[]});
-    channel.send("⏰ Waktu habis!");
-    activeQuiz=null;
-  },60*60*1000);
-}
-
-/* RANDOM 10x PER HARI */
-function scheduleDaily(){
-  for(let i=0;i<10;i++){
-    const delay=Math.floor(Math.random()*24*60*60*1000);
-    setTimeout(()=>sendQuiz(),delay);
-  }
-}
-setInterval(scheduleDaily,24*60*60*1000);
-
-/* ================= KEYWORD ================= */
-
-const keywordCooldown={
-  sahur:30*60*1000,
-  buka:30*60*1000,
-  tarawih:45*60*1000,
-  tadarus:50*60*1000,
-  sedekah:60*60*1000
+const keywordCooldown = {
+  sahur: 30 * 60 * 1000,
+  buka: 30 * 60 * 1000,
+  tarawih: 45 * 60 * 1000,
+  tadarus: 50 * 60 * 1000,
+  sedekah: 60 * 60 * 1000
 };
 
-client.on("messageCreate",async message=>{
-  if(message.author.bot) return;
-  if(message.channel.id!==process.env.KEYWORD_CHANNEL_ID) return;
+const ramadhanQuotes = [
+  "🌙 Ramadhan penuh berkah!",
+  "✨ Ibadah kecil, pahala besar!",
+  "🤲 Semoga amalmu diterima!",
+  "🌟 Terus kumpulkan kebaikan!"
+];
 
-  const content=message.content.toLowerCase().trim();
-  if(!keywordCooldown[content]) return;
+client.on("messageCreate", async message => {
 
-  const user=getUser(message.author.id);
-  const now=Date.now();
+  if (message.author.bot) return;
+  if (message.channel.id !== process.env.KEYWORD_CHANNEL_ID) return;
 
-  if(!user.keywordCooldowns[content]) user.keywordCooldowns[content]=0;
+  const content = message.content.toLowerCase().trim();
+  if (!keywordCooldown[content]) return;
 
-  if(now<user.keywordCooldowns[content]){
-    const remain=Math.ceil((user.keywordCooldowns[content]-now)/60000);
+  const user = getUser(message.author.id);
+  const now = Date.now();
+
+  if (!user.keywordCooldowns[content])
+    user.keywordCooldowns[content] = 0;
+
+  if (now < user.keywordCooldowns[content]) {
+    const remain = Math.ceil((user.keywordCooldowns[content] - now) / 60000);
     return message.reply(`⏳ Tunggu ${remain} menit lagi.`);
   }
 
-  const reward=Math.floor(Math.random()*20)+10;
+  let reward = Math.floor(Math.random() * 20) + 10;
+  reward = applyGapBalance(message.author.id, reward);
 
-  user.points+=reward;
-  user.keywordCooldowns[content]=now+keywordCooldown[content];
+  user.points += reward;
+  user.keywordCooldowns[content] = now + keywordCooldown[content];
 
   saveData();
-  await logPoint(message.guild,message.author.id,reward,"Keyword Farm");
+  await updateLeaderboard(message.guild);
+  await logPoint(message.guild, message.author.id, reward, "Keyword Ramadhan");
 
-  message.channel.send(`✨ +${reward} poin`);
+  const randomQuote = ramadhanQuotes[Math.floor(Math.random()*ramadhanQuotes.length)];
+
+  message.channel.send(
+    `${randomQuote}\n\n📈 +${reward} poin\n🏆 Total: **${user.points} poin**`
+  );
 });
 
 /* ================= INTERACTION ================= */
 
 client.on("interactionCreate", async interaction => {
 
-  if(interaction.isButton()){
-    if(!activeQuiz) return interaction.reply({content:"Soal selesai.",ephemeral:true});
-    if(activeQuiz.answered.includes(interaction.user.id))
-      return interaction.reply({content:"Sudah menjawab.",ephemeral:true});
+  if (!interaction.isChatInputCommand()) return;
 
-    activeQuiz.answered.push(interaction.user.id);
+  if (interaction.commandName === "cooldown") {
+    const user = getUser(interaction.user.id);
+    const now = Date.now();
+    let text = "⏳ **Status Cooldown:**\n\n";
 
-    if(parseInt(interaction.customId)===activeQuiz.correct){
-      const user=getUser(interaction.user.id);
-      user.points+=20;
-      saveData();
-      await logPoint(interaction.guild,interaction.user.id,20,"Quiz");
-      return interaction.reply({content:"🔥 Benar! +20 poin",ephemeral:true});
+    for (const key in keywordCooldown) {
+      const cd = user.keywordCooldowns[key] || 0;
+      if (now >= cd)
+        text += `• ${key}: ✅ Siap digunakan\n`;
+      else
+        text += `• ${key}: ⏱️ ${Math.ceil((cd-now)/60000)} menit lagi\n`;
     }
 
-    return interaction.reply({content:"❌ Salah!",ephemeral:true});
+    return interaction.reply({ content: text, ephemeral: true });
   }
 
-  if(!interaction.isChatInputCommand()) return;
+  if (interaction.commandName === "addpoin") {
 
-  if(interaction.commandName==="quiz"){
-    await interaction.reply({content:"Mengirim soal...",ephemeral:true});
-    await sendQuiz();
-  }
+    if (interaction.user.id !== OWNER_ID)
+      return interaction.reply({ content: "❌ Tidak punya akses.", ephemeral: true });
 
-  if(interaction.commandName==="cooldown"){
-    const user=getUser(interaction.user.id);
-    const now=Date.now();
-    let text="Cooldown:\n";
-    for(const key in keywordCooldown){
-      const cd=user.keywordCooldowns[key]||0;
-      if(now>=cd) text+=`• ${key}: siap\n`;
-      else text+=`• ${key}: ${Math.ceil((cd-now)/60000)} menit\n`;
-    }
-    return interaction.reply({content:text,ephemeral:true});
+    const target = interaction.options.getUser("user");
+    const jumlah = interaction.options.getInteger("jumlah");
+
+    const user = getUser(target.id);
+    user.points += jumlah;
+
+    saveData();
+    await updateLeaderboard(interaction.guild);
+    await logPoint(interaction.guild, target.id, jumlah, "Manual Add");
+
+    return interaction.reply({
+      content: `✅ ${jumlah} poin ditambahkan ke ${target.username}`,
+      ephemeral: true
+    });
   }
 });
 
 /* ================= READY ================= */
 
-client.once("clientReady", async()=>{
-  console.log("BOT ONLINE FULL FIX");
+client.once("clientReady", async () => {
+  console.log("BOT ONLINE - GAP BALANCE ACTIVE");
 
-  scheduleDaily();
-
-  const commands=[
-    new SlashCommandBuilder().setName("quiz").setDescription("Munculkan quiz"),
-    new SlashCommandBuilder().setName("cooldown").setDescription("Cek cooldown")
+  const commands = [
+    new SlashCommandBuilder().setName("cooldown").setDescription("Cek cooldown"),
+    new SlashCommandBuilder()
+      .setName("addpoin")
+      .setDescription("Tambah poin (Owner Only)")
+      .addUserOption(o=>o.setName("user").setDescription("User").setRequired(true))
+      .addIntegerOption(o=>o.setName("jumlah").setDescription("Jumlah poin").setRequired(true))
   ].map(c=>c.toJSON());
 
-  const rest=new REST({version:"10"}).setToken(process.env.TOKEN);
+  const rest = new REST({ version: "10" }).setToken(process.env.TOKEN);
 
   await rest.put(
-    Routes.applicationGuildCommands(client.user.id,process.env.GUILD_ID),
-    {body:commands}
+    Routes.applicationGuildCommands(client.user.id, process.env.GUILD_ID),
+    { body: commands }
   );
 });
 
