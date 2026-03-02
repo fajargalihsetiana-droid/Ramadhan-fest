@@ -24,15 +24,48 @@ const client = new Client({
 });
 
 /* ================= DATA FILE (PAKAI VOLUME) ================= */
-const DATA_FILE = "/data/data.json";
+/* ================= DATA SYSTEM (ANTI RESET) ================= */
 
-if (!fs.existsSync("/data")) {
-  fs.mkdirSync("/data");
+const GITHUB_DATA = "./data.json";
+const VOLUME_PATH = "/data";
+const VOLUME_DATA = "/data/data.json";
+
+if (!fs.existsSync(VOLUME_PATH)) {
+  fs.mkdirSync(VOLUME_PATH);
 }
 
-let data = fs.existsSync(DATA_FILE)
-  ? JSON.parse(fs.readFileSync(DATA_FILE))
-  : {};
+if (!fs.existsSync(VOLUME_DATA)) {
+  console.log("Volume kosong. Mengambil data dari GitHub...");
+
+  if (fs.existsSync(GITHUB_DATA)) {
+    const githubRaw = fs.readFileSync(GITHUB_DATA);
+    fs.writeFileSync(VOLUME_DATA, githubRaw);
+    console.log("Data berhasil dipindahkan ke volume.");
+  } else {
+    fs.writeFileSync(VOLUME_DATA, "{}");
+    console.log("Tidak ada data lama. Membuat file baru.");
+  }
+}
+
+const DATA_FILE = VOLUME_DATA;
+
+let data = JSON.parse(fs.readFileSync(DATA_FILE));
+
+function saveData() {
+  fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
+}
+
+function getUser(id) {
+  if (!data[id]) {
+    data[id] = {
+      points: 0,
+      keywordCooldowns: {}
+    };
+  }
+  if (!data[id].keywordCooldowns)
+    data[id].keywordCooldowns = {};
+  return data[id];
+}
 
 function saveData() {
   fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
