@@ -89,24 +89,53 @@ async function updateLeaderboard(guild) {
 
   if (!sorted.length) return;
 
+  const first = sorted[0];
+  const second = sorted[1];
+
   let desc = "";
 
-  sorted.forEach((entry, index) => {
-    const medal =
-      index === 0 ? "🥇" :
-      index === 1 ? "🥈" :
-      index === 2 ? "🥉" : `**${index + 1}.**`;
+  /* ===== 2 TERATAS SPESIAL ===== */
 
-    desc += `${medal} <@${entry[0]}> — **${entry[1].points} poin**\n`;
+  if (first) {
+    desc += `🥇 **CALON JUARA #1**\n`;
+    desc += `<@${first[0]}> 🪙\n`;
+    desc += `📊 **${first[1].points} poin**\n`;
+
+    if (second) {
+      const gap = first[1].points - second[1].points;
+      desc += `📈 Unggul **${gap} poin** dari posisi 2\n\n`;
+    } else {
+      desc += `\n`;
+    }
+  }
+
+  if (second) {
+    const gap = first[1].points - second[1].points;
+
+    desc += `🥈 **CALON JUARA #2**\n`;
+    desc += `<@${second[0]}> 💎\n`;
+    desc += `📊 **${second[1].points} poin**\n`;
+    desc += `📉 Tertinggal **${gap} poin** dari posisi 1\n\n`;
+  }
+
+  desc += `━━━━━━━━━━━━━━━━━━\n`;
+
+  /* ===== POSISI 3 KE BAWAH ===== */
+
+  sorted.slice(2).forEach((entry, index) => {
+    desc += `**${index + 3}.** <@${entry[0]}> — ${entry[1].points} poin\n`;
   });
 
   const embed = new EmbedBuilder()
-    .setTitle("🏆 RAMADHAN FEST — LIVE LEADERBOARD")
-    .setDescription(desc)
+    .setTitle("🏆 RAMADHAN FEST — LIVE RANKING")
+    .setDescription(
+      "🔥 2 posisi teratas berpeluang juara\n\n" + desc
+    )
     .setColor("Gold")
+    .setFooter({ text: "Persaingan makin panas..." })
     .setTimestamp();
 
-  const firstUser = await guild.members.fetch(sorted[0][0]).catch(() => null);
+  const firstUser = await guild.members.fetch(first[0]).catch(() => null);
   if (firstUser)
     embed.setThumbnail(firstUser.user.displayAvatarURL({ dynamic: true }));
 
@@ -115,7 +144,6 @@ async function updateLeaderboard(guild) {
   else
     await leaderboardMessage.edit({ embeds: [embed] });
 }
-
 /* ================= HISTORY ================= */
 
 async function logPoint(guild, userId, amount, reason) {
