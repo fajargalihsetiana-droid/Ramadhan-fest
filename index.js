@@ -293,7 +293,7 @@ async function sendQuiz(guild){
       `🇦 ${shuffled[0]}\n`+
       `🇧 ${shuffled[1]}\n`+
       `🇨 ${shuffled[2]}\n`+
-      `🇩 ${shuffled[3]}\n\n⏳ 30 menit`
+      `🇩 ${shuffled[3]}\n\n⏳ Waktu Untuk Menjawab 1 Jam`
     )
     .setColor("Gold")
     .setTimestamp();
@@ -318,38 +318,50 @@ async function sendQuiz(guild){
     await msg.edit({components:[]});
     channel.send("⏰ Waktu habis! Soal hangus.");
     activeQuiz=null;
-  },30*60*1000);
+  },60*60*1000);
 }
 
 /* ================= AUTO 12 QUIZ RANDOM PER HARI ================= */
 
 function startAutoQuizSystem(guild){
 
-  function generateDailySchedule(){
+  console.log("🕑 Auto quiz aktif (setiap 2 jam tepat jam genap)");
 
-    console.log("📅 Generate 12 quiz random hari ini...");
+  function scheduleNext(){
 
-    for(let i=0;i<12;i++){
+    const now = new Date();
 
-      const randomDelay = Math.floor(Math.random()*24*60*60*1000);
+    // Hitung jam genap berikutnya
+    let next = new Date(now);
+    next.setMinutes(0);
+    next.setSeconds(0);
+    next.setMilliseconds(0);
 
-      setTimeout(async ()=>{
-        if(!activeQuiz){
-          await sendQuiz(guild);
-        }
-      }, randomDelay);
-
+    if(next.getHours() % 2 !== 0){
+      next.setHours(next.getHours() + 1);
     }
+
+    if(next <= now){
+      next.setHours(next.getHours() + 2);
+    }
+
+    const delay = next - now;
+
+    console.log(`⏳ Quiz berikutnya jam ${next.getHours()}:00`);
+
+    setTimeout(async () => {
+
+      if(!activeQuiz){
+        await sendQuiz(guild);
+      }
+
+      scheduleNext(); // lanjut terus
+
+    }, delay);
   }
 
-  generateDailySchedule();
-
-  setInterval(()=>{
-    generateDailySchedule();
-  }, 24*60*60*1000);
-
+  scheduleNext();
 }
-
 /* ================= INTERACTION ================= */
 
 client.on("interactionCreate", async interaction => {
