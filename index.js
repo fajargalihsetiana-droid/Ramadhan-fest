@@ -456,7 +456,19 @@ client.on("interactionCreate", async interaction => {
 /* ================= READY ================= */
 
 client.once("clientReady", async ()=>{
-  console.log("BOT ONLINE - FULL SYSTEM");
+  console.log("BOT ONLINE - FULL SYSTEM + AUTO QUIZ AKTIF");
+
+  /* ================= AKTIFKAN AUTO QUIZ ================= */
+
+  const guild = client.guilds.cache.get(process.env.GUILD_ID);
+
+  if(guild){
+    startAutoQuizSystem(guild); // 🔥 AUTO 12 QUIZ PER HARI JALAN
+  } else {
+    console.log("❌ GUILD_ID tidak ditemukan!");
+  }
+
+  /* ================= REGISTER COMMAND ================= */
 
   const commands=[
     new SlashCommandBuilder().setName("cooldown").setDescription("Cek cooldown"),
@@ -474,6 +486,8 @@ client.once("clientReady", async ()=>{
     Routes.applicationGuildCommands(client.user.id,process.env.GUILD_ID),
     {body:commands}
   );
+
+  console.log("✅ Slash command terdaftar");
 });
 
 client.login(process.env.TOKEN);
