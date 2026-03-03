@@ -382,7 +382,7 @@ const rankIndex = sorted.findIndex(e=>e[0]===interaction.user.id);
 
 // Boost untuk rank 3 kebawah
 if(rankIndex >= 2){
-  reward = Math.floor(reward * 1.3); // +30%
+  reward = Math.floor(reward * 1.7); // +70%
 }
 
 // Bonus jawaban pertama
