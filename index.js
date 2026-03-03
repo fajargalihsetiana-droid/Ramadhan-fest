@@ -305,7 +305,11 @@ async function sendQuiz(guild){
     new ButtonBuilder().setCustomId("3").setLabel("🇩").setStyle(ButtonStyle.Primary)
   );
 
-  const msg = await channel.send({ embeds:[embed], components:[row] });
+  const msg = await channel.send({
+  content: `<@&${process.env.GIVEAWAY_ROLE_ID}> 🎉 Quiz baru sudah muncul!`,
+  embeds:[embed],
+  components:[row]
+});
 
   activeQuiz = { correct: correctIndex, answered: [] };
 
