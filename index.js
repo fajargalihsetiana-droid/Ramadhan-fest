@@ -311,7 +311,7 @@ async function sendQuiz(guild){
   components:[row]
 });
 
-  activeQuiz = { correct: correctIndex, answered: [] };
+  activeQuiz = { correct: correctIndex, answered: [], firstWinner: null };
 
   setTimeout(async ()=>{
     if(!activeQuiz) return;
@@ -369,10 +369,32 @@ client.on("interactionCreate", async interaction => {
     if(parseInt(interaction.customId)===activeQuiz.correct){
 
       const user=getUser(interaction.user.id);
-      let reward=Math.floor(Math.random()*5)+15;
-      reward=applyGapBalance(interaction.user.id,reward);
 
-      user.points+=reward;
+      // ================= REWARD SYSTEM UPGRADE =================
+
+let reward = Math.floor(Math.random()*11) + 40; // 40–50 poin
+
+// Ranking sekarang
+const sorted = Object.entries(data)
+  .sort((a,b)=>b[1].points - a[1].points);
+
+const rankIndex = sorted.findIndex(e=>e[0]===interaction.user.id);
+
+// Boost untuk rank 3 kebawah
+if(rankIndex >= 2){
+  reward = Math.floor(reward * 1.3); // +30%
+}
+
+// Bonus jawaban pertama
+if(!activeQuiz.firstWinner){
+  reward *= 2;
+  activeQuiz.firstWinner = interaction.user.id;
+}
+
+// Tetap kena gap balance
+reward = applyGapBalance(interaction.user.id, reward);
+
+user.points += reward;
       saveData();
       await updateLeaderboard(interaction.guild);
       await logPoint(interaction.guild, interaction.user.id, reward, "Quiz");
