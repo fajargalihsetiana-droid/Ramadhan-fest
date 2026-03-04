@@ -415,111 +415,219 @@ scheduleNext();
 
 client.on("interactionCreate",async interaction=>{
 
-if(interaction.isButton() && !interaction.customId.startsWith("boss_")){
+/* ================= BUTTON ================= */
+
+if(interaction.isButton()){
+
+/* ================= BOSS BUTTON ================= */
+
+if(boss){
+
+await interaction.deferReply({ephemeral:true})
+
+/* ATTACK */
+
+if(interaction.customId==="boss_attack"){
+
+let dmg=calculateDamage("attack")
+
+boss.hp-=dmg
+
+if(!bossPlayers[interaction.user.id])
+bossPlayers[interaction.user.id]=0
+
+bossPlayers[interaction.user.id]+=dmg
+
+await updateBoss()
+
+return interaction.editReply({
+content:`⚔️ Kamu menyerang boss!\nDamage: ${dmg}`
+})
+
+}
+
+/* SKILL */
+
+if(interaction.customId==="boss_skill"){
+
+let dmg=calculateDamage("skill")
+
+boss.hp-=dmg
+
+if(!bossPlayers[interaction.user.id])
+bossPlayers[interaction.user.id]=0
+
+bossPlayers[interaction.user.id]+=dmg
+
+await updateBoss()
+
+return interaction.editReply({
+content:`✨ Skill mengenai boss!\nDamage: ${dmg}`
+})
+
+}
+
+/* DEFEND */
+
+if(interaction.customId==="boss_defend"){
+
+return interaction.editReply({
+content:"🛡️ Defense aktif!"
+})
+
+}
+
+/* RAGE MODE */
+
+if(boss.hp<=boss.maxHp/2 && !boss.rage){
+
+boss.rage=true
+
+const channel=interaction.guild.channels.cache.get(process.env.BOSS_CHANNEL_ID)
+
+channel.send("🔥 **BOSS MASUK RAGE MODE!**")
+
+}
+
+/* BOSS DEAD */
+
+if(boss.hp<=0){
+
+boss.hp=0
+
+await updateBoss()
+
+await bossDead(interaction.guild)
+
+}
+
+return
+
+}
+
+/* ================= QUIZ BUTTON ================= */
 
 if(!activeQuiz)
-return interaction.reply({content:"⚠️ Soal selesai.",ephemeral:true});
+return interaction.reply({content:"⚠️ Soal selesai.",ephemeral:true})
 
 if(activeQuiz.answered.includes(interaction.user.id))
-return interaction.reply({content:"❌ Kamu sudah menjawab.",ephemeral:true});
+return interaction.reply({content:"❌ Kamu sudah menjawab.",ephemeral:true})
 
-activeQuiz.answered.push(interaction.user.id);
+activeQuiz.answered.push(interaction.user.id)
 
 if(parseInt(interaction.customId)===activeQuiz.correct){
 
-const user=getUser(interaction.user.id);
+const user=getUser(interaction.user.id)
 
-let reward=Math.floor(Math.random()*11)+40;
+let reward=Math.floor(Math.random()*11)+40
 
 const sorted=Object.entries(data)
-.sort((a,b)=>b[1].points-a[1].points);
+.sort((a,b)=>b[1].points-a[1].points)
 
-const rankIndex=sorted.findIndex(e=>e[0]===interaction.user.id);
+const rankIndex=sorted.findIndex(e=>e[0]===interaction.user.id)
 
 if(rankIndex>=2){
-reward=Math.floor(reward*1.7);
+reward=Math.floor(reward*1.7)
 }
 
 if(!activeQuiz.firstWinner){
-reward*=2;
-activeQuiz.firstWinner=interaction.user.id;
+reward*=2
+activeQuiz.firstWinner=interaction.user.id
 }
 
-reward=applyGapBalance(interaction.user.id,reward);
+reward=applyGapBalance(interaction.user.id,reward)
 
-user.points+=reward;
+user.points+=reward
 
 activeQuiz.winners.push({
 id:interaction.user.id,
 points:reward
-});
+})
 
-saveData();
+saveData()
 
-await updateLeaderboard(interaction.guild);
+await updateLeaderboard(interaction.guild)
 
-await logPoint(interaction.guild,interaction.user.id,reward,"Quiz");
+await logPoint(interaction.guild,interaction.user.id,reward,"Quiz")
 
 return interaction.reply({
 content:`🔥 Benar!\n✨ +${reward} poin\n🏆 Total: ${user.points}`,
 ephemeral:true
-});
+})
 
 }
 
-return interaction.reply({content:"❌ Salah!",ephemeral:true});
+return interaction.reply({content:"❌ Salah!",ephemeral:true})
 
 }
 
-if(!interaction.isChatInputCommand()) return;
+/* ================= SLASH COMMAND ================= */
+
+if(!interaction.isChatInputCommand()) return
+
+/* COOLDOWN */
+
 if(interaction.commandName==="cooldown"){
 
-const user = getUser(interaction.user.id);
-const now = Date.now();
+const user=getUser(interaction.user.id)
+const now=Date.now()
 
-let text = "🌙 **STATUS COOLDOWN** 🌙\n";
-text += "━━━━━━━━━━━━━━━━━━\n\n";
+let text="🌙 **STATUS COOLDOWN** 🌙\n"
+text+="━━━━━━━━━━━━━━━━━━\n\n"
 
 for(const key in keywordCooldown){
 
-const cd = user.keywordCooldowns[key] || 0;
+const cd=user.keywordCooldowns[key]||0
 
-if(now >= cd){
-
-text += `✨ **${key.toUpperCase()}** : 🟢 Siap digunakan\n`;
-
+if(now>=cd){
+text+=`✨ **${key.toUpperCase()}** : 🟢 Siap digunakan\n`
 }else{
-
-const remain = Math.ceil((cd - now)/60000);
-text += `⏳ **${key.toUpperCase()}** : ${remain} menit lagi\n`;
-
+const remain=Math.ceil((cd-now)/60000)
+text+=`⏳ **${key.toUpperCase()}** : ${remain} menit lagi\n`
 }
 
 }
 
-text += "\n━━━━━━━━━━━━━━━━━━";
-text += `\n🏆 Total Poin Kamu: **${user.points} poin**`;
+text+="\n━━━━━━━━━━━━━━━━━━"
+text+=`\n🏆 Total Poin Kamu: **${user.points} poin**`
 
 return interaction.reply({
 content:text,
 ephemeral:true
-});
+})
 
 }
 
+/* SOAL */
+
 if(interaction.commandName==="soal"){
 
-await sendQuiz(interaction.guild);
+await sendQuiz(interaction.guild)
 
 return interaction.reply({
 content:"📢 Quiz dikirim!",
 ephemeral:true
-});
+})
 
 }
 
-});
+/* SPAWN BOSS */
 
+if(interaction.commandName==="spawnboss"){
+
+if(interaction.user.id!==OWNER_ID)
+return interaction.reply({content:"❌ Hanya owner.",ephemeral:true})
+
+await spawnBoss(interaction.guild)
+
+return interaction.reply({
+content:"🐉 Boss berhasil di spawn!",
+ephemeral:true
+})
+
+}
+
+})
 /* ================= READY ================= */
 
 client.once("clientReady",async()=>{
@@ -726,187 +834,4 @@ const sorted=Object.entries(bossPlayers)
 let result="🎉 **BOSS RAMADHAN DIKALAHKAN!**\n\n"
 
 sorted.slice(0,5).forEach((p,i)=>{
-result+=`${i+1}. <@${p[0]}> — ${p[1]} damage\n`
-})
-
-channel.send(result)
-
-/* reward */
-
-sorted.forEach((p,i)=>{
-
-const user=getUser(p[0])
-
-if(i===0) user.points+=120
-else if(i===1) user.points+=80
-else if(i===2) user.points+=60
-else user.points+=30
-
-})
-
-saveData()
-
-boss=null
-bossMessage=null
-bossPlayers={}
-
-}
-
-/* ================= DAMAGE ================= */
-
-function calculateDamage(type){
-
-let dmg=0
-
-if(type==="attack") dmg=Math.floor(Math.random()*40)+40
-
-if(type==="skill") dmg=Math.floor(Math.random()*80)+120
-
-/* critical */
-
-if(Math.random()<0.1){
-dmg*=2
-}
-
-if(boss.rage){
-dmg=Math.floor(dmg*1.2)
-}
-
-return dmg
-
-}
-
-/* ================= BUTTON ================= */
-
-client.on("interactionCreate",async interaction=>{
-
-if(!interaction.isButton()) return
-if(!boss) return
-
-/* ATTACK */
-
-if(interaction.customId==="boss_attack"){
-
-let dmg=calculateDamage("attack")
-
-boss.hp-=dmg
-
-if(!bossPlayers[interaction.user.id])
-bossPlayers[interaction.user.id]=0
-
-bossPlayers[interaction.user.id]+=dmg
-
-}
-
-/* SKILL */
-
-if(interaction.customId==="boss_skill"){
-
-let dmg=calculateDamage("skill")
-
-boss.hp-=dmg
-
-if(!bossPlayers[interaction.user.id])
-bossPlayers[interaction.user.id]=0
-
-bossPlayers[interaction.user.id]+=dmg
-
-}
-
-/* DEFEND */
-
-if(interaction.customId==="boss_defend"){
-
-return interaction.reply({
-content:"🛡️ Defense aktif!",
-ephemeral:true
-})
-
-}
-
-/* rage */
-
-if(boss.hp<=boss.maxHp/2 && !boss.rage){
-
-boss.rage=true
-
-const channel=interaction.guild.channels.cache.get(process.env.BOSS_CHANNEL_ID)
-
-channel.send("🔥 **BOSS MASUK RAGE MODE!**")
-
-}
-
-if(boss.hp<=0){
-
-boss.hp=0
-
-await updateBoss()
-
-await bossDead(interaction.guild)
-
-return interaction.reply({
-content:"⚔️ Boss dikalahkan!",
-ephemeral:true
-})
-
-}
-
-await updateBoss()
-
-return interaction.reply({
-content:"⚔️ Serangan berhasil!",
-ephemeral:true
-})
-
-})
-
-/* ================= SPAWN SCHEDULE ================= */
-
-function startBossSchedule(client){
-
-setInterval(()=>{
-
-const now=new Date()
-
-const hour=now.getHours()
-
-if(hour===15||hour===18||hour===21){
-
-client.guilds.cache.forEach(guild=>{
-spawnBoss(guild)
-})
-
-}
-
-},60000)
-
-}
-
-/* ================= MANUAL SPAWN ================= */
-
-client.on("interactionCreate",async interaction=>{
-
-if(!interaction.isChatInputCommand()) return
-
-if(interaction.commandName==="spawnboss"){
-
-if(interaction.user.id!==OWNER_ID)
-return interaction.reply({
-content:"❌ Hanya owner.",
-ephemeral:true
-})
-
-await spawnBoss(interaction.guild)
-
-return interaction.reply({
-content:"🐉 Boss berhasil di spawn!",
-ephemeral:true
-})
-
-}
-
-})
-
-client.once("clientReady",()=>{
-startBossSchedule(client)
-})
+result+=`${i+1}. <@${p[0]}> — ${p
