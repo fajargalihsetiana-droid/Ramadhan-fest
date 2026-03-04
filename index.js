@@ -803,16 +803,14 @@ setInterval(()=>{
 
 const now=new Date()
 
-const hour=now.getHours()
-const minute=now.getMinutes()
+let hour=now.getUTCHours()+7
+const minute=now.getUTCMinutes()
 
-if(minute!==0) return
+if(hour>=24) hour-=24
 
-if(hour===15 || hour===18 || hour===21){
-
-spawnRaid(guild)
-
-}
+if(hour===15 && minute<=1) spawnRaid(guild)
+if(hour===18 && minute<=1) spawnRaid(guild)
+if(hour===21 && minute<=1) spawnRaid(guild)
 
 },60000)
 
