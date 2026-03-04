@@ -204,7 +204,7 @@ let activeQuiz=null;
 
 const questions=[
 
-{/* ================= MATEMATIKA ================= */
+/* ================= MATEMATIKA ================= */
 
 { question: "3² + 4² = ?", correct: "25", options: ["7","12","25","49"] },
 { question: "12² - 5² = ?", correct: "119", options: ["95","119","144","169"] },
