@@ -715,8 +715,33 @@ ephemeral:true
 
 await updateSimpleBoss()
 
+if(interaction.customId==="simple_attack"){
+
+const dmg = Math.floor(Math.random()*40)+30
+
+simpleBoss.hp -= dmg
+
+if(!simplePlayers[interaction.user.id])
+simplePlayers[interaction.user.id]=0
+
+simplePlayers[interaction.user.id]+=dmg
+
 await interaction.deferUpdate()
 
+if(simpleBoss.hp<=0){
+
+simpleBoss.hp=0
+
+await updateSimpleBoss()
+
+await simpleBossDead(interaction.guild)
+
+return
+}
+
+await updateSimpleBoss()
+
+}
 })
 
 /* ================= COMMAND ================= */
