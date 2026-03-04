@@ -1,14 +1,14 @@
 require("dotenv").config();
 const {
-  Client,
-  GatewayIntentBits,
-  EmbedBuilder,
-  ActionRowBuilder,
-  ButtonBuilder,
-  ButtonStyle,
-  SlashCommandBuilder,
-  REST,
-  Routes
+Client,
+GatewayIntentBits,
+EmbedBuilder,
+ActionRowBuilder,
+ButtonBuilder,
+ButtonStyle,
+SlashCommandBuilder,
+REST,
+Routes
 } = require("discord.js");
 const fs = require("fs");
 
@@ -17,509 +17,414 @@ const fs = require("fs");
 const OWNER_ID = process.env.OWNER_ID;
 
 const client = new Client({
-  intents: [
-    GatewayIntentBits.Guilds,
-    GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.GuildMembers,
-    GatewayIntentBits.MessageContent
-  ]
+intents:[
+GatewayIntentBits.Guilds,
+GatewayIntentBits.GuildMessages,
+GatewayIntentBits.GuildMembers,
+GatewayIntentBits.MessageContent
+]
 });
 
 /* ================= DATA ================= */
 
-const DATA_FILE = "/data/data.json";
-if (!fs.existsSync("/data")) fs.mkdirSync("/data");
+const DATA_FILE="/data/data.json";
 
-let data = fs.existsSync(DATA_FILE)
-  ? JSON.parse(fs.readFileSync(DATA_FILE))
-  : {};
+if(!fs.existsSync("/data")) fs.mkdirSync("/data");
 
-function saveData() {
-  fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
+let data=fs.existsSync(DATA_FILE)
+?JSON.parse(fs.readFileSync(DATA_FILE))
+:{};
+
+function saveData(){
+fs.writeFileSync(DATA_FILE,JSON.stringify(data,null,2));
 }
 
-function getUser(id) {
-  if (!data[id]) data[id] = { points: 0, keywordCooldowns: {} };
-  if (!data[id].keywordCooldowns) data[id].keywordCooldowns = {};
-  return data[id];
+function getUser(id){
+if(!data[id]) data[id]={points:0,keywordCooldowns:{}};
+if(!data[id].keywordCooldowns) data[id].keywordCooldowns={};
+return data[id];
 }
 
 /* ================= ERROR HANDLER ================= */
 
-process.on("unhandledRejection", error => {
-  console.error("UNHANDLED:", error);
+process.on("unhandledRejection",error=>{
+console.error("UNHANDLED:",error);
 });
 
 /* ================= HISTORY ================= */
 
-async function logPoint(guild, userId, amount, reason) {
-  const channel = guild.channels.cache.get(process.env.HISTORY_CHANNEL_ID);
-  if (!channel) return;
+async function logPoint(guild,userId,amount,reason){
 
-  const embed = new EmbedBuilder()
-    .setTitle("📜 Update Poin Ramadhan Fest")
-    .setDescription(`👤 <@${userId}>\n➕ +${amount} poin\n📌 ${reason}`)
-    .setColor("Gold")
-    .setTimestamp();
+const channel=guild.channels.cache.get(process.env.HISTORY_CHANNEL_ID);
+if(!channel) return;
 
-  channel.send({ embeds: [embed] });
+const embed=new EmbedBuilder()
+.setTitle("📜 Update Poin Ramadhan Fest")
+.setDescription(`👤 <@${userId}>\n➕ +${amount} poin\n📌 ${reason}`)
+.setColor("Gold")
+.setTimestamp();
+
+channel.send({embeds:[embed]});
+
 }
 
 /* ================= GAP BALANCE ================= */
 
-function applyGapBalance(userId, baseReward) {
-  const sorted = Object.entries(data)
-    .sort((a, b) => b[1].points - a[1].points);
+function applyGapBalance(userId,baseReward){
 
-  if (sorted.length < 3) return baseReward;
+const sorted=Object.entries(data)
+.sort((a,b)=>b[1].points-a[1].points);
 
-  const gap = sorted[0][1].points - sorted[2][1].points;
-  const rankIndex = sorted.findIndex(e => e[0] === userId);
+if(sorted.length<3) return baseReward;
 
-  if (gap > 1500) {
-    if (rankIndex === 0) return Math.floor(baseReward * 0.6);
-    if (rankIndex === 1) return Math.floor(baseReward * 0.75);
-    if (rankIndex >= 2) return Math.floor(baseReward * 1.4);
-  }
+const gap=sorted[0][1].points-sorted[2][1].points;
+const rankIndex=sorted.findIndex(e=>e[0]===userId);
 
-  if (gap > 800) {
-    if (rankIndex === 0) return Math.floor(baseReward * 0.75);
-    if (rankIndex === 1) return Math.floor(baseReward * 0.85);
-    if (rankIndex >= 2) return Math.floor(baseReward * 1.2);
-  }
+if(gap>1500){
+if(rankIndex===0) return Math.floor(baseReward*0.6);
+if(rankIndex===1) return Math.floor(baseReward*0.75);
+if(rankIndex>=2) return Math.floor(baseReward*1.4);
+}
 
-  return baseReward;
+if(gap>800){
+if(rankIndex===0) return Math.floor(baseReward*0.75);
+if(rankIndex===1) return Math.floor(baseReward*0.85);
+if(rankIndex>=2) return Math.floor(baseReward*1.2);
+}
+
+return baseReward;
+
 }
 
 /* ================= LEADERBOARD ================= */
 
-let leaderboardMessage = null;
+let leaderboardMessage=null;
 
-async function updateLeaderboard(guild) {
-  const channel = guild.channels.cache.get(process.env.LEADERBOARD_CHANNEL_ID);
-  if (!channel) return;
+async function updateLeaderboard(guild){
 
-  const sorted = Object.entries(data)
-    .sort((a, b) => b[1].points - a[1].points)
-    .slice(0, 10);
+const channel=guild.channels.cache.get(process.env.LEADERBOARD_CHANNEL_ID);
+if(!channel) return;
 
-  if (!sorted.length) return;
+const sorted=Object.entries(data)
+.sort((a,b)=>b[1].points-a[1].points)
+.slice(0,10);
 
-  const first = sorted[0];
-  const second = sorted[1];
+if(!sorted.length) return;
 
-  let desc = "";
+const first=sorted[0];
+const second=sorted[1];
 
-  desc += `🥇 **CALON JUARA #1**\n<@${first[0]}>\n📊 **${first[1].points} poin**\n`;
-  if (second) {
-    const gap = first[1].points - second[1].points;
-    desc += `📈 Unggul ${gap} poin\n\n`;
-    desc += `🥈 **CALON JUARA #2**\n<@${second[0]}>\n📊 **${second[1].points} poin**\n`;
-    desc += `📉 Tertinggal ${gap} poin\n\n`;
-  }
+let desc="";
 
-  desc += `━━━━━━━━━━━━━━━━━━\n`;
+desc+=`🥇 **CALON JUARA #1**\n<@${first[0]}>\n📊 **${first[1].points} poin**\n`;
 
-  sorted.slice(2).forEach((entry, index) => {
-    desc += `**${index + 3}.** <@${entry[0]}> — ${entry[1].points} poin\n`;
-  });
+if(second){
 
-  const embed = new EmbedBuilder()
-    .setTitle("🏆 RAMADHAN FEST — LIVE RANKING")
-    .setDescription(desc)
-    .setColor("Gold")
-    .setTimestamp();
+const gap=first[1].points-second[1].points;
 
-const firstUser = await guild.members.fetch(first[0]).catch(() => null);
-if (firstUser) {
-  embed.setThumbnail(firstUser.user.displayAvatarURL({ dynamic: true }));
+desc+=`📈 Unggul ${gap} poin\n\n`;
+desc+=`🥈 **CALON JUARA #2**\n<@${second[0]}>\n📊 **${second[1].points} poin**\n`;
+desc+=`📉 Tertinggal ${gap} poin\n\n`;
+
 }
 
-  if (!leaderboardMessage)
-    leaderboardMessage = await channel.send({ embeds: [embed] });
-  else
-    await leaderboardMessage.edit({ embeds: [embed] });
+desc+="━━━━━━━━━━━━━━━━━━\n";
+
+sorted.slice(2).forEach((entry,index)=>{
+desc+=`**${index+3}.** <@${entry[0]}> — ${entry[1].points} poin\n`;
+});
+
+const embed=new EmbedBuilder()
+.setTitle("🏆 RAMADHAN FEST — LIVE RANKING")
+.setDescription(desc)
+.setColor("Gold")
+.setTimestamp();
+
+const firstUser=await guild.members.fetch(first[0]).catch(()=>null);
+
+if(firstUser){
+embed.setThumbnail(firstUser.user.displayAvatarURL({dynamic:true}));
 }
 
-/* ================= KEYWORD ================= */
+if(!leaderboardMessage)
+leaderboardMessage=await channel.send({embeds:[embed]});
+else
+await leaderboardMessage.edit({embeds:[embed]});
 
-const keywordCooldown = {
-  sahur: 30 * 60 * 1000,
-  buka: 30 * 60 * 1000,
-  tarawih: 45 * 60 * 1000,
-  tadarus: 50 * 60 * 1000,
-  sedekah: 60 * 60 * 1000
+}
+
+/* ================= KEYWORD FARM ================= */
+
+const keywordCooldown={
+sahur:30*60*1000,
+buka:30*60*1000,
+tarawih:45*60*1000,
+tadarus:50*60*1000,
+sedekah:60*60*1000
 };
 
-client.on("messageCreate", async message => {
+client.on("messageCreate",async message=>{
 
-  if (message.author.bot) return;
-  if (message.channel.id !== process.env.KEYWORD_CHANNEL_ID) return;
+if(message.author.bot) return;
+if(message.channel.id!==process.env.KEYWORD_CHANNEL_ID) return;
 
-  const content = message.content.toLowerCase().trim();
-  if (!keywordCooldown[content]) return;
+const content=message.content.toLowerCase().trim();
+if(!keywordCooldown[content]) return;
 
-  const user = getUser(message.author.id);
-  const now = Date.now();
+const user=getUser(message.author.id);
+const now=Date.now();
 
-  if (now < (user.keywordCooldowns[content] || 0)) {
-    const remain = Math.ceil((user.keywordCooldowns[content] - now)/60000);
-    return message.reply(`⏳ Tunggu ${remain} menit lagi.`);
-  }
+if(now<(user.keywordCooldowns[content]||0)){
 
-  let reward = Math.floor(Math.random()*10)+10;
-  reward = applyGapBalance(message.author.id, reward);
+const remain=Math.ceil((user.keywordCooldowns[content]-now)/60000);
+return message.reply(`⏳ Tunggu ${remain} menit lagi.`);
 
-  user.points += reward;
-  user.keywordCooldowns[content] = now + keywordCooldown[content];
+}
 
-  saveData();
-  await updateLeaderboard(message.guild);
-  await logPoint(message.guild, message.author.id, reward, "Keyword Ramadhan");
+let reward=Math.floor(Math.random()*10)+10;
 
-  message.channel.send(`✨ +${reward} poin\n🏆 Total: ${user.points} poin`);
+reward=applyGapBalance(message.author.id,reward);
+
+user.points+=reward;
+user.keywordCooldowns[content]=now+keywordCooldown[content];
+
+saveData();
+
+await updateLeaderboard(message.guild);
+
+await logPoint(message.guild,message.author.id,reward,"Keyword Ramadhan");
+
+message.channel.send(`✨ +${reward} poin\n🏆 Total: ${user.points} poin`);
+
 });
 
 /* ================= QUIZ ================= */
 
-let activeQuiz = null;
+let activeQuiz=null;
 
-const questions = [
+const questions=[
 
-/* ================= MATEMATIKA ================= */
-
-{ question: "3² + 4² = ?", correct: "25", options: ["7","12","25","49"] },
-{ question: "12² - 5² = ?", correct: "119", options: ["95","119","144","169"] },
-{ question: "15% dari 400?", correct: "60", options: ["40","50","60","80"] },
-{ question: "2⁵ × 2 = ?", correct: "64", options: ["32","48","64","128"] },
-{ question: "Akar dari 625?", correct: "25", options: ["15","20","25","30"] },
-{ question: "5! = ?", correct: "120", options: ["60","100","120","150"] },
-{ question: "9² - 3² = ?", correct: "72", options: ["54","63","72","81"] },
-{ question: "Jika 8x = 72, maka x?", correct: "9", options: ["7","8","9","10"] },
-{ question: "20% dari 250?", correct: "50", options: ["40","45","50","60"] },
-{ question: "Jika 6² + 8² = ?", correct: "100", options: ["64","100","144","80"] },
-
-/* ================= POLA ================= */
-
-{ question: "1, 4, 9, 16, 25, ...?", correct: "36", options: ["30","35","36","49"] },
-{ question: "2, 6, 12, 20, 30, ...?", correct: "42", options: ["36","40","42","48"] },
-{ question: "5, 10, 20, 40, ...?", correct: "80", options: ["60","70","80","90"] },
-{ question: "3, 9, 27, ...?", correct: "81", options: ["54","72","81","90"] },
-{ question: "7, 14, 28, 56, ...?", correct: "112", options: ["100","108","112","120"] },
-
-/* ================= LOGIKA ================= */
-
-{ question: "Semakin banyak diambil semakin besar?", correct: "Lubang", options: ["Air","Lubang","Api","Angin"] },
-{ question: "Jika semua A adalah B dan semua B adalah C, maka?", correct: "Semua A adalah C", options: ["Semua C adalah A","Semua A adalah C","Tidak ada hubungan","Tidak pasti"] },
-{ question: "Hari ini Senin. 14 hari lagi?", correct: "Senin", options: ["Selasa","Minggu","Senin","Rabu"] },
-{ question: "Jika 1 kg besi vs 1 kg kapas?", correct: "Sama berat", options: ["Besi","Kapas","Sama berat","Tergantung"] },
-{ question: "100 dibagi 0?", correct: "Tidak terdefinisi", options: ["0","100","Tak hingga","Tidak terdefinisi"] },
-
-/* ================= PENGETAHUAN UMUM ================= */
-
-{ question: "Planet terbesar?", correct: "Jupiter", options: ["Mars","Jupiter","Saturnus","Neptunus"] },
-{ question: "Ibukota Jepang?", correct: "Tokyo", options: ["Kyoto","Tokyo","Osaka","Seoul"] },
-{ question: "Benua terbesar?", correct: "Asia", options: ["Afrika","Asia","Eropa","Amerika"] },
-{ question: "Lambang kimia emas?", correct: "Au", options: ["Ag","Au","Fe","Em"] },
-{ question: "Penemu relativitas?", correct: "Albert Einstein", options: ["Newton","Einstein","Tesla","Galileo"] },
-
-/* ================= CAMPURAN MENANTANG ================= */
-
-{ question: "Jika 4 orang menyelesaikan kerja 6 hari, 2 orang butuh?", correct: "12 hari", options: ["8 hari","10 hari","12 hari","14 hari"] },
-{ question: "Jumlah sudut segi lima?", correct: "540°", options: ["360°","540°","720°","600°"] },
-{ question: "Akar 169?", correct: "13", options: ["11","12","13","14"] },
-{ question: "Jika 2³ + 3³ = ?", correct: "35", options: ["17","25","35","45"] },
-{ question: "Jika 50% dari X adalah 75, maka X?", correct: "150", options: ["100","125","150","175"] },
-
-/* ================= TRICKY RINGAN ================= */
-
-{ question: "Dibalik, 91 menjadi?", correct: "19", options: ["16","19","61","109"] },
-{ question: "Jumlah hari dalam 3 minggu?", correct: "21", options: ["18","20","21","24"] },
-{ question: "Jika 0 dikali 999?", correct: "0", options: ["0","999","1","Tak hingga"] },
-{ question: "Berapa sisi kubus?", correct: "6", options: ["4","6","8","12"] },
-{ question: "Berapa rusuk kubus?", correct: "12", options: ["8","10","12","14"] },
-
-/* ================= BONUS TAMBAHAN ================= */
-
-{ question: "10² - 8² = ?", correct: "36", options: ["20","32","36","40"] },
-{ question: "Jika 9x = 81?", correct: "9", options: ["7","8","9","10"] },
-{ question: "Akar dari 81?", correct: "9", options: ["7","8","9","10"] },
-{ question: "Jika 7² = ?", correct: "49", options: ["42","48","49","56"] },
-{ question: "3 × 7 + 4 = ?", correct: "25", options: ["21","23","25","28"] },
-
-{ question: "Jika 18 ÷ 3 × 2 = ?", correct: "12", options: ["6","9","12","18"] },
-{ question: "Jumlah sudut segitiga?", correct: "180°", options: ["90°","180°","270°","360°"] },
-{ question: "Jika 2x = 50?", correct: "25", options: ["20","25","30","35"] },
-{ question: "Akar 256?", correct: "16", options: ["14","15","16","18"] },
-{ question: "Jika 100 - 45 = ?", correct: "55", options: ["45","50","55","65"] },
-
-{ question: "Pola: 4, 8, 16, 32, ...?", correct: "64", options: ["48","56","64","72"] },
-{ question: "Jika 11² = ?", correct: "121", options: ["111","121","131","141"] },
-{ question: "Jika 144 ÷ 12 = ?", correct: "12", options: ["10","11","12","14"] },
-{ question: "Jika 6 × 7 = ?", correct: "42", options: ["36","40","42","48"] },
-{ question: "Jika 25% dari 200 = ?", correct: "50", options: ["40","45","50","60"] },
-
-{ question: "Jumlah bulan dalam 2 tahun?", correct: "24", options: ["20","22","24","26"] },
-{ question: "Jika 2 + 2 × 2 = ?", correct: "6", options: ["8","6","4","10"] },
-{ question: "Jika 1000 ÷ 10 = ?", correct: "100", options: ["10","50","100","200"] },
-{ question: "Jika 81 ÷ 9 = ?", correct: "9", options: ["8","9","10","11"] },
-{ question: "Jika 13 + 7 = ?", correct: "20", options: ["18","19","20","21"] }
+{question:"3² + 4² = ?",correct:"25",options:["7","12","25","49"]},
+{question:"Planet terbesar?",correct:"Jupiter",options:["Mars","Jupiter","Saturnus","Neptunus"]},
+{question:"Jumlah sudut segitiga?",correct:"180°",options:["90°","180°","270°","360°"]},
+{question:"Akar dari 144?",correct:"12",options:["10","11","12","13"]},
+{question:"Jika 2 + 2 × 2 = ?",correct:"6",options:["8","6","4","10"]}
 
 ];
 
 /* ================= SHUFFLE ================= */
 
 function shuffle(arr){
-  return arr.sort(()=>Math.random()-0.5);
+return arr.sort(()=>Math.random()-0.5);
 }
 
 /* ================= SEND QUIZ ================= */
 
 async function sendQuiz(guild){
 
-  if(activeQuiz) return;
+if(activeQuiz) return;
 
-  const channel = guild.channels.cache.get(process.env.QUIZ_CHANNEL_ID);
-  if(!channel) return;
+const channel=guild.channels.cache.get(process.env.QUIZ_CHANNEL_ID);
+if(!channel) return;
 
-  const q = questions[Math.floor(Math.random()*questions.length)];
-  const shuffled = shuffle([...q.options]);
-  const correctIndex = shuffled.indexOf(q.correct);
+const q=questions[Math.floor(Math.random()*questions.length)];
+const shuffled=shuffle([...q.options]);
+const correctIndex=shuffled.indexOf(q.correct);
 
-  const embed = new EmbedBuilder()
-    .setTitle("🌙 QUIZ RAMADHAN FEST")
-    .setDescription(
-      `**${q.question}**\n\n`+
-      `🇦 ${shuffled[0]}\n`+
-      `🇧 ${shuffled[1]}\n`+
-      `🇨 ${shuffled[2]}\n`+
-      `🇩 ${shuffled[3]}\n\n⏳ Waktu Untuk Menjawab 1 Jam`
-    )
-    .setColor("Gold")
-    .setTimestamp();
+const embed = new EmbedBuilder()
+.setTitle("🧠 QUIZ RAMADHAN FEST")
+.setDescription(
+`━━━━━━━━━━━━━━━━━━\n`+
+`📢 **PERTANYAAN BARU!**\n\n`+
 
-  const row = new ActionRowBuilder().addComponents(
-    new ButtonBuilder().setCustomId("0").setLabel("🇦").setStyle(ButtonStyle.Primary),
-    new ButtonBuilder().setCustomId("1").setLabel("🇧").setStyle(ButtonStyle.Primary),
-    new ButtonBuilder().setCustomId("2").setLabel("🇨").setStyle(ButtonStyle.Primary),
-    new ButtonBuilder().setCustomId("3").setLabel("🇩").setStyle(ButtonStyle.Primary)
-  );
+`❓ **${q.question}**\n\n`+
 
-  const msg = await channel.send({
-  content: `<@&${process.env.GIVEAWAY_ROLE_ID}> 🎉 Quiz baru sudah muncul!`,
-  embeds:[embed],
-  components:[row]
+`🇦 **${shuffled[0]}**\n`+
+`🇧 **${shuffled[1]}**\n`+
+`🇨 **${shuffled[2]}**\n`+
+`🇩 **${shuffled[3]}**\n\n`+
+
+`━━━━━━━━━━━━━━━━━━\n`+
+
+`⏳ **Waktu menjawab: 45 menit**\n`+
+`🔥 **Jawaban pertama = 2x poin!**\n`+
+`⚡ **Rank 3+ bonus poin**\n`+
+`🏆 **Kejar leaderboard sekarang!**`
+)
+.setColor("Gold")
+.setFooter({text:"Ramadhan Fest Quiz Event"})
+.setTimestamp();
+
+const row=new ActionRowBuilder().addComponents(
+
+new ButtonBuilder().setCustomId("0").setLabel("🇦").setStyle(ButtonStyle.Primary),
+new ButtonBuilder().setCustomId("1").setLabel("🇧").setStyle(ButtonStyle.Primary),
+new ButtonBuilder().setCustomId("2").setLabel("🇨").setStyle(ButtonStyle.Primary),
+new ButtonBuilder().setCustomId("3").setLabel("🇩").setStyle(ButtonStyle.Primary)
+
+);
+
+const msg=await channel.send({
+
+content:`<@&${process.env.GIVEAWAY_ROLE_ID}> 🎉 Quiz baru muncul!`,
+embeds:[embed],
+components:[row]
+
 });
 
-  activeQuiz = { correct: correctIndex, answered: [], firstWinner: null };
+activeQuiz={
+correct:correctIndex,
+answered:[],
+winners:[],
+firstWinner:null
+};
 
-  setTimeout(async ()=>{
-    if(!activeQuiz) return;
-    await msg.edit({components:[]});
-    channel.send("⏰ Waktu habis! Soal hangus.");
-    activeQuiz=null;
-  },60*60*1000);
+setTimeout(async()=>{
+
+if(!activeQuiz) return;
+
+await msg.edit({components:[]});
+
+let result="📊 **HASIL QUIZ**\n\n";
+
+if(activeQuiz.winners.length===0){
+result+="❌ Tidak ada yang menjawab benar.";
+}else{
+
+activeQuiz.winners.forEach((w,i)=>{
+result+=`${i+1}. <@${w.id}> — +${w.points} poin\n`;
+});
+
 }
 
-/* ================= AUTO QUIZ TIAP JAM TEPAT ================= */
+channel.send(result);
+
+activeQuiz=null;
+
+},45*60*1000);
+
+}
+
+/* ================= AUTO QUIZ TIAP JAM ================= */
 
 function startAutoQuizSystem(guild){
 
-  console.log("🕒 Auto quiz tiap jam tepat aktif");
+function scheduleNext(){
 
-  function scheduleNext(){
+const now=new Date();
 
-    const now = new Date();
+const next=new Date(now);
 
-    const next = new Date(now);
-    next.setMinutes(0);
-    next.setSeconds(0);
-    next.setMilliseconds(0);
+next.setMinutes(0);
+next.setSeconds(0);
+next.setMilliseconds(0);
+next.setHours(next.getHours()+1);
 
-    next.setHours(next.getHours() + 1); // jam berikutnya
+const delay=next-now;
 
-    const delay = next - now;
+setTimeout(async()=>{
 
-    console.log(`⏳ Quiz berikutnya jam ${next.getHours()}:00`);
+if(!activeQuiz){
+await sendQuiz(guild);
+}
 
-    setTimeout(async () => {
+scheduleNext();
 
-      if(!activeQuiz){
-        await sendQuiz(guild);
-      }
+},delay);
 
-      scheduleNext(); // ulang terus
+}
 
-    }, delay);
-  }
+scheduleNext();
 
-  scheduleNext();
 }
 
 /* ================= INTERACTION ================= */
 
-client.on("interactionCreate", async interaction => {
+client.on("interactionCreate",async interaction=>{
 
-  /* ================= BUTTON QUIZ ================= */
+if(interaction.isButton()){
 
-  if(interaction.isButton()){
+if(!activeQuiz)
+return interaction.reply({content:"⚠️ Soal selesai.",ephemeral:true});
 
-    if(!activeQuiz)
-      return interaction.reply({content:"⚠️ Soal sudah selesai.",ephemeral:true});
+if(activeQuiz.answered.includes(interaction.user.id))
+return interaction.reply({content:"❌ Kamu sudah menjawab.",ephemeral:true});
 
-    if(activeQuiz.answered.includes(interaction.user.id))
-      return interaction.reply({content:"❌ Kamu sudah menjawab.",ephemeral:true});
+activeQuiz.answered.push(interaction.user.id);
 
-    activeQuiz.answered.push(interaction.user.id);
+if(parseInt(interaction.customId)===activeQuiz.correct){
 
-    if(parseInt(interaction.customId)===activeQuiz.correct){
+const user=getUser(interaction.user.id);
 
-      const user=getUser(interaction.user.id);
+let reward=Math.floor(Math.random()*11)+40;
 
-      // ================= REWARD SYSTEM UPGRADE =================
+const sorted=Object.entries(data)
+.sort((a,b)=>b[1].points-a[1].points);
 
-let reward = Math.floor(Math.random()*11) + 40; // 40–50 poin
+const rankIndex=sorted.findIndex(e=>e[0]===interaction.user.id);
 
-// Ranking sekarang
-const sorted = Object.entries(data)
-  .sort((a,b)=>b[1].points - a[1].points);
-
-const rankIndex = sorted.findIndex(e=>e[0]===interaction.user.id);
-
-// Boost untuk rank 3 kebawah
-if(rankIndex >= 2){
-  reward = Math.floor(reward * 1.7); // +70%
+if(rankIndex>=2){
+reward=Math.floor(reward*1.7);
 }
 
-// Bonus jawaban pertama
 if(!activeQuiz.firstWinner){
-  reward *= 2;
-  activeQuiz.firstWinner = interaction.user.id;
+reward*=2;
+activeQuiz.firstWinner=interaction.user.id;
 }
 
-// Tetap kena gap balance
-reward = applyGapBalance(interaction.user.id, reward);
+reward=applyGapBalance(interaction.user.id,reward);
 
-user.points += reward;
-      saveData();
-      await updateLeaderboard(interaction.guild);
-      await logPoint(interaction.guild, interaction.user.id, reward, "Quiz");
+user.points+=reward;
 
-      return interaction.reply({
-        content:`🔥 **JAWABAN BENAR!**\n✨ +${reward} poin\n🏆 Total sekarang: **${user.points} poin**`,
-        ephemeral:true
-      });
-    }
+activeQuiz.winners.push({
+id:interaction.user.id,
+points:reward
+});
 
-    return interaction.reply({content:"❌ Jawaban salah!",ephemeral:true});
-  }
+saveData();
 
-  /* ================= SLASH COMMAND ================= */
+await updateLeaderboard(interaction.guild);
 
-  if(!interaction.isChatInputCommand()) return;
+await logPoint(interaction.guild,interaction.user.id,reward,"Quiz");
 
-  /* ===== COOLDOWN ===== */
+return interaction.reply({
+content:`🔥 Benar!\n✨ +${reward} poin\n🏆 Total: ${user.points}`,
+ephemeral:true
+});
 
-  if(interaction.commandName==="cooldown"){
+}
 
-    const user = getUser(interaction.user.id);
-    const now = Date.now();
+return interaction.reply({content:"❌ Salah!",ephemeral:true});
 
-    let text = "🌙 **STATUS IBADAH RAMADHAN** 🌙\n";
-    text += "━━━━━━━━━━━━━━━━━━\n\n";
+}
 
-    for(const key in keywordCooldown){
+if(!interaction.isChatInputCommand()) return;
 
-      const cd = user.keywordCooldowns[key] || 0;
+if(interaction.commandName==="soal"){
 
-      if(now >= cd){
+await sendQuiz(interaction.guild);
 
-        text += `✨ **${key.toUpperCase()}** : 🟢 Siap digunakan\n`;
+return interaction.reply({
+content:"📢 Quiz dikirim!",
+ephemeral:true
+});
 
-      } else {
-
-        const remain = Math.ceil((cd - now)/60000);
-        text += `🔥 **${key.toUpperCase()}** : ⏳ ${remain} menit lagi\n`;
-
-      }
-    }
-
-    text += "\n━━━━━━━━━━━━━━━━━━";
-    text += `\n🏆 Total Poin Kamu: **${user.points}**`;
-    text += "\n🤲 Terus kumpulkan pahala & poin!";
-
-    return interaction.reply({
-      content: text,
-      ephemeral: true
-    });
-  }
-
-  /* ===== SOAL MANUAL ===== */
-
-  if(interaction.commandName==="soal"){
-    await sendQuiz(interaction.guild);
-    return interaction.reply({content:"📢 Quiz dikirim!",ephemeral:true});
-  }
-
-  /* ===== ADD POIN ===== */
-
-  if(interaction.commandName==="addpoin"){
-
-    if(interaction.user.id!==OWNER_ID)
-      return interaction.reply({content:"❌ Tidak punya akses.",ephemeral:true});
-
-    const target=interaction.options.getUser("user");
-    const jumlah=interaction.options.getInteger("jumlah");
-
-    const user=getUser(target.id);
-    user.points+=jumlah;
-
-    saveData();
-    await updateLeaderboard(interaction.guild);
-    await logPoint(interaction.guild,target.id,jumlah,"Manual Add");
-
-    return interaction.reply({
-      content:`✅ ${jumlah} poin ditambahkan ke ${target.username}`,
-      ephemeral:true
-    });
-  }
+}
 
 });
+
 /* ================= READY ================= */
 
-client.once("clientReady", async ()=>{
-  console.log("BOT ONLINE - AUTO QUIZ TIAP JAM AKTIF");
+client.once("clientReady",async()=>{
 
-  /* ================= AKTIFKAN AUTO QUIZ ================= */
+console.log("BOT ONLINE - AUTO QUIZ TIAP JAM AKTIF");
 
-  const guild = client.guilds.cache.get(process.env.GUILD_ID);
+const guild=client.guilds.cache.get(process.env.GUILD_ID);
 
-  if(guild){
-    startAutoQuizSystem(guild); // 🔥 Quiz otomatis tiap jam tepat
-  } else {
-    console.log("❌ GUILD_ID tidak ditemukan!");
-  }
+if(guild){
+startAutoQuizSystem(guild);
+}
 
-  /* ================= REGISTER COMMAND ================= */
-
-  const commands=[
-    new SlashCommandBuilder().setName("cooldown").setDescription("Cek cooldown"),
-    new SlashCommandBuilder().setName("soal").setDescription("Kirim quiz"),
-    new SlashCommandBuilder()
-      .setName("addpoin")
-      .setDescription("Tambah poin")
-      .addUserOption(o=>o.setName("user").setDescription("User").setRequired(true))
-      .addIntegerOption(o=>o.setName("jumlah").setDescription("Jumlah").setRequired(true))
-  ].map(c=>c.toJSON());
-
-  const rest=new REST({version:"10"}).setToken(process.env.TOKEN);
-
-  await rest.put(
-    Routes.applicationGuildCommands(client.user.id,process.env.GUILD_ID),
-    {body:commands}
-  );
-
-  console.log("✅ Slash command terdaftar");
 });
 
 client.login(process.env.TOKEN);
