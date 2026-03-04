@@ -399,6 +399,40 @@ return interaction.reply({content:"❌ Salah!",ephemeral:true});
 }
 
 if(!interaction.isChatInputCommand()) return;
+if(interaction.commandName==="cooldown"){
+
+const user = getUser(interaction.user.id);
+const now = Date.now();
+
+let text = "🌙 **STATUS COOLDOWN** 🌙\n";
+text += "━━━━━━━━━━━━━━━━━━\n\n";
+
+for(const key in keywordCooldown){
+
+const cd = user.keywordCooldowns[key] || 0;
+
+if(now >= cd){
+
+text += `✨ **${key.toUpperCase()}** : 🟢 Siap digunakan\n`;
+
+}else{
+
+const remain = Math.ceil((cd - now)/60000);
+text += `⏳ **${key.toUpperCase()}** : ${remain} menit lagi\n`;
+
+}
+
+}
+
+text += "\n━━━━━━━━━━━━━━━━━━";
+text += `\n🏆 Total Poin Kamu: **${user.points} poin**`;
+
+return interaction.reply({
+content:text,
+ephemeral:true
+});
+
+}
 
 if(interaction.commandName==="soal"){
 
