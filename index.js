@@ -536,101 +536,59 @@ startAutoQuizSystem(guild);
 
 client.login(process.env.TOKEN);
 
-/* ================= SIMPLE BOSS RAMADHAN ================= */
+/* =====================================================
+🐉 RAMADHAN BOSS RAID PRO
+===================================================== */
 
-let simpleBoss = null
-let simpleBossMessage = null
-let simplePlayers = {}
+let raidBoss=null
+let raidMessage=null
+let raidPlayers={}
+let attackCooldown={}
 
-const SIMPLE_BOSS_HP = 3000
+const RAID_HP=4000
 
-function simpleHPBar(current,max){
+let updatePending=false
 
-const size = 20
-const percent = current / max
+/* ================= HP BAR ================= */
 
-const filled = Math.round(size * percent)
-const empty = size - filled
+function raidHPBar(current,max){
 
-return "🟥".repeat(filled) + "⬛".repeat(empty)
+const size=20
+const percent=current/max
 
-}
+const filled=Math.round(size*percent)
+const empty=size-filled
 
-/* ================= SPAWN ================= */
-
-async function spawnSimpleBoss(guild){
-
-if(simpleBoss) return
-
-const channel = guild.channels.cache.get(process.env.BOSS_CHANNEL_ID)
-if(!channel) return
-
-simplePlayers = {}
-
-simpleBoss = {
-hp:SIMPLE_BOSS_HP,
-max:SIMPLE_BOSS_HP
-}
-
-const embed = new EmbedBuilder()
-
-.setTitle("🐉 BOSS RAMADHAN MUNCUL!")
-
-.setDescription(`
-HP: **${simpleBoss.hp} / ${simpleBoss.max}**
-
-${simpleHPBar(simpleBoss.hp,simpleBoss.max)}
-
-Klik tombol untuk menyerang!
-`)
-
-.setColor("Red")
-
-const row = new ActionRowBuilder().addComponents(
-
-new ButtonBuilder()
-.setCustomId("simple_attack")
-.setLabel("⚔️ Attack")
-.setStyle(ButtonStyle.Danger)
-
-)
-
-simpleBossMessage = await channel.send({
-
-content:`<@&${process.env.GIVEAWAY_ROLE_ID}> 🐉 Boss muncul!`,
-embeds:[embed],
-components:[row]
-
-})
+return "🟥".repeat(filled)+"⬛".repeat(empty)
 
 }
 
 /* ================= UPDATE ================= */
 
-async function updateSimpleBoss(){
+async function updateRaid(){
 
-if(!simpleBossMessage) return
+if(!raidMessage) return
 
-const sorted = Object.entries(simplePlayers)
+const sorted=Object.entries(raidPlayers)
 .sort((a,b)=>b[1]-a[1])
 .slice(0,5)
 
-let leaderboard = ""
+let leaderboard=""
 
 sorted.forEach((p,i)=>{
-leaderboard += `${i+1}. <@${p[0]}> — ${p[1]} dmg\n`
+leaderboard+=`${i+1}. <@${p[0]}> — ${p[1]} dmg\n`
 })
 
 if(!leaderboard) leaderboard="Belum ada serangan"
 
-const embed = new EmbedBuilder()
+const embed=new EmbedBuilder()
 
 .setTitle("🐉 RAMADHAN BOSS RAID")
 
 .setDescription(`
-HP: **${simpleBoss.hp} / ${simpleBoss.max}**
+HP: **${raidBoss.hp} / ${raidBoss.max}**
 
-${simpleHPBar(simpleBoss.hp,simpleBoss.max)}
+${raidHPBar(raidBoss.hp,raidBoss.max)}
 
 🏆 Top Damage
 
@@ -639,45 +597,115 @@ ${leaderboard}
 
 .setColor("Red")
 
-await simpleBossMessage.edit({embeds:[embed]})
+await raidMessage.edit({embeds:[embed]})
 
 }
 
-/* ================= DEAD ================= */
+/* ================= SAFE UPDATE ================= */
 
-async function simpleBossDead(guild){
+function safeUpdate(){
 
-const channel = guild.channels.cache.get(process.env.BOSS_CHANNEL_ID)
+if(updatePending) return
 
-const sorted = Object.entries(simplePlayers)
+updatePending=true
+
+setTimeout(async()=>{
+
+await updateRaid()
+
+updatePending=false
+
+},800)
+
+}
+
+/* ================= SPAWN ================= */
+
+async function spawnRaid(guild){
+
+if(raidBoss) return
+
+const channel=guild.channels.cache.get(process.env.BOSS_CHANNEL_ID)
+if(!channel) return
+
+raidPlayers={}
+attackCooldown={}
+
+raidBoss={
+hp:RAID_HP,
+max:RAID_HP
+}
+
+const embed=new EmbedBuilder()
+
+.setTitle("🐉 BOSS RAMADHAN MUNCUL!")
+
+.setDescription(`
+HP: **${raidBoss.hp} / ${raidBoss.max}**
+
+${raidHPBar(raidBoss.hp,raidBoss.max)}
+
+⚔️ Attack boss untuk menyerang!
+`)
+
+.setColor("Red")
+
+const row=new ActionRowBuilder().addComponents(
+
+new ButtonBuilder()
+.setCustomId("raid_attack")
+.setLabel("⚔️ Attack")
+.setStyle(ButtonStyle.Danger)
+
+)
+
+raidMessage=await channel.send({
+
+content:`<@&${process.env.GIVEAWAY_ROLE_ID}> 🐉 **Boss Ramadhan muncul!**`,
+embeds:[embed],
+components:[row]
+
+})
+
+}
+
+/* ================= BOSS DEAD ================= */
+
+async function raidDead(guild){
+
+const channel=guild.channels.cache.get(process.env.BOSS_CHANNEL_ID)
+
+const sorted=Object.entries(raidPlayers)
 .sort((a,b)=>b[1]-a[1])
 
 let result="🎉 **Boss Ramadhan dikalahkan!**\n\n"
 
-sorted.slice(0,5).forEach((p,i)=>{
-result+=`${i+1}. <@${p[0]}> — ${p[1]} dmg\n`
+sorted.slice(0,10).forEach((p,i)=>{
+
+const user=getUser(p[0])
+
+let reward=50
+
+if(i===0) reward=300
+else if(i===1) reward=200
+else if(i===2) reward=100
+
+user.points+=reward
+
+result+=`${i+1}. <@${p[0]}> — ${p[1]} dmg (+${reward} poin)\n`
+
 })
 
 channel.send(result)
-
-sorted.forEach((p,i)=>{
-
-const user = getUser(p[0])
-
-if(i===0) user.points+=100
-else if(i===1) user.points+=70
-else if(i===2) user.points+=50
-else user.points+=20
-
-})
 
 saveData()
 
 updateLeaderboard(guild)
 
-simpleBoss=null
-simpleBossMessage=null
-simplePlayers={}
+raidBoss=null
+raidPlayers={}
+raidMessage=null
+attackCooldown={}
 
 }
 
@@ -686,65 +714,87 @@ simplePlayers={}
 client.on("interactionCreate",async interaction=>{
 
 if(!interaction.isButton()) return
-if(interaction.customId!=="simple_attack") return
-if(!simpleBoss) return
+if(interaction.customId!=="raid_attack") return
+if(!raidBoss) return
 
-const dmg = Math.floor(Math.random()*40)+30
+const now=Date.now()
 
-simpleBoss.hp -= dmg
+if(attackCooldown[interaction.user.id] && now<attackCooldown[interaction.user.id]){
 
-if(!simplePlayers[interaction.user.id])
-simplePlayers[interaction.user.id]=0
-
-simplePlayers[interaction.user.id]+=dmg
-
-if(simpleBoss.hp<=0){
-
-simpleBoss.hp=0
-
-await updateSimpleBoss()
-
-await simpleBossDead(interaction.guild)
+const wait=Math.ceil((attackCooldown[interaction.user.id]-now)/1000)
 
 return interaction.reply({
-content:`💥 ${dmg} damage!`,
+content:`⏳ Tunggu ${wait} detik sebelum menyerang lagi`,
 ephemeral:true
 })
 
 }
 
-await updateSimpleBoss()
-
-if(interaction.customId==="simple_attack"){
-
-const dmg = Math.floor(Math.random()*40)+30
-
-simpleBoss.hp -= dmg
-
-if(!simplePlayers[interaction.user.id])
-simplePlayers[interaction.user.id]=0
-
-simplePlayers[interaction.user.id]+=dmg
+attackCooldown[interaction.user.id]=now+3000
 
 await interaction.deferUpdate()
 
-if(simpleBoss.hp<=0){
+const dmg=Math.floor(Math.random()*50)+30
 
-simpleBoss.hp=0
+raidBoss.hp-=dmg
 
-await updateSimpleBoss()
+if(!raidPlayers[interaction.user.id])
+raidPlayers[interaction.user.id]=0
 
-await simpleBossDead(interaction.guild)
+raidPlayers[interaction.user.id]+=dmg
+
+if(raidBoss.hp<=0){
+
+raidBoss.hp=0
+
+await updateRaid()
+
+await raidDead(interaction.guild)
 
 return
-}
-
-await updateSimpleBoss()
 
 }
+
+safeUpdate()
+
 })
 
-/* ================= COMMAND ================= */
+/* ================= AUTO SPAWN ================= */
+
+function startBossSchedule(guild){
+
+setInterval(()=>{
+
+const now=new Date()
+
+const hour=now.getHours()
+const minute=now.getMinutes()
+
+if(minute!==0) return
+
+if(hour===15 || hour===18 || hour===21){
+
+spawnRaid(guild)
+
+}
+
+},60000)
+
+}
+
+/* ================= READY HOOK ================= */
+
+client.once("clientReady",()=>{
+
+const guild=client.guilds.cache.get(process.env.GUILD_ID)
+
+if(guild){
+startBossSchedule(guild)
+}
+
+})
+
+/* ================= MANUAL COMMAND ================= */
 
 client.on("interactionCreate",async interaction=>{
 
@@ -755,9 +805,12 @@ if(interaction.commandName==="spawnboss"){
 if(interaction.user.id!==OWNER_ID)
 return interaction.reply({content:"Owner only.",ephemeral:true})
 
-spawnSimpleBoss(interaction.guild)
+spawnRaid(interaction.guild)
 
-interaction.reply({content:"🐉 Boss spawn!",ephemeral:true})
+interaction.reply({
+content:"🐉 Boss berhasil di-spawn!",
+ephemeral:true
+})
 
 }
 
