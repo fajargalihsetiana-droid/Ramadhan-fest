@@ -321,29 +321,22 @@ async function sendQuiz(guild){
   },60*60*1000);
 }
 
-/* ================= AUTO 12 QUIZ RANDOM PER HARI ================= */
+/* ================= AUTO QUIZ TIAP JAM TEPAT ================= */
 
 function startAutoQuizSystem(guild){
 
-  console.log("🕑 Auto quiz aktif (setiap 2 jam tepat jam genap)");
+  console.log("🕒 Auto quiz tiap jam tepat aktif");
 
   function scheduleNext(){
 
     const now = new Date();
 
-    // Hitung jam genap berikutnya
-    let next = new Date(now);
+    const next = new Date(now);
     next.setMinutes(0);
     next.setSeconds(0);
     next.setMilliseconds(0);
 
-    if(next.getHours() % 2 !== 0){
-      next.setHours(next.getHours() + 1);
-    }
-
-    if(next <= now){
-      next.setHours(next.getHours() + 2);
-    }
+    next.setHours(next.getHours() + 1); // jam berikutnya
 
     const delay = next - now;
 
@@ -355,13 +348,14 @@ function startAutoQuizSystem(guild){
         await sendQuiz(guild);
       }
 
-      scheduleNext(); // lanjut terus
+      scheduleNext(); // ulang terus
 
     }, delay);
   }
 
   scheduleNext();
 }
+
 /* ================= INTERACTION ================= */
 
 client.on("interactionCreate", async interaction => {
@@ -494,14 +488,14 @@ user.points += reward;
 /* ================= READY ================= */
 
 client.once("clientReady", async ()=>{
-  console.log("BOT ONLINE - FULL SYSTEM + AUTO QUIZ AKTIF");
+  console.log("BOT ONLINE - AUTO QUIZ TIAP JAM AKTIF");
 
   /* ================= AKTIFKAN AUTO QUIZ ================= */
 
   const guild = client.guilds.cache.get(process.env.GUILD_ID);
 
   if(guild){
-    startAutoQuizSystem(guild); // 🔥 AUTO 12 QUIZ PER HARI JALAN
+    startAutoQuizSystem(guild); // 🔥 Quiz otomatis tiap jam tepat
   } else {
     console.log("❌ GUILD_ID tidak ditemukan!");
   }
