@@ -415,7 +415,7 @@ scheduleNext();
 
 client.on("interactionCreate",async interaction=>{
 
-if(interaction.isButton()){
+if(interaction.isButton() && ["0","1","2","3"].includes(interaction.customId)){
 
 if(!activeQuiz)
 return interaction.reply({content:"⚠️ Soal selesai.",ephemeral:true});
