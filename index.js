@@ -535,3 +535,206 @@ startAutoQuizSystem(guild);
 });
 
 client.login(process.env.TOKEN);
+
+/* ================= SIMPLE BOSS RAMADHAN ================= */
+
+let simpleBoss = null
+let simpleBossMessage = null
+let simplePlayers = {}
+
+const SIMPLE_BOSS_HP = 3000
+
+function simpleHPBar(current,max){
+
+const size = 20
+const percent = current / max
+
+const filled = Math.round(size * percent)
+const empty = size - filled
+
+return "🟥".repeat(filled) + "⬛".repeat(empty)
+
+}
+
+/* ================= SPAWN ================= */
+
+async function spawnSimpleBoss(guild){
+
+if(simpleBoss) return
+
+const channel = guild.channels.cache.get(process.env.BOSS_CHANNEL_ID)
+if(!channel) return
+
+simplePlayers = {}
+
+simpleBoss = {
+hp:SIMPLE_BOSS_HP,
+max:SIMPLE_BOSS_HP
+}
+
+const embed = new EmbedBuilder()
+
+.setTitle("🐉 BOSS RAMADHAN MUNCUL!")
+
+.setDescription(`
+HP: **${simpleBoss.hp} / ${simpleBoss.max}**
+
+${simpleHPBar(simpleBoss.hp,simpleBoss.max)}
+
+Klik tombol untuk menyerang!
+`)
+
+.setColor("Red")
+
+const row = new ActionRowBuilder().addComponents(
+
+new ButtonBuilder()
+.setCustomId("simple_attack")
+.setLabel("⚔️ Attack")
+.setStyle(ButtonStyle.Danger)
+
+)
+
+simpleBossMessage = await channel.send({
+
+content:`<@&${process.env.GIVEAWAY_ROLE_ID}> 🐉 Boss muncul!`,
+embeds:[embed],
+components:[row]
+
+})
+
+}
+
+/* ================= UPDATE ================= */
+
+async function updateSimpleBoss(){
+
+if(!simpleBossMessage) return
+
+const sorted = Object.entries(simplePlayers)
+.sort((a,b)=>b[1]-a[1])
+.slice(0,5)
+
+let leaderboard = ""
+
+sorted.forEach((p,i)=>{
+leaderboard += `${i+1}. <@${p[0]}> — ${p[1]} dmg\n`
+})
+
+if(!leaderboard) leaderboard="Belum ada serangan"
+
+const embed = new EmbedBuilder()
+
+.setTitle("🐉 RAMADHAN BOSS RAID")
+
+.setDescription(`
+HP: **${simpleBoss.hp} / ${simpleBoss.max}**
+
+${simpleHPBar(simpleBoss.hp,simpleBoss.max)}
+
+🏆 Top Damage
+
+${leaderboard}
+`)
+
+.setColor("Red")
+
+await simpleBossMessage.edit({embeds:[embed]})
+
+}
+
+/* ================= DEAD ================= */
+
+async function simpleBossDead(guild){
+
+const channel = guild.channels.cache.get(process.env.BOSS_CHANNEL_ID)
+
+const sorted = Object.entries(simplePlayers)
+.sort((a,b)=>b[1]-a[1])
+
+let result="🎉 **Boss Ramadhan dikalahkan!**\n\n"
+
+sorted.slice(0,5).forEach((p,i)=>{
+result+=`${i+1}. <@${p[0]}> — ${p[1]} dmg\n`
+})
+
+channel.send(result)
+
+sorted.forEach((p,i)=>{
+
+const user = getUser(p[0])
+
+if(i===0) user.points+=100
+else if(i===1) user.points+=70
+else if(i===2) user.points+=50
+else user.points+=20
+
+})
+
+saveData()
+
+simpleBoss=null
+simpleBossMessage=null
+simplePlayers={}
+
+}
+
+/* ================= BUTTON ================= */
+
+client.on("interactionCreate",async interaction=>{
+
+if(!interaction.isButton()) return
+if(interaction.customId!=="simple_attack") return
+if(!simpleBoss) return
+
+const dmg = Math.floor(Math.random()*40)+30
+
+simpleBoss.hp -= dmg
+
+if(!simplePlayers[interaction.user.id])
+simplePlayers[interaction.user.id]=0
+
+simplePlayers[interaction.user.id]+=dmg
+
+if(simpleBoss.hp<=0){
+
+simpleBoss.hp=0
+
+await updateSimpleBoss()
+
+await simpleBossDead(interaction.guild)
+
+return interaction.reply({
+content:`💥 ${dmg} damage!`,
+ephemeral:true
+})
+
+}
+
+await updateSimpleBoss()
+
+interaction.reply({
+content:`⚔️ Kamu memberi **${dmg} damage!**`,
+ephemeral:true
+})
+
+})
+
+/* ================= COMMAND ================= */
+
+client.on("interactionCreate",async interaction=>{
+
+if(!interaction.isChatInputCommand()) return
+
+if(interaction.commandName==="spawnboss"){
+
+if(interaction.user.id!==OWNER_ID)
+return interaction.reply({content:"Owner only.",ephemeral:true})
+
+spawnSimpleBoss(interaction.guild)
+
+interaction.reply({content:"🐉 Boss spawn!",ephemeral:true})
+
+}
+
+})
