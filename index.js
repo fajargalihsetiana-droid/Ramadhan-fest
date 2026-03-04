@@ -204,11 +204,84 @@ let activeQuiz=null;
 
 const questions=[
 
-{question:"3² + 4² = ?",correct:"25",options:["7","12","25","49"]},
-{question:"Planet terbesar?",correct:"Jupiter",options:["Mars","Jupiter","Saturnus","Neptunus"]},
-{question:"Jumlah sudut segitiga?",correct:"180°",options:["90°","180°","270°","360°"]},
-{question:"Akar dari 144?",correct:"12",options:["10","11","12","13"]},
-{question:"Jika 2 + 2 × 2 = ?",correct:"6",options:["8","6","4","10"]}
+{/* ================= MATEMATIKA ================= */
+
+{ question: "3² + 4² = ?", correct: "25", options: ["7","12","25","49"] },
+{ question: "12² - 5² = ?", correct: "119", options: ["95","119","144","169"] },
+{ question: "15% dari 400?", correct: "60", options: ["40","50","60","80"] },
+{ question: "2⁵ × 2 = ?", correct: "64", options: ["32","48","64","128"] },
+{ question: "Akar dari 625?", correct: "25", options: ["15","20","25","30"] },
+{ question: "5! = ?", correct: "120", options: ["60","100","120","150"] },
+{ question: "9² - 3² = ?", correct: "72", options: ["54","63","72","81"] },
+{ question: "Jika 8x = 72, maka x?", correct: "9", options: ["7","8","9","10"] },
+{ question: "20% dari 250?", correct: "50", options: ["40","45","50","60"] },
+{ question: "Jika 6² + 8² = ?", correct: "100", options: ["64","100","144","80"] },
+
+/* ================= POLA ================= */
+
+{ question: "1, 4, 9, 16, 25, ...?", correct: "36", options: ["30","35","36","49"] },
+{ question: "2, 6, 12, 20, 30, ...?", correct: "42", options: ["36","40","42","48"] },
+{ question: "5, 10, 20, 40, ...?", correct: "80", options: ["60","70","80","90"] },
+{ question: "3, 9, 27, ...?", correct: "81", options: ["54","72","81","90"] },
+{ question: "7, 14, 28, 56, ...?", correct: "112", options: ["100","108","112","120"] },
+
+/* ================= LOGIKA ================= */
+
+{ question: "Semakin banyak diambil semakin besar?", correct: "Lubang", options: ["Air","Lubang","Api","Angin"] },
+{ question: "Jika semua A adalah B dan semua B adalah C, maka?", correct: "Semua A adalah C", options: ["Semua C adalah A","Semua A adalah C","Tidak ada hubungan","Tidak pasti"] },
+{ question: "Hari ini Senin. 14 hari lagi?", correct: "Senin", options: ["Selasa","Minggu","Senin","Rabu"] },
+{ question: "Jika 1 kg besi vs 1 kg kapas?", correct: "Sama berat", options: ["Besi","Kapas","Sama berat","Tergantung"] },
+{ question: "100 dibagi 0?", correct: "Tidak terdefinisi", options: ["0","100","Tak hingga","Tidak terdefinisi"] },
+
+/* ================= PENGETAHUAN UMUM ================= */
+
+{ question: "Planet terbesar?", correct: "Jupiter", options: ["Mars","Jupiter","Saturnus","Neptunus"] },
+{ question: "Ibukota Jepang?", correct: "Tokyo", options: ["Kyoto","Tokyo","Osaka","Seoul"] },
+{ question: "Benua terbesar?", correct: "Asia", options: ["Afrika","Asia","Eropa","Amerika"] },
+{ question: "Lambang kimia emas?", correct: "Au", options: ["Ag","Au","Fe","Em"] },
+{ question: "Penemu relativitas?", correct: "Albert Einstein", options: ["Newton","Einstein","Tesla","Galileo"] },
+
+/* ================= CAMPURAN MENANTANG ================= */
+
+{ question: "Jika 4 orang menyelesaikan kerja 6 hari, 2 orang butuh?", correct: "12 hari", options: ["8 hari","10 hari","12 hari","14 hari"] },
+{ question: "Jumlah sudut segi lima?", correct: "540°", options: ["360°","540°","720°","600°"] },
+{ question: "Akar 169?", correct: "13", options: ["11","12","13","14"] },
+{ question: "Jika 2³ + 3³ = ?", correct: "35", options: ["17","25","35","45"] },
+{ question: "Jika 50% dari X adalah 75, maka X?", correct: "150", options: ["100","125","150","175"] },
+
+/* ================= TRICKY RINGAN ================= */
+
+{ question: "Dibalik, 91 menjadi?", correct: "19", options: ["16","19","61","109"] },
+{ question: "Jumlah hari dalam 3 minggu?", correct: "21", options: ["18","20","21","24"] },
+{ question: "Jika 0 dikali 999?", correct: "0", options: ["0","999","1","Tak hingga"] },
+{ question: "Berapa sisi kubus?", correct: "6", options: ["4","6","8","12"] },
+{ question: "Berapa rusuk kubus?", correct: "12", options: ["8","10","12","14"] },
+
+/* ================= BONUS TAMBAHAN ================= */
+
+{ question: "10² - 8² = ?", correct: "36", options: ["20","32","36","40"] },
+{ question: "Jika 9x = 81?", correct: "9", options: ["7","8","9","10"] },
+{ question: "Akar dari 81?", correct: "9", options: ["7","8","9","10"] },
+{ question: "Jika 7² = ?", correct: "49", options: ["42","48","49","56"] },
+{ question: "3 × 7 + 4 = ?", correct: "25", options: ["21","23","25","28"] },
+
+{ question: "Jika 18 ÷ 3 × 2 = ?", correct: "12", options: ["6","9","12","18"] },
+{ question: "Jumlah sudut segitiga?", correct: "180°", options: ["90°","180°","270°","360°"] },
+{ question: "Jika 2x = 50?", correct: "25", options: ["20","25","30","35"] },
+{ question: "Akar 256?", correct: "16", options: ["14","15","16","18"] },
+{ question: "Jika 100 - 45 = ?", correct: "55", options: ["45","50","55","65"] },
+
+{ question: "Pola: 4, 8, 16, 32, ...?", correct: "64", options: ["48","56","64","72"] },
+{ question: "Jika 11² = ?", correct: "121", options: ["111","121","131","141"] },
+{ question: "Jika 144 ÷ 12 = ?", correct: "12", options: ["10","11","12","14"] },
+{ question: "Jika 6 × 7 = ?", correct: "42", options: ["36","40","42","48"] },
+{ question: "Jika 25% dari 200 = ?", correct: "50", options: ["40","45","50","60"] },
+
+{ question: "Jumlah bulan dalam 2 tahun?", correct: "24", options: ["20","22","24","26"] },
+{ question: "Jika 2 + 2 × 2 = ?", correct: "6", options: ["8","6","4","10"] },
+{ question: "Jika 1000 ÷ 10 = ?", correct: "100", options: ["10","50","100","200"] },
+{ question: "Jika 81 ÷ 9 = ?", correct: "9", options: ["8","9","10","11"] },
+{ question: "Jika 13 + 7 = ?", correct: "20", options: ["18","19","20","21"] }
 
 ];
 
@@ -342,7 +415,7 @@ scheduleNext();
 
 client.on("interactionCreate",async interaction=>{
 
-if(interaction.isButton()){
+if(interaction.isButton() && !interaction.customId.startsWith("boss_")){
 
 if(!activeQuiz)
 return interaction.reply({content:"⚠️ Soal selesai.",ephemeral:true});
@@ -510,13 +583,17 @@ const BOSS_MAX_HP=5000
 
 function bossHPBar(current,max){
 
-const size=18
+const size=20
 const percent=current/max
 
 const filled=Math.round(size*percent)
 const empty=size-filled
 
-return "█".repeat(filled)+"░".repeat(empty)
+const bar="🟥".repeat(filled)+"⬛".repeat(empty)
+
+const percentText=Math.floor(percent*100)
+
+return `${bar}\n${percentText}%`
 
 }
 
@@ -553,7 +630,7 @@ ${bossHPBar(boss.hp,boss.maxHp)}
 
 .setColor("Red")
 
-.setImage("https://i.imgur.com/7nQqK5F.png")
+.setImage("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR4uXZL1cmXfBxKQINQIT1R4H2Orko-9uRJXbmEv7XO9BhrMnxo0AlFnvrW&s=10")
 
 const row=new ActionRowBuilder().addComponents(
 
@@ -630,7 +707,7 @@ ${leaderboard}
 
 .setColor("Red")
 
-.setImage("https://i.imgur.com/7nQqK5F.png")
+.setImage("https://cdn.discordapp.com/attachments/1478602183032311919/1478612467201609771/file_000000007da872088dcfe415d2d39f88.png?ex=69a908ab&is=69a7b72b&hm=bc97d7776984994166cdab770f5d965067d895a54ff8fe86499f25e5acce65f7&")
 
 await bossMessage.edit({embeds:[embed]})
 
