@@ -459,6 +459,377 @@ if(guild){
 startAutoQuizSystem(guild);
 }
 
+/* ================= COMMAND ================= */
+
+const commands=[
+
+new SlashCommandBuilder()
+.setName("cooldown")
+.setDescription("Cek cooldown"),
+
+new SlashCommandBuilder()
+.setName("soal")
+.setDescription("Kirim quiz"),
+
+new SlashCommandBuilder()
+.setName("spawnboss")
+.setDescription("Spawn boss ramadhan"),
+
+new SlashCommandBuilder()
+.setName("addpoin")
+.setDescription("Tambah poin")
+.addUserOption(o=>o.setName("user").setDescription("User").setRequired(true))
+.addIntegerOption(o=>o.setName("jumlah").setDescription("Jumlah").setRequired(true))
+
+].map(c=>c.toJSON());
+
+const rest=new REST({version:"10"}).setToken(process.env.TOKEN);
+
+await rest.put(
+Routes.applicationGuildCommands(client.user.id,process.env.GUILD_ID),
+{body:commands}
+);
+
+console.log("✅ Slash command terdaftar");
+
 });
 
 client.login(process.env.TOKEN);
+
+/* =====================================================
+🐉 RAMADHAN BOSS RAID SYSTEM
+===================================================== */
+
+let boss=null
+let bossMessage=null
+let bossPlayers={}
+
+const BOSS_MAX_HP=5000
+
+/* ================= HP BAR ================= */
+
+function bossHPBar(current,max){
+
+const size=18
+const percent=current/max
+
+const filled=Math.round(size*percent)
+const empty=size-filled
+
+return "█".repeat(filled)+"░".repeat(empty)
+
+}
+
+/* ================= SPAWN BOSS ================= */
+
+async function spawnBoss(guild){
+
+if(boss) return
+
+const channel=guild.channels.cache.get(process.env.BOSS_CHANNEL_ID)
+if(!channel) return
+
+bossPlayers={}
+
+boss={
+hp:BOSS_MAX_HP,
+maxHp:BOSS_MAX_HP,
+rage:false
+}
+
+const embed=new EmbedBuilder()
+
+.setTitle("🐉 BOSS RAMADHAN MUNCUL!")
+
+.setDescription(`
+HP: **${boss.hp} / ${boss.maxHp}**
+
+${bossHPBar(boss.hp,boss.maxHp)}
+
+⚔️ Attack
+🛡️ Defend
+✨ Skill
+`)
+
+.setColor("Red")
+
+.setImage("https://i.imgur.com/7nQqK5F.png")
+
+const row=new ActionRowBuilder().addComponents(
+
+new ButtonBuilder()
+.setCustomId("boss_attack")
+.setLabel("⚔️ Attack")
+.setStyle(ButtonStyle.Danger),
+
+new ButtonBuilder()
+.setCustomId("boss_defend")
+.setLabel("🛡️ Defend")
+.setStyle(ButtonStyle.Secondary),
+
+new ButtonBuilder()
+.setCustomId("boss_skill")
+.setLabel("✨ Skill")
+.setStyle(ButtonStyle.Primary)
+
+)
+
+bossMessage=await channel.send({
+
+content:`<@&${process.env.GIVEAWAY_ROLE_ID}> 🐉 **BOSS RAMADHAN MUNCUL!**`,
+
+embeds:[embed],
+components:[row]
+
+})
+
+}
+
+/* ================= UPDATE BOSS ================= */
+
+async function updateBoss(){
+
+if(!bossMessage) return
+
+const sorted=Object.entries(bossPlayers)
+
+.sort((a,b)=>b[1]-a[1])
+.slice(0,5)
+
+let leaderboard=""
+
+sorted.forEach((p,i)=>{
+leaderboard+=`${i+1}. <@${p[0]}> — ${p[1]} dmg\n`
+})
+
+if(!leaderboard) leaderboard="Belum ada serangan"
+
+let rageText=""
+
+if(boss.rage) rageText="🔥 **RAGE MODE AKTIF!**\n"
+
+const embed=new EmbedBuilder()
+
+.setTitle("🐉 RAMADHAN BOSS RAID")
+
+.setDescription(`
+HP: **${boss.hp} / ${boss.maxHp}**
+
+${bossHPBar(boss.hp,boss.maxHp)}
+
+${rageText}
+
+🏆 Top Damage
+
+${leaderboard}
+
+⚔️ Attack
+🛡️ Defend
+✨ Skill
+`)
+
+.setColor("Red")
+
+.setImage("https://i.imgur.com/7nQqK5F.png")
+
+await bossMessage.edit({embeds:[embed]})
+
+}
+
+/* ================= BOSS DEAD ================= */
+
+async function bossDead(guild){
+
+const channel=guild.channels.cache.get(process.env.BOSS_CHANNEL_ID)
+
+const sorted=Object.entries(bossPlayers)
+
+.sort((a,b)=>b[1]-a[1])
+
+let result="🎉 **BOSS RAMADHAN DIKALAHKAN!**\n\n"
+
+sorted.slice(0,5).forEach((p,i)=>{
+result+=`${i+1}. <@${p[0]}> — ${p[1]} damage\n`
+})
+
+channel.send(result)
+
+/* reward */
+
+sorted.forEach((p,i)=>{
+
+const user=getUser(p[0])
+
+if(i===0) user.points+=120
+else if(i===1) user.points+=80
+else if(i===2) user.points+=60
+else user.points+=30
+
+})
+
+saveData()
+
+boss=null
+bossMessage=null
+bossPlayers={}
+
+}
+
+/* ================= DAMAGE ================= */
+
+function calculateDamage(type){
+
+let dmg=0
+
+if(type==="attack") dmg=Math.floor(Math.random()*40)+40
+
+if(type==="skill") dmg=Math.floor(Math.random()*80)+120
+
+/* critical */
+
+if(Math.random()<0.1){
+dmg*=2
+}
+
+if(boss.rage){
+dmg=Math.floor(dmg*1.2)
+}
+
+return dmg
+
+}
+
+/* ================= BUTTON ================= */
+
+client.on("interactionCreate",async interaction=>{
+
+if(!interaction.isButton()) return
+if(!boss) return
+
+/* ATTACK */
+
+if(interaction.customId==="boss_attack"){
+
+let dmg=calculateDamage("attack")
+
+boss.hp-=dmg
+
+if(!bossPlayers[interaction.user.id])
+bossPlayers[interaction.user.id]=0
+
+bossPlayers[interaction.user.id]+=dmg
+
+}
+
+/* SKILL */
+
+if(interaction.customId==="boss_skill"){
+
+let dmg=calculateDamage("skill")
+
+boss.hp-=dmg
+
+if(!bossPlayers[interaction.user.id])
+bossPlayers[interaction.user.id]=0
+
+bossPlayers[interaction.user.id]+=dmg
+
+}
+
+/* DEFEND */
+
+if(interaction.customId==="boss_defend"){
+
+return interaction.reply({
+content:"🛡️ Defense aktif!",
+ephemeral:true
+})
+
+}
+
+/* rage */
+
+if(boss.hp<=boss.maxHp/2 && !boss.rage){
+
+boss.rage=true
+
+const channel=interaction.guild.channels.cache.get(process.env.BOSS_CHANNEL_ID)
+
+channel.send("🔥 **BOSS MASUK RAGE MODE!**")
+
+}
+
+if(boss.hp<=0){
+
+boss.hp=0
+
+await updateBoss()
+
+await bossDead(interaction.guild)
+
+return interaction.reply({
+content:"⚔️ Boss dikalahkan!",
+ephemeral:true
+})
+
+}
+
+await updateBoss()
+
+return interaction.reply({
+content:"⚔️ Serangan berhasil!",
+ephemeral:true
+})
+
+})
+
+/* ================= SPAWN SCHEDULE ================= */
+
+function startBossSchedule(client){
+
+setInterval(()=>{
+
+const now=new Date()
+
+const hour=now.getHours()
+
+if(hour===15||hour===18||hour===21){
+
+client.guilds.cache.forEach(guild=>{
+spawnBoss(guild)
+})
+
+}
+
+},60000)
+
+}
+
+/* ================= MANUAL SPAWN ================= */
+
+client.on("interactionCreate",async interaction=>{
+
+if(!interaction.isChatInputCommand()) return
+
+if(interaction.commandName==="spawnboss"){
+
+if(interaction.user.id!==OWNER_ID)
+return interaction.reply({
+content:"❌ Hanya owner.",
+ephemeral:true
+})
+
+await spawnBoss(interaction.guild)
+
+return interaction.reply({
+content:"🐉 Boss berhasil di spawn!",
+ephemeral:true
+})
+
+}
+
+})
+
+client.once("clientReady",()=>{
+startBossSchedule(client)
+})
