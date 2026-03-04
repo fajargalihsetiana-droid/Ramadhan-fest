@@ -673,6 +673,8 @@ else user.points+=20
 
 saveData()
 
+updateLeaderboard(guild)
+
 simpleBoss=null
 simpleBossMessage=null
 simplePlayers={}
@@ -713,10 +715,7 @@ ephemeral:true
 
 await updateSimpleBoss()
 
-interaction.reply({
-content:`⚔️ Kamu memberi **${dmg} damage!**`,
-ephemeral:true
-})
+await interaction.deferUpdate()
 
 })
 
