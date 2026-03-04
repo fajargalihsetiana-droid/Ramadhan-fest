@@ -472,6 +472,42 @@ return interaction.reply({content:"❌ Salah!",ephemeral:true});
 }
 
 if(!interaction.isChatInputCommand()) return;
+
+/* ================= ADD POIN ================= */
+
+if(interaction.commandName==="addpoin"){
+
+if(interaction.user.id!==OWNER_ID)
+return interaction.reply({
+content:"❌ Owner only.",
+ephemeral:true
+});
+
+const target=interaction.options.getUser("user");
+const amount=interaction.options.getInteger("jumlah");
+
+const user=getUser(target.id);
+
+user.points+=amount;
+
+saveData();
+
+await updateLeaderboard(interaction.guild);
+
+await logPoint(
+interaction.guild,
+target.id,
+amount,
+"Manual add poin"
+);
+
+return interaction.reply({
+content:`✅ ${amount} poin berhasil ditambahkan ke ${target}`,
+ephemeral:true
+});
+
+}
+
 if(interaction.commandName==="cooldown"){
 
 const user = getUser(interaction.user.id);
