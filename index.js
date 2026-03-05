@@ -972,7 +972,17 @@ saveData()
 
 await updateLeaderboard(message.guild)
 
-message.channel.send(`🎉 <@${message.author.id}> berhasil claim **${reward} poin!**`)
+const rank = getRank(message.author.id)
+
+message.channel.send(`
+🎉 **HADIAH BERHASIL DIAMBIL!**
+
+👤 Pemenang : <@${message.author.id}>
+🏆 Rank : #${rank}
+💰 Hadiah : **${reward} poin**
+
+🔥 Cepat sekali!
+`)
 
 hadiahActive = null
 
