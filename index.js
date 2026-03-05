@@ -900,7 +900,7 @@ client.on("interactionCreate", async interaction=>{
 /* ================= BUTTON ================= */
 
 if(interaction.isButton() && interaction.customId==="rampok_start"){
-
+await interaction.deferReply({ ephemeral: true })
 const now = Date.now()
 
 if(rampokCooldown[interaction.user.id] && now < rampokCooldown[interaction.user.id]){
@@ -931,13 +931,10 @@ const menu = new StringSelectMenuBuilder()
 
 const row = new ActionRowBuilder().addComponents(menu)
 
-return interaction.reply({
-content:"🎯 Pilih target yang ingin dirampok:",
-components:[row],
-ephemeral:true
+return interaction.editReply({
+content:"🎯 Pilih target",
+components:[row]
 })
-
-}
 
 /* ================= SELECT TARGET ================= */
 
