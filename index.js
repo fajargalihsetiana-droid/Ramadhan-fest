@@ -568,6 +568,7 @@ if(!guild) return;
 
 startAutoQuizSystem(guild);
 startBossSchedule(guild);
+sendRampokMessage(guild)
 
 });
 
@@ -836,5 +837,173 @@ ephemeral:true
 })
 
 }
+
+})
+
+/* =====================================================
+🗡️ RAMPOK POIN SYSTEM
+===================================================== */
+
+let rampokCooldown = {}
+
+/* ================= SEND MESSAGE ================= */
+
+async function sendRampokMessage(guild){
+
+const channel = guild.channels.cache.get(process.env.RAMPOK_CHANNEL_ID)
+if(!channel) return
+
+const embed = new EmbedBuilder()
+
+.setTitle("🗡️ RAMPOK POIN")
+
+.setDescription(`
+Klik tombol untuk mencoba merampok poin member lain.
+
+⚠️ Risiko:
+• Berhasil mencuri poin
+• Ketahuan polisi
+• Korban melawan
+
+⏳ Cooldown: 45 menit
+`)
+
+.setColor("DarkRed")
+
+const row = new ActionRowBuilder().addComponents(
+
+new ButtonBuilder()
+.setCustomId("rampok_start")
+.setLabel("🗡️ Rampok")
+.setStyle(ButtonStyle.Danger)
+
+)
+
+channel.send({
+embeds:[embed],
+components:[row]
+})
+
+}
+
+/* ================= BUTTON START ================= */
+
+client.on("interactionCreate",async interaction=>{
+
+if(!interaction.isButton()) return
+if(interaction.customId!=="rampok_start") return
+
+const now = Date.now()
+
+if(rampokCooldown[interaction.user.id] && now < rampokCooldown[interaction.user.id]){
+
+const wait = Math.ceil((rampokCooldown[interaction.user.id]-now)/60000)
+
+return interaction.reply({
+content:`⏳ Kamu harus menunggu ${wait} menit sebelum rampok lagi.`,
+ephemeral:true
+})
+
+}
+
+const members = await interaction.guild.members.fetch()
+
+const options = members
+.filter(m=>!m.user.bot && m.id!==interaction.user.id)
+.first(25)
+.map(m=>({
+label:m.user.username,
+value:m.id
+}))
+
+const menu = new StringSelectMenuBuilder()
+
+.setCustomId("rampok_target")
+.setPlaceholder("Pilih target rampok")
+.addOptions(options)
+
+const row = new ActionRowBuilder().addComponents(menu)
+
+interaction.reply({
+content:"Pilih target yang ingin dirampok:",
+components:[row],
+ephemeral:true
+})
+
+})
+
+/* ================= TARGET SELECT ================= */
+
+client.on("interactionCreate",async interaction=>{
+
+if(!interaction.isStringSelectMenu()) return
+if(interaction.customId!=="rampok_target") return
+
+const targetId = interaction.values[0]
+
+const robber = getUser(interaction.user.id)
+const victim = getUser(targetId)
+
+if(victim.points < 50)
+return interaction.reply({
+content:"❌ Target terlalu miskin.",
+ephemeral:true
+})
+
+rampokCooldown[interaction.user.id] = Date.now() + 2700000
+
+const chance = Math.random()
+
+let text = ""
+
+/* ================= BERHASIL ================= */
+
+if(chance < 0.40){
+
+const steal = Math.floor(Math.random()*120)+40
+const amount = Math.min(steal,victim.points)
+
+victim.points -= amount
+robber.points += amount
+
+text = `🗡️ **BERHASIL MERAMPOK!**
+
+<@${interaction.user.id}> mencuri **${amount} poin** dari <@${targetId}> 💰`
+
+}
+
+/* ================= KETAHUAN ================= */
+
+else if(chance < 0.75){
+
+const fine = Math.floor(Math.random()*80)+40
+
+robber.points -= fine
+
+text = `🚨 **KETAHUAN POLISI!**
+
+<@${interaction.user.id}> didenda **-${fine} poin**`
+
+}
+
+/* ================= KORBAN MELAWAN ================= */
+
+else{
+
+const counter = Math.floor(Math.random()*100)+60
+
+robber.points -= counter
+victim.points += counter
+
+text = `⚔️ **KORBAN MELAWAN!**
+
+<@${interaction.user.id}> kalah dan kehilangan **-${counter} poin**`
+}
+
+saveData()
+
+await updateLeaderboard(interaction.guild)
+
+interaction.reply({content:text})
 
 })
