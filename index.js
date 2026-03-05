@@ -568,7 +568,6 @@ if(!guild) return;
 
 startAutoQuizSystem(guild);
 startBossSchedule(guild);
-sendRampokMessage(guild)
 
 });
 
