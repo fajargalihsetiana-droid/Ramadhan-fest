@@ -854,9 +854,7 @@ const channel = guild.channels.cache.get(process.env.RAMPOK_CHANNEL_ID)
 if(!channel) return
 
 const embed = new EmbedBuilder()
-
 .setTitle("🗡️ RAMPOK POIN")
-
 .setDescription(`
 Klik tombol untuk mencoba merampok poin member lain.
 
@@ -867,16 +865,13 @@ Klik tombol untuk mencoba merampok poin member lain.
 
 ⏳ Cooldown: 45 menit
 `)
-
 .setColor("DarkRed")
 
 const row = new ActionRowBuilder().addComponents(
-
 new ButtonBuilder()
 .setCustomId("rampok_start")
 .setLabel("🗡️ Rampok")
 .setStyle(ButtonStyle.Danger)
-
 )
 
 channel.send({
@@ -893,15 +888,16 @@ client.on("interactionCreate",async interaction=>{
 if(!interaction.isButton()) return
 if(interaction.customId!=="rampok_start") return
 
+await interaction.deferReply({ephemeral:true})
+
 const now = Date.now()
 
 if(rampokCooldown[interaction.user.id] && now < rampokCooldown[interaction.user.id]){
 
 const wait = Math.ceil((rampokCooldown[interaction.user.id]-now)/60000)
 
-return interaction.reply({
-content:`⏳ Kamu harus menunggu ${wait} menit sebelum rampok lagi.`,
-ephemeral:true
+return interaction.editReply({
+content:`⏳ Tunggu ${wait} menit sebelum rampok lagi.`
 })
 
 }
@@ -917,17 +913,15 @@ value:m.id
 }))
 
 const menu = new StringSelectMenuBuilder()
-
 .setCustomId("rampok_target")
 .setPlaceholder("Pilih target rampok")
 .addOptions(options)
 
 const row = new ActionRowBuilder().addComponents(menu)
 
-interaction.reply({
-content:"Pilih target yang ingin dirampok:",
-components:[row],
-ephemeral:true
+interaction.editReply({
+content:"🎯 Pilih target yang ingin dirampok:",
+components:[row]
 })
 
 })
@@ -939,15 +933,16 @@ client.on("interactionCreate",async interaction=>{
 if(!interaction.isStringSelectMenu()) return
 if(interaction.customId!=="rampok_target") return
 
+await interaction.deferReply({ephemeral:true})
+
 const targetId = interaction.values[0]
 
 const robber = getUser(interaction.user.id)
 const victim = getUser(targetId)
 
 if(victim.points < 50)
-return interaction.reply({
-content:"❌ Target terlalu miskin.",
-ephemeral:true
+return interaction.editReply({
+content:"❌ Target terlalu miskin."
 })
 
 rampokCooldown[interaction.user.id] = Date.now() + 2700000
@@ -983,7 +978,6 @@ robber.points -= fine
 text = `🚨 **KETAHUAN POLISI!**
 
 <@${interaction.user.id}> didenda **-${fine} poin**`
-
 }
 
 /* ================= KORBAN MELAWAN ================= */
@@ -1004,6 +998,9 @@ saveData()
 
 await updateLeaderboard(interaction.guild)
 
-interaction.reply({content:text})
+interaction.editReply({
+content:text,
+components:[]
+})
 
 })
