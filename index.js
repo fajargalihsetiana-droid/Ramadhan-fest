@@ -845,3 +845,42 @@ ephemeral:true
 })
 
 require("./kerja.js")(client)
+
+require("./kerja.js")(client)
+
+/* ================= PANEL KERJA ================= */
+
+client.on("interactionCreate",async interaction=>{
+
+if(!interaction.isChatInputCommand()) return
+
+if(interaction.commandName==="panelkerja"){
+
+const embed=new EmbedBuilder()
+.setTitle("🧹 KERJA RAMADHAN")
+.setDescription(`
+Rank #3 ke bawah bisa bekerja.
+
+💰 Reward
+100 - 220 poin
+
+⏳ Cooldown
+45 menit
+`)
+.setColor("Green")
+
+const row=new ActionRowBuilder().addComponents(
+new ButtonBuilder()
+.setCustomId("kerja_start")
+.setLabel("🧹 Mulai Kerja")
+.setStyle(ButtonStyle.Success)
+)
+
+interaction.reply({
+embeds:[embed],
+components:[row]
+})
+
+}
+
+})
