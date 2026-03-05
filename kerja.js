@@ -10,59 +10,14 @@ module.exports = (client)=>{
 let kerjaProgress = {}
 let kerjaCooldown = {}
 
-/* ================= EMBED ================= */
-
-async function sendKerjaEmbed(guild){
-
-const channel = guild.channels.cache.get(process.env.KERJA_CHANNEL_ID)
-if(!channel) return
-
-const embed = new EmbedBuilder()
-
-.setTitle("🧹 KERJA RAMADHAN")
-
-.setDescription(`
-Selesaikan pekerjaan untuk mendapatkan poin.
-
-⚠️ Hanya **rank #3 ke bawah**
-
-Cara kerja:
-Klik tombol sampai progress selesai.
-
-💰 Reward
-100 - 220 poin
-
-⏳ Cooldown
-45 menit
-`)
-
-.setColor("Green")
-
-const row = new ActionRowBuilder().addComponents(
-
-new ButtonBuilder()
-.setCustomId("kerja_start")
-.setLabel("🧹 Mulai Kerja")
-.setStyle(ButtonStyle.Success)
-
-)
-
-channel.send({
-embeds:[embed],
-components:[row]
-})
-
-}
-
-/* ================= PROGRESS BAR ================= */
-
 function progressBar(step){
 
 const total = 5
+
 const done = "🟩".repeat(step)
 const left = "⬜".repeat(total-step)
 
-return done+left
+return done + left
 
 }
 
@@ -72,7 +27,7 @@ client.on("interactionCreate",async interaction=>{
 
 if(!interaction.isButton()) return
 
-/* START */
+/* ================= MULAI ================= */
 
 if(interaction.customId === "kerja_start"){
 
@@ -131,16 +86,24 @@ new ButtonBuilder()
 
 return interaction.reply({
 embeds:[embed],
-components:[row]
+components:[row],
+ephemeral:true
 })
 
 }
 
-/* ================= KERJA ================= */
+/* ================= PROGRESS ================= */
 
 if(interaction.customId === "kerja_do"){
 
-if(!(interaction.user.id in kerjaProgress)) return
+if(!(interaction.user.id in kerjaProgress)){
+
+return interaction.reply({
+content:"Klik **Mulai Kerja** dulu.",
+ephemeral:true
+})
+
+}
 
 kerjaProgress[interaction.user.id]++
 
@@ -151,6 +114,7 @@ const step = kerjaProgress[interaction.user.id]
 if(step >= 5){
 
 const rewards = [100,120,150,180,220]
+
 const reward = rewards[Math.floor(Math.random()*rewards.length)]
 
 const user = getUser(interaction.user.id)
@@ -161,7 +125,7 @@ saveData()
 
 await updateLeaderboard(interaction.guild)
 
-kerjaCooldown[interaction.user.id] = Date.now()+2700000
+kerjaCooldown[interaction.user.id] = Date.now() + 2700000
 
 delete kerjaProgress[interaction.user.id]
 
@@ -195,18 +159,6 @@ return interaction.update({
 embeds:[embed]
 })
 
-}
-
-})
-
-/* ================= READY ================= */
-
-client.once("clientReady",()=>{
-
-const guild = client.guilds.cache.get(process.env.GUILD_ID)
-
-if(guild){
-sendKerjaEmbed(guild)
 }
 
 })
