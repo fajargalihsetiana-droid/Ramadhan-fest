@@ -838,3 +838,5 @@ ephemeral:true
 }
 
 })
+
+require("./kerja.js")(client)
