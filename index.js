@@ -45,11 +45,6 @@ if(!data[id].keywordCooldowns) data[id].keywordCooldowns={};
 return data[id];
 }
 
-global.data = data
-global.getUser = getUser
-global.saveData = saveData
-global.updateLeaderboard = updateLeaderboard
-
 /* ================= ERROR HANDLER ================= */
 
 process.on("unhandledRejection",error=>{
@@ -814,8 +809,8 @@ const minute=now.getUTCMinutes()
 
 if(hour>=24) hour-=24
 
+if(hour===09 && minute<=1) spawnRaid(guild)
 if(hour===15 && minute<=1) spawnRaid(guild)
-if(hour===18 && minute<=1) spawnRaid(guild)
 if(hour===21 && minute<=1) spawnRaid(guild)
 
 },60000)
@@ -838,47 +833,6 @@ spawnRaid(interaction.guild)
 interaction.reply({
 content:"🐉 Boss berhasil di-spawn!",
 ephemeral:true
-})
-
-}
-
-})
-
-require("./kerja.js")(client)
-
-require("./kerja.js")(client)
-
-/* ================= PANEL KERJA ================= */
-
-client.on("interactionCreate",async interaction=>{
-
-if(!interaction.isChatInputCommand()) return
-
-if(interaction.commandName==="panelkerja"){
-
-const embed=new EmbedBuilder()
-.setTitle("🧹 KERJA RAMADHAN")
-.setDescription(`
-Rank #3 ke bawah bisa bekerja.
-
-💰 Reward
-100 - 220 poin
-
-⏳ Cooldown
-45 menit
-`)
-.setColor("Green")
-
-const row=new ActionRowBuilder().addComponents(
-new ButtonBuilder()
-.setCustomId("kerja_start")
-.setLabel("🧹 Mulai Kerja")
-.setStyle(ButtonStyle.Success)
-)
-
-interaction.reply({
-embeds:[embed],
-components:[row]
 })
 
 }
