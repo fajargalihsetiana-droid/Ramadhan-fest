@@ -68,6 +68,31 @@ channel.send({embeds:[embed]});
 
 }
 
+/* ================= RANK BALANCE ================= */
+
+function applyRankBalance(userId,baseReward){
+
+const sorted=Object.entries(data)
+.sort((a,b)=>b[1].points-a[1].points);
+
+const rankIndex=sorted.findIndex(e=>e[0]===userId);
+
+if(rankIndex===-1) return baseReward;
+
+const multipliers=[
+0.75, // rank 1
+1.10, // rank 2
+1.20, // rank 3
+1.30, // rank 4
+1.35  // rank 5
+];
+
+const multi=multipliers[rankIndex]||1.4;
+
+return Math.floor(baseReward*multi);
+
+}
+
 /* ================= GAP BALANCE ================= */
 
 function applyGapBalance(userId,baseReward){
@@ -198,6 +223,7 @@ return message.reply(`⏳ Tunggu ${remain} menit lagi.`);
 
 let reward=Math.floor(Math.random()*10)+10;
 
+reward=applyRankBalance(message.author.id,reward);
 reward=applyGapBalance(message.author.id,reward);
 
 user.points+=reward;
@@ -460,10 +486,10 @@ reward*=2;
 activeQuiz.firstWinner=interaction.user.id;
 }
 
+reward=applyRankBalance(interaction.user.id,reward);
 reward=applyGapBalance(interaction.user.id,reward);
 
 user.points+=reward;
-
 activeQuiz.winners.push({
 id:interaction.user.id,
 points:reward
@@ -962,12 +988,14 @@ if(message.author.id===hadiahActive.user){
 if(message.content.toLowerCase()==="ambil"){
 
 const rank = getRank(message.author.id)
-const reward = getReward(rank)
+let reward = getReward(rank)
+
+reward = applyRankBalance(message.author.id,reward)
+reward = applyGapBalance(message.author.id,reward)
 
 const user = getUser(message.author.id)
 
 user.points += reward
-
 saveData()
 
 await updateLeaderboard(message.guild)
