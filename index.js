@@ -853,6 +853,18 @@ async function sendRampokMessage(guild){
 const channel = guild.channels.cache.get(process.env.RAMPOK_CHANNEL_ID)
 if(!channel) return
 
+/* cek apakah embed sudah ada */
+
+const messages = await channel.messages.fetch({limit:10})
+
+const exist = messages.find(m =>
+m.author.id === client.user.id &&
+m.embeds.length &&
+m.embeds[0].title === "🗡 RAMPOK POIN"
+)
+
+if(exist) return
+
 const embed = new EmbedBuilder()
 .setTitle("🗡 RAMPOK POIN")
 .setDescription(`
@@ -874,24 +886,12 @@ new ButtonBuilder()
 .setStyle(ButtonStyle.Danger)
 )
 
-await channel.send({
+channel.send({
 embeds:[embed],
 components:[row]
 })
 
 }
-
-/* ================= READY ================= */
-
-client.once("clientReady", async ()=>{
-
-const guild = client.guilds.cache.get(process.env.GUILD_ID)
-
-if(guild){
-sendRampokMessage(guild)
-}
-
-})
 
 /* ================= INTERACTION ================= */
 
