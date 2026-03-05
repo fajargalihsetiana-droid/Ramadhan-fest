@@ -560,13 +560,14 @@ ephemeral:true
 
 client.once("clientReady",async()=>{
 
-console.log("BOT ONLINE - AUTO QUIZ TIAP JAM AKTIF");
+console.log("BOT ONLINE - SYSTEM AKTIF");
 
-const guild=client.guilds.cache.get(process.env.GUILD_ID);
+const guild = client.guilds.cache.get(process.env.GUILD_ID);
 
-if(guild){
+if(!guild) return;
+
 startAutoQuizSystem(guild);
-}
+startBossSchedule(guild);
 
 });
 
@@ -815,18 +816,6 @@ if(hour===21 && minute<=1) spawnRaid(guild)
 },60000)
 
 }
-
-/* ================= READY HOOK ================= */
-
-client.once("clientReady",()=>{
-
-const guild=client.guilds.cache.get(process.env.GUILD_ID)
-
-if(guild){
-startBossSchedule(guild)
-}
-
-})
 
 /* ================= MANUAL COMMAND ================= */
 
