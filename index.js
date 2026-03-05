@@ -45,6 +45,11 @@ if(!data[id].keywordCooldowns) data[id].keywordCooldowns={};
 return data[id];
 }
 
+global.data = data
+global.getUser = getUser
+global.saveData = saveData
+global.updateLeaderboard = updateLeaderboard
+
 /* ================= ERROR HANDLER ================= */
 
 process.on("unhandledRejection",error=>{
