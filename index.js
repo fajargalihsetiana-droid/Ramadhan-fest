@@ -841,12 +841,12 @@ ephemeral:true
 })
 
 /* =====================================================
-🗡️ RAMPOK POIN SYSTEM
+🗡 RAMPOK POIN SYSTEM
 ===================================================== */
 
-let rampokCooldown = {}
+const rampokCooldown = {}
 
-/* ================= SEND MESSAGE ================= */
+/* ================= KIRIM EMBED ================= */
 
 async function sendRampokMessage(guild){
 
@@ -854,7 +854,7 @@ const channel = guild.channels.cache.get(process.env.RAMPOK_CHANNEL_ID)
 if(!channel) return
 
 const embed = new EmbedBuilder()
-.setTitle("🗡️ RAMPOK POIN")
+.setTitle("🗡 RAMPOK POIN")
 .setDescription(`
 Klik tombol untuk mencoba merampok poin member lain.
 
@@ -870,25 +870,36 @@ Klik tombol untuk mencoba merampok poin member lain.
 const row = new ActionRowBuilder().addComponents(
 new ButtonBuilder()
 .setCustomId("rampok_start")
-.setLabel("🗡️ Rampok")
+.setLabel("🗡 Rampok")
 .setStyle(ButtonStyle.Danger)
 )
 
-channel.send({
+await channel.send({
 embeds:[embed],
 components:[row]
 })
 
 }
 
-/* ================= BUTTON START ================= */
+/* ================= READY ================= */
 
-client.on("interactionCreate",async interaction=>{
+client.once("clientReady", async ()=>{
 
-if(!interaction.isButton()) return
-if(interaction.customId!=="rampok_start") return
+const guild = client.guilds.cache.get(process.env.GUILD_ID)
 
-await interaction.deferReply({ephemeral:true})
+if(guild){
+sendRampokMessage(guild)
+}
+
+})
+
+/* ================= INTERACTION ================= */
+
+client.on("interactionCreate", async interaction=>{
+
+/* ================= BUTTON ================= */
+
+if(interaction.isButton() && interaction.customId==="rampok_start"){
 
 const now = Date.now()
 
@@ -896,15 +907,16 @@ if(rampokCooldown[interaction.user.id] && now < rampokCooldown[interaction.user.
 
 const wait = Math.ceil((rampokCooldown[interaction.user.id]-now)/60000)
 
-return interaction.editReply({
-content:`⏳ Tunggu ${wait} menit sebelum rampok lagi.`
+return interaction.reply({
+content:`⏳ Tunggu ${wait} menit sebelum rampok lagi.`,
+ephemeral:true
 })
 
 }
 
 const members = await interaction.guild.members.fetch()
 
-const options = members
+const targets = members
 .filter(m=>!m.user.bot && m.id!==interaction.user.id)
 .first(25)
 .map(m=>({
@@ -915,23 +927,21 @@ value:m.id
 const menu = new StringSelectMenuBuilder()
 .setCustomId("rampok_target")
 .setPlaceholder("Pilih target rampok")
-.addOptions(options)
+.addOptions(targets)
 
 const row = new ActionRowBuilder().addComponents(menu)
 
-interaction.editReply({
+return interaction.reply({
 content:"🎯 Pilih target yang ingin dirampok:",
-components:[row]
+components:[row],
+ephemeral:true
 })
 
-})
+}
 
-/* ================= TARGET SELECT ================= */
+/* ================= SELECT TARGET ================= */
 
-client.on("interactionCreate",async interaction=>{
-
-if(!interaction.isStringSelectMenu()) return
-if(interaction.customId!=="rampok_target") return
+if(interaction.isStringSelectMenu() && interaction.customId==="rampok_target"){
 
 await interaction.deferReply({ephemeral:true})
 
@@ -941,15 +951,13 @@ const robber = getUser(interaction.user.id)
 const victim = getUser(targetId)
 
 if(victim.points < 50)
-return interaction.editReply({
-content:"❌ Target terlalu miskin."
-})
+return interaction.editReply("❌ Target terlalu miskin.")
 
 rampokCooldown[interaction.user.id] = Date.now() + 2700000
 
 const chance = Math.random()
 
-let text = ""
+let result=""
 
 /* ================= BERHASIL ================= */
 
@@ -961,23 +969,25 @@ const amount = Math.min(steal,victim.points)
 victim.points -= amount
 robber.points += amount
 
-text = `🗡️ **BERHASIL MERAMPOK!**
+result = `🗡 **BERHASIL!**
 
-<@${interaction.user.id}> mencuri **${amount} poin** dari <@${targetId}> 💰`
+Kamu mencuri **${amount} poin** dari <@${targetId}> 💰`
 
 }
 
-/* ================= KETAHUAN ================= */
+/* ================= KETAHUAN POLISI ================= */
 
 else if(chance < 0.75){
 
 const fine = Math.floor(Math.random()*80)+40
 
 robber.points -= fine
+if(robber.points < 0) robber.points = 0
 
-text = `🚨 **KETAHUAN POLISI!**
+result = `🚔 **KETAHUAN POLISI!**
 
-<@${interaction.user.id}> didenda **-${fine} poin**`
+Kamu didenda **-${fine} poin**`
+
 }
 
 /* ================= KORBAN MELAWAN ================= */
@@ -989,18 +999,21 @@ const counter = Math.floor(Math.random()*100)+60
 robber.points -= counter
 victim.points += counter
 
-text = `⚔️ **KORBAN MELAWAN!**
+if(robber.points < 0) robber.points = 0
 
-<@${interaction.user.id}> kalah dan kehilangan **-${counter} poin**`
+result = `⚔️ **KORBAN MELAWAN!**
+
+<@${targetId}> berhasil melawan!
+
+Kamu kehilangan **-${counter} poin**`
 }
 
 saveData()
 
 await updateLeaderboard(interaction.guild)
 
-interaction.editReply({
-content:text,
-components:[]
-})
+interaction.editReply(result)
+
+}
 
 })
