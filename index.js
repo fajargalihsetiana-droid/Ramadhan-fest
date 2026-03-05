@@ -568,6 +568,7 @@ if(!guild) return;
 
 startAutoQuizSystem(guild);
 startBossSchedule(guild);
+startHadiahRandom(guild);
 
 });
 
@@ -839,4 +840,189 @@ ephemeral:true
 
 })
 
-require("./kerja.js")(client)
+/* =====================================================
+🎁 HADIAH RAMADHAN
+===================================================== */
+
+let hadiahActive = null
+let hadiahToday = 0
+let hadiahTarget = 7
+
+function getRank(userId){
+
+const sorted = Object.entries(data)
+.sort((a,b)=>b[1].points-a[1].points)
+
+return sorted.findIndex(e=>e[0]===userId)+1
+
+}
+
+function getReward(rank){
+
+/* jackpot */
+
+if(Math.random() < 0.05){
+return 500
+}
+
+/* reward berdasarkan rank */
+
+if(rank===1) return Math.floor(Math.random()*20)+20
+if(rank===2) return Math.floor(Math.random()*30)+40
+if(rank===3) return Math.floor(Math.random()*40)+70
+if(rank<=5) return Math.floor(Math.random()*60)+100
+if(rank<=10) return Math.floor(Math.random()*90)+150
+
+return Math.floor(Math.random()*150)+220
+
+}
+
+async function spawnHadiah(guild){
+
+if(hadiahActive) return
+
+const channel = guild.channels.cache.get(process.env.HADIAH_CHANNEL_ID)
+if(!channel) return
+
+const members = await guild.members.fetch()
+
+const users = members
+.filter(m=>!m.user.bot)
+.map(m=>m.id)
+
+if(!users.length) return
+
+const target = users[Math.floor(Math.random()*users.length)]
+
+hadiahActive = {
+user:target,
+expire:Date.now()+180000
+}
+
+const embed = new EmbedBuilder()
+
+.setTitle("🎁 HADIAH RAMADHAN")
+
+.setDescription(`
+🎉 Hadiah muncul!
+
+<@${target}>
+
+Ketik **ambil**
+
+⏳ Waktu claim: 3 menit
+`)
+
+.setColor("Gold")
+
+channel.send({
+content:`<@${target}>`,
+embeds:[embed]
+})
+
+/* reroll jika tidak diambil */
+
+setTimeout(()=>{
+
+if(hadiahActive){
+
+hadiahActive = null
+spawnHadiah(guild)
+
+}
+
+},180000)
+
+}
+
+/* ================= CLAIM ================= */
+
+client.on("messageCreate",async message=>{
+
+if(message.author.bot) return
+if(!hadiahActive) return
+
+if(message.author.id===hadiahActive.user){
+
+if(message.content.toLowerCase()==="ambil"){
+
+const rank = getRank(message.author.id)
+const reward = getReward(rank)
+
+const user = getUser(message.author.id)
+
+user.points += reward
+
+saveData()
+
+await updateLeaderboard(message.guild)
+
+message.channel.send(`🎉 <@${message.author.id}> berhasil claim **${reward} poin!**`)
+
+hadiahActive = null
+
+}
+
+}
+
+})
+
+/* ================= COMMAND ================= */
+
+client.on("interactionCreate",async interaction=>{
+
+if(!interaction.isChatInputCommand()) return
+
+if(interaction.commandName==="hadiah"){
+
+if(interaction.user.id!==OWNER_ID)
+return interaction.reply({
+content:"❌ Owner only.",
+ephemeral:true
+})
+
+spawnHadiah(interaction.guild)
+
+interaction.reply({
+content:"🎁 Hadiah berhasil di-spawn!",
+ephemeral:true
+})
+
+}
+
+})
+
+/* ================= AUTO SPAWN ================= */
+
+function startHadiahRandom(guild){
+
+setInterval(()=>{
+
+const now = new Date()
+
+/* reset setiap hari */
+
+if(now.getHours()===0 && now.getMinutes()===0){
+
+hadiahToday = 0
+hadiahTarget = 6 + Math.floor(Math.random()*3)
+
+}
+
+/* spawn random */
+
+if(hadiahToday < hadiahTarget){
+
+if(Math.random() < 0.15){
+
+spawnHadiah(guild)
+
+hadiahToday++
+
+}
+
+}
+
+},1800000)
+
+}
