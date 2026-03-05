@@ -165,7 +165,22 @@ sedekah:60*60*1000
 
 client.on("messageCreate",async message=>{
 
-if(message.author.bot) return;
+if(message.author.bot) return
+
+/* ================= COMMAND HADIAH ================= */
+
+if(message.content === "!hadiah"){
+
+if(message.author.id !== OWNER_ID) return
+
+spawnHadiah(message.guild)
+
+return message.reply("🎁 Hadiah berhasil di-spawn!")
+
+}
+
+/* ================= KEYWORD SYSTEM ================= */
+
 if(message.channel.id!==process.env.KEYWORD_CHANNEL_ID) return;
 
 const content=message.content.toLowerCase().trim();
