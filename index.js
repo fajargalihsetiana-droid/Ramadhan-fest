@@ -70,17 +70,37 @@ console.error("UNHANDLED:",error);
 
 async function logPoint(guild,userId,amount,reason){
 
-const channel=guild.channels.cache.get(process.env.HISTORY_CHANNEL_ID);
-if(!channel) return;
+const channel = guild.channels.cache.get(process.env.HISTORY_CHANNEL_ID)
+if(!channel) return
 
-const embed=new EmbedBuilder()
-.setTitle("📜 Update Poin Ramadhan Fest")
-.setDescription(`👤 <@${userId}>\n➕ +${amount} poin\n📌 ${reason}`)
+let emoji = "✨"
+
+if(reason.includes("Quiz")) emoji = "🧠"
+if(reason.includes("Boss")) emoji = "🐉"
+if(reason.includes("Hadiah")) emoji = "🎁"
+if(reason.includes("Keyword")) emoji = "🌙"
+
+const embed = new EmbedBuilder()
+
+.setTitle("📜 HISTORY POIN RAMADHAN FEST")
+
+.setDescription(`
+👤 Player
+<@${userId}>
+
+${emoji} Event
+${reason}
+
+💰 Poin
++${amount}
+`)
+
 .setColor("Gold")
-.setTimestamp();
+.setTimestamp()
 
-channel.send({embeds:[embed]});
+channel.send({embeds:[embed]})
 
+}
 }
 
 /* ================= RANK BALANCE ================= */
@@ -818,6 +838,8 @@ else if(i===2) reward=100
 
 user.points+=reward
 
+await logPoint(guild,p[0],reward,"Boss Ramadhan")
+
 result+=`${i+1}. <@${p[0]}> — ${p[1]} dmg (+${reward} poin)\n`
 
 })
@@ -889,20 +911,31 @@ safeUpdate()
 
 function startBossSchedule(guild){
 
+let lastSpawn = null
+
 setInterval(()=>{
 
-const now=new Date()
+const now = new Date()
 
-let hour=now.getUTCHours()+7
-const minute=now.getUTCMinutes()
+let hour = now.getUTCHours()+7
+const minute = now.getUTCMinutes()
 
-if(hour>=24) hour-=24
+if(hour >= 24) hour -= 24
 
-if(hour===09 && minute<=1) spawnRaid(guild)
-if(hour===15 && minute<=1) spawnRaid(guild)
-if(hour===21 && minute<=1) spawnRaid(guild)
+if(minute !== 0) return
 
-},60000)
+if([9,15,21].includes(hour)){
+
+if(lastSpawn !== hour){
+
+spawnRaid(guild)
+lastSpawn = hour
+
+}
+
+}
+
+},30000)
 
 }
 
@@ -1043,6 +1076,9 @@ reward = applyGapBalance(message.author.id,reward)
 const user = getUser(message.author.id)
 
 user.points += reward
+
+await logPoint(message.guild,message.author.id,reward,"Hadiah Ramadhan")
+
 saveData()
 
 await updateLeaderboard(message.guild)
