@@ -80,14 +80,14 @@ const rankIndex=sorted.findIndex(e=>e[0]===userId);
 if(rankIndex===-1) return baseReward;
 
 const multipliers=[
-0.75, // rank 1
-1.10, // rank 2
-1.20, // rank 3
-1.30, // rank 4
-1.35  // rank 5
+1.00, // rank1
+1.05, // rank2
+1.10, // rank3
+1.15, // rank4
+1.20  // rank5
 ];
 
-const multi=multipliers[rankIndex]||1.4;
+const multi=multipliers[rankIndex]||2.0;
 
 return Math.floor(baseReward*multi);
 
@@ -100,21 +100,27 @@ function applyGapBalance(userId,baseReward){
 const sorted=Object.entries(data)
 .sort((a,b)=>b[1].points-a[1].points);
 
-if(sorted.length<3) return baseReward;
+if(sorted.length<2) return baseReward;
 
-const gap=sorted[0][1].points-sorted[2][1].points;
+const gap=sorted[0][1].points-sorted[1][1].points;
 const rankIndex=sorted.findIndex(e=>e[0]===userId);
 
-if(gap>1500){
-if(rankIndex===0) return Math.floor(baseReward*0.6);
-if(rankIndex===1) return Math.floor(baseReward*0.75);
-if(rankIndex>=2) return Math.floor(baseReward*1.4);
+if(gap>750){
+
+if(rankIndex>=1) return Math.floor(baseReward*1.50);
+
 }
 
-if(gap>800){
-if(rankIndex===0) return Math.floor(baseReward*0.75);
-if(rankIndex===1) return Math.floor(baseReward*0.85);
-if(rankIndex>=2) return Math.floor(baseReward*1.2);
+if(gap>500){
+
+if(rankIndex>=1) return Math.floor(baseReward*1.35);
+
+}
+
+if(gap>250){
+
+if(rankIndex>=1) return Math.floor(baseReward*1.20);
+
 }
 
 return baseReward;
