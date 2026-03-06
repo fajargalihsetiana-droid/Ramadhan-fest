@@ -288,10 +288,12 @@ const embed = new EmbedBuilder()
 name: message.author.username,
 iconURL: message.author.displayAvatarURL()
 })
-.setDescription(`✨ **+${reward} poin**`)
-.addFields(
-{ name:"🏆 Total", value:`${user.points} poin`, inline:true },
-{ name:"📊 Rank", value:`#${info.rank}`, inline:true }
+.setDescription(
+`✨ **+${reward} poin**
+
+🏆 **Total:** ${user.points}
+📊 **Rank:** #${info.rank}
+${info.rank !== 1 ? `📉 **${info.gap} poin lagi untuk mengejar rank #1**` : "👑 **Kamu sedang memimpin leaderboard!**"}`
 );
 
 if(chaseText){
