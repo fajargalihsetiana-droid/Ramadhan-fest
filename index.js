@@ -105,9 +105,9 @@ if(sorted.length<2) return baseReward;
 const gap=sorted[0][1].points-sorted[1][1].points;
 const rankIndex=sorted.findIndex(e=>e[0]===userId);
 
-if(gap>750){
+if(gap>1200){
 
-if(rankIndex>=1) return Math.floor(baseReward*1.50);
+if(rankIndex>=1) return Math.floor(baseReward*1.90);
 
 }
 
