@@ -296,13 +296,6 @@ iconURL: message.author.displayAvatarURL()
 ${info.rank !== 1 ? `📉 **${info.gap} poin lagi untuk mengejar rank #1**` : "👑 **Kamu sedang memimpin leaderboard!**"}`
 );
 
-if(chaseText){
-embed.addFields({
-name:"📈 Progress",
-value:chaseText
-});
-}
-
 message.channel.send({embeds:[embed]});
 
 });
