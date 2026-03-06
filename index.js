@@ -837,7 +837,7 @@ else if(i===2) reward=100
 
 user.points+=reward
 
-await logPoint(guild,p[0],reward,"Boss Ramadhan")
+logPoint(guild,p[0],reward,"Boss Ramadhan")
 
 result+=`${i+1}. <@${p[0]}> — ${p[1]} dmg (+${reward} poin)\n`
 
