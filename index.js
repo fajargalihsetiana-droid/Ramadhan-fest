@@ -101,7 +101,6 @@ ${reason}
 channel.send({embeds:[embed]})
 
 }
-}
 
 /* ================= RANK BALANCE ================= */
 
