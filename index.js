@@ -825,7 +825,7 @@ const sorted=Object.entries(raidPlayers)
 
 let result="🎉 **Boss Ramadhan dikalahkan!**\n\n"
 
-sorted.slice(0,10).forEach((p,i)=>{
+for(const [i,p] of sorted.slice(0,10).entries()){
 
 const user=getUser(p[0])
 
