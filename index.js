@@ -841,7 +841,7 @@ await logPoint(guild,p[0],reward,"Boss Ramadhan")
 
 result+=`${i+1}. <@${p[0]}> — ${p[1]} dmg (+${reward} poin)\n`
 
-})
+}
 
 channel.send(result)
 
