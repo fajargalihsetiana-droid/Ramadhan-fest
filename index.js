@@ -276,12 +276,6 @@ await logPoint(message.guild,message.author.id,reward,"Keyword Ramadhan");
 
 const info = getRankInfo(message.author.id);
 
-let chaseText = "";
-
-if(info.rank !== 1){
-chaseText = `📉 **${info.gap} poin lagi untuk mengejar rank #1**`;
-}
-
 const embed = new EmbedBuilder()
 .setColor("Gold")
 .setAuthor({
