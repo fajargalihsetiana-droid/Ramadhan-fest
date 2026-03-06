@@ -39,6 +39,21 @@ function saveData(){
 fs.writeFileSync(DATA_FILE,JSON.stringify(data,null,2));
 }
 
+function getRankInfo(userId){
+const sorted = Object.entries(data)
+.sort((a,b)=>b[1].points-a[1].points);
+const rankIndex = sorted.findIndex(e=>e[0]===userId);
+const rank = rankIndex + 1;
+const firstPoints = sorted.length ? sorted[0][1].points : 0;
+const userPoints = data[userId]?.points || 0;
+const gap = firstPoints - userPoints;
+return {
+rank,
+gap
+};
+
+}
+
 function getUser(id){
 if(!data[id]) data[id]={points:0,keywordCooldowns:{}};
 if(!data[id].keywordCooldowns) data[id].keywordCooldowns={};
@@ -259,7 +274,34 @@ await updateLeaderboard(message.guild);
 
 await logPoint(message.guild,message.author.id,reward,"Keyword Ramadhan");
 
-message.channel.send(`✨ +${reward} poin\n🏆 Total: ${user.points} poin`);
+const info = getRankInfo(message.author.id);
+
+let chaseText = "";
+
+if(info.rank !== 1){
+chaseText = `📉 **${info.gap} poin lagi untuk mengejar rank #1**`;
+}
+
+const embed = new EmbedBuilder()
+.setColor("Gold")
+.setAuthor({
+name: message.author.username,
+iconURL: message.author.displayAvatarURL()
+})
+.setDescription(`✨ **+${reward} poin**`)
+.addFields(
+{ name:"🏆 Total", value:`${user.points} poin`, inline:true },
+{ name:"📊 Rank", value:`#${info.rank}`, inline:true }
+);
+
+if(chaseText){
+embed.addFields({
+name:"📈 Progress",
+value:chaseText
+});
+}
+
+message.reply({embeds:[embed]});
 
 });
 
