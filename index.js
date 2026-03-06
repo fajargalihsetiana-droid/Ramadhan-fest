@@ -121,39 +121,27 @@ const gap=sorted[0][1].points-sorted[1][1].points;
 const rankIndex=sorted.findIndex(e=>e[0]===userId);
 
 if(gap>1200){
-
 if(rankIndex>=1) return Math.floor(baseReward*1.90);
-
 }
 
 if(gap>1000){
-
 if(rankIndex>=1) return Math.floor(baseReward*1.75);
-
 }
 
 if(gap>750){
-
 if(rankIndex>=1) return Math.floor(baseReward*1.50);
-
 }
 
 if(gap>500){
-
 if(rankIndex>=1) return Math.floor(baseReward*1.35);
-
 }
 
 if(gap>250){
-
 if(rankIndex>=1) return Math.floor(baseReward*1.20);
-
 }
 
 if(gap>100){
-
 if(rankIndex>=1) return Math.floor(baseReward*1.10);
-
 }
 
 return baseReward;
@@ -276,6 +264,10 @@ await logPoint(message.guild,message.author.id,reward,"Keyword Ramadhan");
 
 const info = getRankInfo(message.author.id);
 
+const text = info.rank !== 1
+? `📉 **${info.gap} poin lagi untuk mengejar rank #1**`
+: `👑 **Kamu sedang memimpin leaderboard!**`;
+
 const embed = new EmbedBuilder()
 .setColor("Gold")
 .setAuthor({
@@ -285,9 +277,10 @@ iconURL: message.author.displayAvatarURL()
 .setDescription(
 `✨ **+${reward} poin**
 
-🏆 **Total:** ${user.points}
+🏆 **Total:** ${user.points} poin
 📊 **Rank:** #${info.rank}
-${info.rank !== 1 ? `📉 **${info.gap} poin lagi untuk mengejar rank #1**` : "👑 **Kamu sedang memimpin leaderboard!**"}`
+
+${text}`
 );
 
 message.channel.send({embeds:[embed]});
