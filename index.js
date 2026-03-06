@@ -371,23 +371,23 @@ const correctIndex=shuffled.indexOf(q.correct);
 
 const embed = new EmbedBuilder()
 .setTitle("🧠 QUIZ RAMADHAN FEST")
-.setDescription(
-`━━━━━━━━━━━━━━━━━━\n`+
-`📢 **PERTANYAAN BARU!**\n\n`+
+.setDescription(`
+━━━━━━━━━━━━━━━━━━
+📢 **PERTANYAAN BARU!**
 
-`❓ **${q.question}**\n\n`+
+❓ **${q.question}**
 
-`🇦 **${shuffled[0]}**\n`+
-`🇧 **${shuffled[1]}**\n`+
-`🇨 **${shuffled[2]}**\n`+
-`🇩 **${shuffled[3]}**\n\n`+
+🇦 **${shuffled[0]}**
+🇧 **${shuffled[1]}**
+🇨 **${shuffled[2]}**
+🇩 **${shuffled[3]}**
 
-`━━━━━━━━━━━━━━━━━━\n`+
+━━━━━━━━━━━━━━━━━━
 
-`⏳ **Waktu menjawab: 45 menit**\n`+
-`🔥 **Jawaban pertama = 2x poin!**\n`+
+⏳ **Waktu menjawab: 45 menit**
+🔥 **Jawaban pertama = 2x poin!**
+`)
 
-)
 .setColor("Gold")
 .setFooter({text:"Ramadhan Fest Quiz Event"})
 .setTimestamp();
