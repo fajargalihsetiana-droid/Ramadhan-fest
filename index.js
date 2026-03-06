@@ -111,6 +111,18 @@ if(rankIndex>=1) return Math.floor(baseReward*1.50);
 
 }
 
+if(gap>1000){
+
+if(rankIndex>=1) return Math.floor(baseReward*1.75);
+
+}
+
+if(gap>750){
+
+if(rankIndex>=1) return Math.floor(baseReward*1.50);
+
+}
+
 if(gap>500){
 
 if(rankIndex>=1) return Math.floor(baseReward*1.35);
@@ -120,6 +132,12 @@ if(rankIndex>=1) return Math.floor(baseReward*1.35);
 if(gap>250){
 
 if(rankIndex>=1) return Math.floor(baseReward*1.20);
+
+}
+
+if(gap>100){
+
+if(rankIndex>=1) return Math.floor(baseReward*1.10);
 
 }
 
@@ -368,8 +386,7 @@ const embed = new EmbedBuilder()
 
 `⏳ **Waktu menjawab: 45 menit**\n`+
 `🔥 **Jawaban pertama = 2x poin!**\n`+
-`⚡ **Rank 3+ bonus poin**\n`+
-`🏆 **Kejar leaderboard sekarang!**`
+
 )
 .setColor("Gold")
 .setFooter({text:"Ramadhan Fest Quiz Event"})
@@ -668,7 +685,7 @@ if(!leaderboard) leaderboard="Belum ada serangan"
 
 const embed=new EmbedBuilder()
 
-.setTitle("🐉 RAMADHAN BOSS RAID")
+.setTitle("🐉 RAMADHAN BOSS MENGAMUK")
 
 .setDescription(`
 HP: **${raidBoss.hp} / ${raidBoss.max}**
@@ -948,7 +965,7 @@ expire:Date.now()+180000
 
 const embed = new EmbedBuilder()
 
-.setTitle("🎁 HADIAH RAMADHAN")
+.setTitle("🎁 HADIAH POIN RAMADHAN")
 
 .setDescription(`
 🎉 Hadiah muncul!
