@@ -301,7 +301,7 @@ value:chaseText
 });
 }
 
-message.reply({embeds:[embed]});
+message.channel.send({embeds:[embed]});
 
 });
 
