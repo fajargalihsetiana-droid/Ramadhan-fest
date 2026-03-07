@@ -310,94 +310,82 @@ message.channel.send({embeds:[embed]});
 
 let activeQuiz=null;
 
-const questions=[
+const questions = [
 
-/* ================= MATEMATIKA ================= */
+{ question:"Apa yang bisa naik tetapi tidak pernah turun?", correct:"Umur", options:["Umur","Harga","Balon","Asap"] },
+{ question:"Apa yang selalu datang tetapi tidak pernah tiba?", correct:"Besok", options:["Besok","Pagi","Waktu","Hari"] },
+{ question:"Semakin banyak diambil semakin besar jadinya?", correct:"Lubang", options:["Lubang","Api","Air","Tanah"] },
+{ question:"Apa yang memiliki banyak kunci tetapi tidak bisa membuka pintu?", correct:"Piano", options:["Piano","Keyboard","Peta","Komputer"] },
+{ question:"Apa yang berjalan tanpa kaki?", correct:"Waktu", options:["Angin","Waktu","Air","Bayangan"] },
+{ question:"Apa yang punya mata tetapi tidak bisa melihat?", correct:"Jarum", options:["Jarum","Boneka","Kamera","Topi"] },
+{ question:"Apa yang selalu di depanmu tetapi tidak bisa dilihat?", correct:"Masa depan", options:["Udara","Masa depan","Langit","Cermin"] },
+{ question:"Apa yang bisa pecah tanpa disentuh?", correct:"Janji", options:["Janji","Kaca","Balon","Gelas"] },
+{ question:"Apa yang punya leher tetapi tidak punya kepala?", correct:"Botol", options:["Botol","Baju","Kursi","Gitar"] },
+{ question:"Apa yang memiliki tangan tetapi tidak bisa bertepuk tangan?", correct:"Jam", options:["Jam","Robot","Boneka","Patung"] },
 
-{ question: "3² + 4² = ?", correct: "25", options: ["7","12","25","49"] },
-{ question: "12² - 5² = ?", correct: "119", options: ["95","119","144","169"] },
-{ question: "15% dari 400?", correct: "60", options: ["40","50","60","80"] },
-{ question: "2⁵ × 2 = ?", correct: "64", options: ["32","48","64","128"] },
-{ question: "Akar dari 625?", correct: "25", options: ["15","20","25","30"] },
-{ question: "5! = ?", correct: "120", options: ["60","100","120","150"] },
-{ question: "9² - 3² = ?", correct: "72", options: ["54","63","72","81"] },
-{ question: "Jika 8x = 72, maka x?", correct: "9", options: ["7","8","9","10"] },
-{ question: "20% dari 250?", correct: "50", options: ["40","45","50","60"] },
-{ question: "Jika 6² + 8² = ?", correct: "100", options: ["64","100","144","80"] },
+{ question:"Apa yang semakin kering saat semakin banyak digunakan?", correct:"Handuk", options:["Handuk","Kain","Baju","Spons"] },
+{ question:"Apa yang memiliki gigi tetapi tidak bisa menggigit?", correct:"Sisir", options:["Sisir","Garpu","Kunci","Gergaji"] },
+{ question:"Apa yang bisa mengisi ruangan tetapi tidak memakan tempat?", correct:"Cahaya", options:["Udara","Cahaya","Angin","Suara"] },
+{ question:"Apa yang selalu basah saat mengeringkan sesuatu?", correct:"Handuk", options:["Handuk","Air","Spons","Sabun"] },
+{ question:"Apa yang memiliki satu mata tetapi tidak bisa melihat?", correct:"Jarum", options:["Jarum","Robot","Kamera","Boneka"] },
+{ question:"Apa yang semakin besar semakin sedikit terlihat?", correct:"Kegelapan", options:["Kegelapan","Kabut","Bayangan","Awan"] },
+{ question:"Apa yang bisa kamu tangkap tetapi tidak bisa kamu lempar?", correct:"Flu", options:["Flu","Air","Angin","Debu"] },
+{ question:"Apa yang punya kota tetapi tidak punya rumah?", correct:"Peta", options:["Peta","Atlas","Globe","Buku"] },
+{ question:"Apa yang bisa berbicara tanpa mulut?", correct:"Gema", options:["Gema","Radio","Air","Angin"] },
+{ question:"Apa yang selalu bergerak tetapi tidak pernah pergi dari tempatnya?", correct:"Jam", options:["Jam","Air","Angin","Bayangan"] },
 
-/* ================= POLA ================= */
+{ question:"Apa yang semakin dipakai semakin habis?", correct:"Lilin", options:["Lilin","Baterai","Sabun","Air"] },
+{ question:"Apa yang punya sayap tetapi tidak bisa terbang?", correct:"Ayam", options:["Ayam","Pesawat","Burung","Kupu"] },
+{ question:"Apa yang punya kaki tetapi tidak bisa berjalan?", correct:"Meja", options:["Meja","Kursi","Lemari","Sofa"] },
+{ question:"Apa yang selalu naik tetapi tidak pernah turun selain umur?", correct:"Tangga", options:["Tangga","Asap","Balon","Uap"] },
+{ question:"Apa yang punya kepala dan ekor tetapi tidak punya badan?", correct:"Koin", options:["Koin","Ular","Kadal","Ikan"] },
+{ question:"Apa yang punya banyak lubang tetapi tetap menahan air?", correct:"Spons", options:["Spons","Kain","Sabun","Botol"] },
+{ question:"Apa yang bisa dilihat tetapi tidak bisa disentuh?", correct:"Bayangan", options:["Bayangan","Air","Udara","Kabut"] },
+{ question:"Apa yang selalu mengikuti kamu tetapi tidak bisa disentuh?", correct:"Bayangan", options:["Bayangan","Angin","Udara","Suara"] },
+{ question:"Apa yang selalu lebih besar saat dibalik?", correct:"Angka 6", options:["Angka 6","Angka 9","Angka 8","Angka 3"] },
+{ question:"Apa yang bisa kamu dengar tetapi tidak bisa kamu lihat?", correct:"Suara", options:["Suara","Angin","Udara","Air"] },
 
-{ question: "1, 4, 9, 16, 25, ...?", correct: "36", options: ["30","35","36","49"] },
-{ question: "2, 6, 12, 20, 30, ...?", correct: "42", options: ["36","40","42","48"] },
-{ question: "5, 10, 20, 40, ...?", correct: "80", options: ["60","70","80","90"] },
-{ question: "3, 9, 27, ...?", correct: "81", options: ["54","72","81","90"] },
-{ question: "7, 14, 28, 56, ...?", correct: "112", options: ["100","108","112","120"] },
+{ question:"Apa yang punya banyak halaman tetapi bukan buku?", correct:"Kalender", options:["Kalender","Peta","Majalah","Poster"] },
+{ question:"Apa yang selalu jatuh tetapi tidak pernah terluka?", correct:"Hujan", options:["Hujan","Daun","Bola","Air"] },
+{ question:"Apa yang bisa berlari tetapi tidak punya kaki?", correct:"Air", options:["Air","Angin","Api","Awan"] },
+{ question:"Apa yang bisa makan tetapi tidak pernah kenyang?", correct:"Api", options:["Api","Angin","Air","Tanah"] },
+{ question:"Apa yang bisa terbang tanpa sayap?", correct:"Waktu", options:["Waktu","Angin","Debu","Awan"] },
+{ question:"Apa yang punya banyak cincin tetapi tidak punya jari?", correct:"Pohon", options:["Pohon","Planet","Bola","Saturnus"] },
+{ question:"Apa yang bisa memantul tetapi bukan bola?", correct:"Suara", options:["Suara","Air","Cahaya","Angin"] },
+{ question:"Apa yang bisa pecah tetapi tidak pernah terlihat?", correct:"Keheningan", options:["Keheningan","Janji","Kaca","Balon"] },
+{ question:"Apa yang punya banyak wajah tetapi tidak punya kepala?", correct:"Dadu", options:["Dadu","Jam","Topeng","Koin"] },
+{ question:"Apa yang selalu ada tetapi tidak pernah terlihat?", correct:"Udara", options:["Udara","Angin","Kabut","Awan"] },
 
-/* ================= LOGIKA ================= */
+{ question:"Apa yang selalu berlari tetapi tidak pernah lelah?", correct:"Sungai", options:["Sungai","Air","Angin","Awan"] },
+{ question:"Apa yang semakin besar semakin ringan?", correct:"Balon", options:["Balon","Awan","Asap","Udara"] },
+{ question:"Apa yang memiliki jantung tetapi tidak hidup?", correct:"Artichoke", options:["Artichoke","Kubis","Bawang","Kentang"] },
+{ question:"Apa yang bisa terbuka tetapi bukan pintu?", correct:"Buku", options:["Buku","Jendela","Kotak","Tas"] },
+{ question:"Apa yang punya banyak cabang tetapi bukan pohon?", correct:"Bank", options:["Bank","Sungai","Peta","Jalan"] },
+{ question:"Apa yang semakin diisi semakin ringan?", correct:"Balon", options:["Balon","Botol","Tas","Kotak"] },
+{ question:"Apa yang bisa dipatahkan tanpa disentuh?", correct:"Janji", options:["Janji","Kayu","Kaca","Balon"] },
+{ question:"Apa yang memiliki banyak titik tetapi tidak bergerak?", correct:"Dadu", options:["Dadu","Peta","Bintang","Domino"] },
+{ question:"Apa yang selalu berada di belakang tetapi tidak terlihat?", correct:"Masa lalu", options:["Masa lalu","Bayangan","Udara","Langit"] },
+{ question:"Apa yang punya banyak jari tetapi tidak hidup?", correct:"Sarung tangan", options:["Sarung tangan","Sepatu","Kaos kaki","Topi"] },
 
-{ question: "Semakin banyak diambil semakin besar?", correct: "Lubang", options: ["Air","Lubang","Api","Angin"] },
-{ question: "Jika semua A adalah B dan semua B adalah C, maka?", correct: "Semua A adalah C", options: ["Semua C adalah A","Semua A adalah C","Tidak ada hubungan","Tidak pasti"] },
-{ question: "Hari ini Senin. 14 hari lagi?", correct: "Senin", options: ["Selasa","Minggu","Senin","Rabu"] },
-{ question: "Jika 1 kg besi vs 1 kg kapas?", correct: "Sama berat", options: ["Besi","Kapas","Sama berat","Tergantung"] },
-{ question: "100 dibagi 0?", correct: "Tidak terdefinisi", options: ["0","100","Tak hingga","Tidak terdefinisi"] },
+{ question:"Apa yang semakin tinggi semakin dingin?", correct:"Gunung", options:["Gunung","Langit","Awan","Udara"] },
+{ question:"Apa yang selalu jatuh tetapi tidak pernah menyentuh tanah?", correct:"Malam", options:["Malam","Kabut","Awan","Bayangan"] },
+{ question:"Apa yang selalu tumbuh tetapi tidak hidup?", correct:"Bayangan", options:["Bayangan","Kabut","Awan","Udara"] },
+{ question:"Apa yang bisa hilang saat disebutkan?", correct:"Rahasia", options:["Rahasia","Nama","Suara","Kata"] },
+{ question:"Apa yang bisa kamu pegang tetapi tidak bisa kamu lihat?", correct:"Napas", options:["Napas","Udara","Angin","Asap"] },
 
-/* ================= PENGETAHUAN UMUM ================= */
+{ question:"Apa yang punya banyak jalan tetapi tidak bisa dilalui?", correct:"Peta", options:["Peta","Atlas","Globe","Poster"] },
+{ question:"Apa yang punya banyak mata tetapi tidak bisa melihat?", correct:"Kentang", options:["Kentang","Jarum","Boneka","Robot"] },
+{ question:"Apa yang punya banyak gigi tetapi tidak makan?", correct:"Sisir", options:["Sisir","Gergaji","Garpu","Pisau"] },
+{ question:"Apa yang punya kepala tetapi tidak punya otak?", correct:"Kubis", options:["Kubis","Batu","Botol","Meja"] },
+{ question:"Apa yang punya lidah tetapi tidak bisa berbicara?", correct:"Sepatu", options:["Sepatu","Tas","Topi","Baju"] },
 
-{ question: "Planet terbesar?", correct: "Jupiter", options: ["Mars","Jupiter","Saturnus","Neptunus"] },
-{ question: "Ibukota Jepang?", correct: "Tokyo", options: ["Kyoto","Tokyo","Osaka","Seoul"] },
-{ question: "Benua terbesar?", correct: "Asia", options: ["Afrika","Asia","Eropa","Amerika"] },
-{ question: "Lambang kimia emas?", correct: "Au", options: ["Ag","Au","Fe","Em"] },
-{ question: "Penemu relativitas?", correct: "Albert Einstein", options: ["Newton","Einstein","Tesla","Galileo"] },
+{ question:"Apa yang bisa kamu lihat sekali dalam setahun?", correct:"Ulang tahun", options:["Ulang tahun","Tahun baru","Liburan","Festival"] },
+{ question:"Apa yang selalu berubah tetapi tetap sama?", correct:"Waktu", options:["Waktu","Hari","Langit","Cuaca"] },
+{ question:"Apa yang semakin dicari semakin sulit ditemukan?", correct:"Kesalahan", options:["Kesalahan","Kebenaran","Jawaban","Petunjuk"] },
+{ question:"Apa yang bisa memotong tetapi tidak memiliki pisau?", correct:"Waktu", options:["Waktu","Air","Angin","Cahaya"] },
+{ question:"Apa yang memiliki banyak warna tetapi tidak terlihat saat gelap?", correct:"Pelangi", options:["Pelangi","Bunga","Langit","Lampu"] }
 
-/* ================= CAMPURAN MENANTANG ================= */
-
-{ question: "Jika 4 orang menyelesaikan kerja 6 hari, 2 orang butuh?", correct: "12 hari", options: ["8 hari","10 hari","12 hari","14 hari"] },
-{ question: "Jumlah sudut segi lima?", correct: "540°", options: ["360°","540°","720°","600°"] },
-{ question: "Akar 169?", correct: "13", options: ["11","12","13","14"] },
-{ question: "Jika 2³ + 3³ = ?", correct: "35", options: ["17","25","35","45"] },
-{ question: "Jika 50% dari X adalah 75, maka X?", correct: "150", options: ["100","125","150","175"] },
-
-/* ================= TRICKY RINGAN ================= */
-
-{ question: "Dibalik, 91 menjadi?", correct: "19", options: ["16","19","61","109"] },
-{ question: "Jumlah hari dalam 3 minggu?", correct: "21", options: ["18","20","21","24"] },
-{ question: "Jika 0 dikali 999?", correct: "0", options: ["0","999","1","Tak hingga"] },
-{ question: "Berapa sisi kubus?", correct: "6", options: ["4","6","8","12"] },
-{ question: "Berapa rusuk kubus?", correct: "12", options: ["8","10","12","14"] },
-
-/* ================= BONUS TAMBAHAN ================= */
-
-{ question: "10² - 8² = ?", correct: "36", options: ["20","32","36","40"] },
-{ question: "Jika 9x = 81?", correct: "9", options: ["7","8","9","10"] },
-{ question: "Akar dari 81?", correct: "9", options: ["7","8","9","10"] },
-{ question: "Jika 7² = ?", correct: "49", options: ["42","48","49","56"] },
-{ question: "3 × 7 + 4 = ?", correct: "25", options: ["21","23","25","28"] },
-
-{ question: "Jika 18 ÷ 3 × 2 = ?", correct: "12", options: ["6","9","12","18"] },
-{ question: "Jumlah sudut segitiga?", correct: "180°", options: ["90°","180°","270°","360°"] },
-{ question: "Jika 2x = 50?", correct: "25", options: ["20","25","30","35"] },
-{ question: "Akar 256?", correct: "16", options: ["14","15","16","18"] },
-{ question: "Jika 100 - 45 = ?", correct: "55", options: ["45","50","55","65"] },
-
-{ question: "Pola: 4, 8, 16, 32, ...?", correct: "64", options: ["48","56","64","72"] },
-{ question: "Jika 11² = ?", correct: "121", options: ["111","121","131","141"] },
-{ question: "Jika 144 ÷ 12 = ?", correct: "12", options: ["10","11","12","14"] },
-{ question: "Jika 6 × 7 = ?", correct: "42", options: ["36","40","42","48"] },
-{ question: "Jika 25% dari 200 = ?", correct: "50", options: ["40","45","50","60"] },
-
-{ question: "Jumlah bulan dalam 2 tahun?", correct: "24", options: ["20","22","24","26"] },
-{ question: "Jika 2 + 2 × 2 = ?", correct: "6", options: ["8","6","4","10"] },
-{ question: "Jika 1000 ÷ 10 = ?", correct: "100", options: ["10","50","100","200"] },
-{ question: "Jika 81 ÷ 9 = ?", correct: "9", options: ["8","9","10","11"] },
-{ question: "Jika 13 + 7 = ?", correct: "20", options: ["18","19","20","21"] }
-
-];
-
-/* ================= SHUFFLE ================= */
-
-function shuffle(arr){
-return arr.sort(()=>Math.random()-0.5);
-}
+]
 
 /* ================= SEND QUIZ ================= */
 
