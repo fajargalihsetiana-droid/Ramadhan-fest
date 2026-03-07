@@ -968,6 +968,62 @@ let hadiahActive = null
 let hadiahToday = 0
 let hadiahTarget = 7
 
+/* queue system */
+
+let hadiahQueue = []
+let missCount = {}
+let calledToday = new Set()
+let lastCalled = null
+
+function shuffle(arr){
+return arr.sort(()=>Math.random()-0.5)
+}
+
+function getNextTarget(users){
+
+if(!hadiahQueue.length){
+hadiahQueue = shuffle([...users])
+}
+
+for(let i=0;i<hadiahQueue.length;i++){
+
+const user = hadiahQueue[i]
+
+if(user===lastCalled) continue
+if((missCount[user]||0)>=2) continue
+
+if(!calledToday.has(user)){
+
+hadiahQueue.splice(i,1)
+
+lastCalled = user
+calledToday.add(user)
+
+return user
+
+}
+
+}
+
+for(let i=0;i<hadiahQueue.length;i++){
+
+const user = hadiahQueue[i]
+
+if(user===lastCalled) continue
+if((missCount[user]||0)>=2) continue
+
+hadiahQueue.splice(i,1)
+
+lastCalled = user
+
+return user
+
+}
+
+return null
+
+}
+
 function getRank(userId){
 
 const sorted = Object.entries(data)
@@ -979,13 +1035,9 @@ return sorted.findIndex(e=>e[0]===userId)+1
 
 function getReward(rank){
 
-/* jackpot */
-
 if(Math.random() < 0.05){
 return 500
 }
-
-/* reward berdasarkan rank */
 
 if(rank===1) return Math.floor(Math.random()*20)+20
 if(rank===2) return Math.floor(Math.random()*30)+40
@@ -1012,7 +1064,8 @@ const users = members
 
 if(!users.length) return
 
-const target = users[Math.floor(Math.random()*users.length)]
+const target = getNextTarget(users)
+if(!target) return
 
 hadiahActive = {
 user:target,
@@ -1020,9 +1073,7 @@ expire:Date.now()+180000
 }
 
 const embed = new EmbedBuilder()
-
 .setTitle("🎁 HADIAH POIN RAMADHAN")
-
 .setDescription(`
 🎉 Hadiah muncul!
 
@@ -1032,7 +1083,6 @@ Ketik **ambil**
 
 ⏳ Waktu claim: 3 menit
 `)
-
 .setColor("Gold")
 
 channel.send({
@@ -1040,13 +1090,17 @@ content:`<@${target}>`,
 embeds:[embed]
 })
 
-/* reroll jika tidak diambil */
-
 setTimeout(()=>{
 
 if(hadiahActive){
 
+const user = hadiahActive.user
+
+missCount[user] = (missCount[user]||0)+1
+hadiahQueue.push(user)
+
 hadiahActive = null
+
 spawnHadiah(guild)
 
 }
@@ -1088,8 +1142,11 @@ message.channel.send(`
 👤 Pemenang : <@${message.author.id}>
 💰 Hadiah : **${reward} poin**
 
-🔥 Cepat sekali!
+🔥 Ayo Semangat Kumpulkan Poin!
 `)
+
+missCount[message.author.id] = 0
+hadiahQueue.push(message.author.id)
 
 hadiahActive = null
 
@@ -1132,16 +1189,17 @@ setInterval(()=>{
 
 const now = new Date()
 
-/* reset setiap hari */
-
 if(now.getHours()===0 && now.getMinutes()===0){
 
 hadiahToday = 0
 hadiahTarget = 6 + Math.floor(Math.random()*3)
 
-}
+hadiahQueue = []
+missCount = {}
+calledToday.clear()
+lastCalled = null
 
-/* spawn random */
+}
 
 if(hadiahToday < hadiahTarget){
 
