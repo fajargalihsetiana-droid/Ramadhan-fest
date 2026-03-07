@@ -312,80 +312,67 @@ let activeQuiz=null;
 
 const questions = [
 
-{ question:"Apa yang bisa naik tetapi tidak pernah turun?", correct:"Umur", options:["Umur","Harga","Balon","Asap"] },
-{ question:"Apa yang selalu datang tetapi tidak pernah tiba?", correct:"Besok", options:["Besok","Pagi","Waktu","Hari"] },
-{ question:"Semakin banyak diambil semakin besar jadinya?", correct:"Lubang", options:["Lubang","Api","Air","Tanah"] },
-{ question:"Apa yang memiliki banyak kunci tetapi tidak bisa membuka pintu?", correct:"Piano", options:["Piano","Keyboard","Peta","Komputer"] },
-{ question:"Apa yang berjalan tanpa kaki?", correct:"Waktu", options:["Angin","Waktu","Air","Bayangan"] },
-{ question:"Apa yang punya mata tetapi tidak bisa melihat?", correct:"Jarum", options:["Jarum","Boneka","Kamera","Topi"] },
-{ question:"Apa yang selalu di depanmu tetapi tidak bisa dilihat?", correct:"Masa depan", options:["Udara","Masa depan","Langit","Cermin"] },
-{ question:"Apa yang bisa pecah tanpa disentuh?", correct:"Janji", options:["Janji","Kaca","Balon","Gelas"] },
-{ question:"Apa yang punya leher tetapi tidak punya kepala?", correct:"Botol", options:["Botol","Baju","Kursi","Gitar"] },
-{ question:"Apa yang memiliki tangan tetapi tidak bisa bertepuk tangan?", correct:"Jam", options:["Jam","Robot","Boneka","Patung"] },
+{ question:"Budi memiliki 15 apel. Ia memberikan 4 apel kepada temannya dan membeli lagi 7 apel. Berapa apel Budi sekarang?", correct:"18", options:["18","16","20","17"] },
 
-{ question:"Apa yang semakin kering saat semakin banyak digunakan?", correct:"Handuk", options:["Handuk","Kain","Baju","Spons"] },
-{ question:"Apa yang memiliki gigi tetapi tidak bisa menggigit?", correct:"Sisir", options:["Sisir","Garpu","Kunci","Gergaji"] },
-{ question:"Apa yang bisa mengisi ruangan tetapi tidak memakan tempat?", correct:"Cahaya", options:["Udara","Cahaya","Angin","Suara"] },
-{ question:"Apa yang selalu basah saat mengeringkan sesuatu?", correct:"Handuk", options:["Handuk","Air","Spons","Sabun"] },
-{ question:"Apa yang memiliki satu mata tetapi tidak bisa melihat?", correct:"Jarum", options:["Jarum","Robot","Kamera","Boneka"] },
-{ question:"Apa yang semakin besar semakin sedikit terlihat?", correct:"Kegelapan", options:["Kegelapan","Kabut","Bayangan","Awan"] },
-{ question:"Apa yang bisa kamu tangkap tetapi tidak bisa kamu lempar?", correct:"Flu", options:["Flu","Air","Angin","Debu"] },
-{ question:"Apa yang punya kota tetapi tidak punya rumah?", correct:"Peta", options:["Peta","Atlas","Globe","Buku"] },
-{ question:"Apa yang bisa berbicara tanpa mulut?", correct:"Gema", options:["Gema","Radio","Air","Angin"] },
-{ question:"Apa yang selalu bergerak tetapi tidak pernah pergi dari tempatnya?", correct:"Jam", options:["Jam","Air","Angin","Bayangan"] },
+{ question:"Di sebuah kelas ada 24 siswa. Jika 1/3 dari mereka pergi ke perpustakaan, berapa siswa yang masih di kelas?", correct:"16", options:["16","18","12","20"] },
 
-{ question:"Apa yang semakin dipakai semakin habis?", correct:"Lilin", options:["Lilin","Baterai","Sabun","Air"] },
-{ question:"Apa yang punya sayap tetapi tidak bisa terbang?", correct:"Ayam", options:["Ayam","Pesawat","Burung","Kupu"] },
-{ question:"Apa yang punya kaki tetapi tidak bisa berjalan?", correct:"Meja", options:["Meja","Kursi","Lemari","Sofa"] },
-{ question:"Apa yang selalu naik tetapi tidak pernah turun selain umur?", correct:"Tangga", options:["Tangga","Asap","Balon","Uap"] },
-{ question:"Apa yang punya kepala dan ekor tetapi tidak punya badan?", correct:"Koin", options:["Koin","Ular","Kadal","Ikan"] },
-{ question:"Apa yang punya banyak lubang tetapi tetap menahan air?", correct:"Spons", options:["Spons","Kain","Sabun","Botol"] },
-{ question:"Apa yang bisa dilihat tetapi tidak bisa disentuh?", correct:"Bayangan", options:["Bayangan","Air","Udara","Kabut"] },
-{ question:"Apa yang selalu mengikuti kamu tetapi tidak bisa disentuh?", correct:"Bayangan", options:["Bayangan","Angin","Udara","Suara"] },
-{ question:"Apa yang selalu lebih besar saat dibalik?", correct:"Angka 6", options:["Angka 6","Angka 9","Angka 8","Angka 3"] },
-{ question:"Apa yang bisa kamu dengar tetapi tidak bisa kamu lihat?", correct:"Suara", options:["Suara","Angin","Udara","Air"] },
+{ question:"Ani memiliki uang 50.000 rupiah. Ia membeli buku seharga 18.000 dan pensil 7.000. Berapa sisa uang Ani?", correct:"25.000", options:["25.000","24.000","23.000","22.000"] },
 
-{ question:"Apa yang punya banyak halaman tetapi bukan buku?", correct:"Kalender", options:["Kalender","Peta","Majalah","Poster"] },
-{ question:"Apa yang selalu jatuh tetapi tidak pernah terluka?", correct:"Hujan", options:["Hujan","Daun","Bola","Air"] },
-{ question:"Apa yang bisa berlari tetapi tidak punya kaki?", correct:"Air", options:["Air","Angin","Api","Awan"] },
-{ question:"Apa yang bisa makan tetapi tidak pernah kenyang?", correct:"Api", options:["Api","Angin","Air","Tanah"] },
-{ question:"Apa yang bisa terbang tanpa sayap?", correct:"Waktu", options:["Waktu","Angin","Debu","Awan"] },
-{ question:"Apa yang punya banyak cincin tetapi tidak punya jari?", correct:"Pohon", options:["Pohon","Planet","Bola","Saturnus"] },
-{ question:"Apa yang bisa memantul tetapi bukan bola?", correct:"Suara", options:["Suara","Air","Cahaya","Angin"] },
-{ question:"Apa yang bisa pecah tetapi tidak pernah terlihat?", correct:"Keheningan", options:["Keheningan","Janji","Kaca","Balon"] },
-{ question:"Apa yang punya banyak wajah tetapi tidak punya kepala?", correct:"Dadu", options:["Dadu","Jam","Topeng","Koin"] },
-{ question:"Apa yang selalu ada tetapi tidak pernah terlihat?", correct:"Udara", options:["Udara","Angin","Kabut","Awan"] },
+{ question:"Seekor ayam memiliki 2 kaki. Jika ada 12 ayam di kandang, berapa total kaki ayam?", correct:"24", options:["24","22","26","20"] },
 
-{ question:"Apa yang selalu berlari tetapi tidak pernah lelah?", correct:"Sungai", options:["Sungai","Air","Angin","Awan"] },
-{ question:"Apa yang semakin besar semakin ringan?", correct:"Balon", options:["Balon","Awan","Asap","Udara"] },
-{ question:"Apa yang memiliki jantung tetapi tidak hidup?", correct:"Artichoke", options:["Artichoke","Kubis","Bawang","Kentang"] },
-{ question:"Apa yang bisa terbuka tetapi bukan pintu?", correct:"Buku", options:["Buku","Jendela","Kotak","Tas"] },
-{ question:"Apa yang punya banyak cabang tetapi bukan pohon?", correct:"Bank", options:["Bank","Sungai","Peta","Jalan"] },
-{ question:"Apa yang semakin diisi semakin ringan?", correct:"Balon", options:["Balon","Botol","Tas","Kotak"] },
-{ question:"Apa yang bisa dipatahkan tanpa disentuh?", correct:"Janji", options:["Janji","Kayu","Kaca","Balon"] },
-{ question:"Apa yang memiliki banyak titik tetapi tidak bergerak?", correct:"Dadu", options:["Dadu","Peta","Bintang","Domino"] },
-{ question:"Apa yang selalu berada di belakang tetapi tidak terlihat?", correct:"Masa lalu", options:["Masa lalu","Bayangan","Udara","Langit"] },
-{ question:"Apa yang punya banyak jari tetapi tidak hidup?", correct:"Sarung tangan", options:["Sarung tangan","Sepatu","Kaos kaki","Topi"] },
+{ question:"Jika 5 orang bisa membuat 5 kursi dalam 5 jam, berapa kursi yang bisa dibuat 10 orang dalam 5 jam?", correct:"10", options:["10","15","20","5"] },
 
-{ question:"Apa yang semakin tinggi semakin dingin?", correct:"Gunung", options:["Gunung","Langit","Awan","Udara"] },
-{ question:"Apa yang selalu jatuh tetapi tidak pernah menyentuh tanah?", correct:"Malam", options:["Malam","Kabut","Awan","Bayangan"] },
-{ question:"Apa yang selalu tumbuh tetapi tidak hidup?", correct:"Bayangan", options:["Bayangan","Kabut","Awan","Udara"] },
-{ question:"Apa yang bisa hilang saat disebutkan?", correct:"Rahasia", options:["Rahasia","Nama","Suara","Kata"] },
-{ question:"Apa yang bisa kamu pegang tetapi tidak bisa kamu lihat?", correct:"Napas", options:["Napas","Udara","Angin","Asap"] },
+{ question:"Sebuah mobil berjalan 60 km dalam 1 jam. Berapa jarak yang ditempuh dalam 3 jam?", correct:"180", options:["180","160","200","150"] },
 
-{ question:"Apa yang punya banyak jalan tetapi tidak bisa dilalui?", correct:"Peta", options:["Peta","Atlas","Globe","Poster"] },
-{ question:"Apa yang punya banyak mata tetapi tidak bisa melihat?", correct:"Kentang", options:["Kentang","Jarum","Boneka","Robot"] },
-{ question:"Apa yang punya banyak gigi tetapi tidak makan?", correct:"Sisir", options:["Sisir","Gergaji","Garpu","Pisau"] },
-{ question:"Apa yang punya kepala tetapi tidak punya otak?", correct:"Kubis", options:["Kubis","Batu","Botol","Meja"] },
-{ question:"Apa yang punya lidah tetapi tidak bisa berbicara?", correct:"Sepatu", options:["Sepatu","Tas","Topi","Baju"] },
+{ question:"Rina membaca 12 halaman buku setiap hari. Berapa halaman yang ia baca dalam 7 hari?", correct:"84", options:["84","72","96","90"] },
 
-{ question:"Apa yang bisa kamu lihat sekali dalam setahun?", correct:"Ulang tahun", options:["Ulang tahun","Tahun baru","Liburan","Festival"] },
-{ question:"Apa yang selalu berubah tetapi tetap sama?", correct:"Waktu", options:["Waktu","Hari","Langit","Cuaca"] },
-{ question:"Apa yang semakin dicari semakin sulit ditemukan?", correct:"Kesalahan", options:["Kesalahan","Kebenaran","Jawaban","Petunjuk"] },
-{ question:"Apa yang bisa memotong tetapi tidak memiliki pisau?", correct:"Waktu", options:["Waktu","Air","Angin","Cahaya"] },
-{ question:"Apa yang memiliki banyak warna tetapi tidak terlihat saat gelap?", correct:"Pelangi", options:["Pelangi","Bunga","Langit","Lampu"] }
+{ question:"Ada 30 permen dibagi sama rata kepada 5 anak. Berapa permen yang didapat setiap anak?", correct:"6", options:["6","5","4","7"] },
 
-]
+{ question:"Sebuah kereta berangkat pukul 08:30 dan tiba pukul 11:00. Berapa lama perjalanan kereta?", correct:"2,5 jam", options:["2,5 jam","3 jam","1,5 jam","2 jam"] },
+
+{ question:"Jika satu kotak berisi 24 telur, berapa telur dalam 4 kotak?", correct:"96", options:["96","88","100","92"] },
+
+{ question:"Andi memiliki 10 kelereng. Ia memenangkan 15 lagi dari temannya tetapi kehilangan 5. Berapa kelereng Andi sekarang?", correct:"20", options:["20","18","22","25"] },
+
+{ question:"Sebuah tangga memiliki 12 anak tangga. Jika seseorang naik 3 anak tangga setiap langkah, berapa langkah yang diperlukan?", correct:"4", options:["4","3","5","6"] },
+
+{ question:"Jika harga 1 roti adalah 2.000 rupiah, berapa harga 8 roti?", correct:"16.000", options:["16.000","18.000","14.000","12.000"] },
+
+{ question:"Seekor sapi memiliki 4 kaki. Jika ada 7 sapi di padang rumput, berapa total kaki sapi?", correct:"28", options:["28","24","30","26"] },
+
+{ question:"Jika sebuah jam menunjukkan pukul 3:00 dan jarum menit bergerak 90 menit, jam berapa sekarang?", correct:"4:30", options:["4:30","4:00","5:00","3:30"] },
+
+{ question:"Di perpustakaan ada 120 buku. Jika 35 buku dipinjam dan 10 buku dikembalikan, berapa buku sekarang di perpustakaan?", correct:"95", options:["95","90","85","100"] },
+
+{ question:"Sebuah bus memiliki 40 kursi. Jika 27 kursi terisi, berapa kursi yang masih kosong?", correct:"13", options:["13","12","14","10"] },
+
+{ question:"Jika 3 pensil harganya 6.000 rupiah, berapa harga 9 pensil?", correct:"18.000", options:["18.000","15.000","21.000","12.000"] },
+
+{ question:"Seorang pelari berlari 5 km setiap hari. Berapa jarak yang ditempuh dalam 6 hari?", correct:"30", options:["30","25","35","28"] },
+
+{ question:"Sebuah ember berisi 10 liter air. Jika 3 liter digunakan, berapa sisa air?", correct:"7", options:["7","6","8","5"] },
+
+{ question:"Jika 8 anak membagi 40 kue sama rata, berapa kue yang didapat setiap anak?", correct:"5", options:["5","6","4","7"] },
+
+{ question:"Sebuah toko menjual 15 baju pada hari Senin dan 20 pada hari Selasa. Berapa total baju yang terjual?", correct:"35", options:["35","30","40","25"] },
+
+{ question:"Jika sebuah mobil membutuhkan 4 liter bensin untuk 40 km, berapa bensin yang dibutuhkan untuk 80 km?", correct:"8", options:["8","6","10","12"] },
+
+{ question:"Jika umur Andi sekarang 10 tahun dan umur kakaknya 5 tahun lebih tua, berapa umur kakaknya?", correct:"15", options:["15","14","16","13"] },
+
+{ question:"Sebuah kelas memiliki 18 meja. Jika setiap meja ditempati 2 siswa, berapa jumlah siswa?", correct:"36", options:["36","30","32","40"] },
+
+{ question:"Jika satu minggu ada 7 hari, berapa hari dalam 5 minggu?", correct:"35", options:["35","30","28","40"] },
+
+{ question:"Jika 2 apel + 3 apel + 5 apel, berapa total apel?", correct:"10", options:["10","9","11","8"] },
+
+{ question:"Jika satu lusin berarti 12, berapa dua lusin?", correct:"24", options:["24","20","18","30"] },
+
+{ question:"Jika 100 dibagi 4, hasilnya?", correct:"25", options:["25","20","30","15"] },
+
+{ question:"Jika 7 x 8, hasilnya?", correct:"56", options:["56","54","48","64"] }
+
+];
 
 /* ================= SEND QUIZ ================= */
 
