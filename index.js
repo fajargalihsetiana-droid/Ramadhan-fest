@@ -989,14 +989,14 @@ let missCount = {}
 let calledToday = new Set()
 let lastCalled = null
 
-function shuffle(arr){
+function shuffleUsers(arr){
 return arr.sort(()=>Math.random()-0.5)
 }
 
 function getNextTarget(users){
 
 if(!hadiahQueue.length){
-hadiahQueue = shuffle([...users])
+hadiahQueue = shuffleUsers([...users])
 }
 
 for(let i=0;i<hadiahQueue.length;i++){
