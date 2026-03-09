@@ -308,69 +308,90 @@ message.channel.send({embeds:[embed]});
 
 /* ================= QUIZ ================= */
 
-let activeQuiz=null;
+let activeQuiz = null;
+let questionPool = [];
 
 const questions = [
 
-{ question:"Budi memiliki 15 apel. Ia memberikan 4 apel kepada temannya dan membeli lagi 7 apel. Berapa apel Budi sekarang?", correct:"18", options:["18","16","20","17"] },
+{ 
+question:"Pada leaderboard cashback terlihat bahwa Hidupp_J0k0W111111 memiliki 1.125 cashback dan berada di rank Elite. Jika pemain di bawahnya adalah 5_atapu dengan 822 cashback, berapa selisih cashback antara keduanya?", 
+correct:"303", 
+options:["303","283","293","313"] 
+},
 
-{ question:"Di sebuah kelas ada 24 siswa. Jika 1/3 dari mereka pergi ke perpustakaan, berapa siswa yang masih di kelas?", correct:"16", options:["16","18","12","20"] },
+{ 
+question:"Jika total cashback didapat adalah 4.946 dan tiga pemain teratas memiliki 1.125, 822, dan 643 cashback, berapa total cashback yang dimiliki tiga pemain tersebut?", 
+correct:"2590", 
+options:["2590","2580","2600","2550"] 
+},
 
-{ question:"Ani memiliki uang 50.000 rupiah. Ia membeli buku seharga 18.000 dan pensil 7.000. Berapa sisa uang Ani?", correct:"25.000", options:["25.000","24.000","23.000","22.000"] },
+{ 
+question:"Dalam leaderboard, SkylarkGw memiliki 470 cashback dan berada di rank Investor. Jika pemain tepat di atasnya memiliki 643 cashback, berapa selisih cashback mereka?", 
+correct:"173", 
+options:["173","163","183","153"] 
+},
 
-{ question:"Seekor ayam memiliki 2 kaki. Jika ada 12 ayam di kandang, berapa total kaki ayam?", correct:"24", options:["24","22","26","20"] },
+{ 
+question:"Jika total cashback yang dimiliki empat pemain teratas adalah 1.125, 822, 643, dan 470, berapa total cashback dari empat pemain tersebut?", 
+correct:"3060", 
+options:["3060","3040","3080","3000"] 
+},
 
-{ question:"Jika 5 orang bisa membuat 5 kursi dalam 5 jam, berapa kursi yang bisa dibuat 10 orang dalam 5 jam?", correct:"10", options:["10","15","20","5"] },
+{ 
+question:"Dari leaderboard terlihat bahwa pemain dengan rank Grinder memiliki 257 dan 222 cashback. Berapa total cashback kedua pemain Grinder tersebut?", 
+correct:"479", 
+options:["479","469","489","459"] 
+},
 
-{ question:"Sebuah mobil berjalan 60 km dalam 1 jam. Berapa jarak yang ditempuh dalam 3 jam?", correct:"180", options:["180","160","200","150"] },
+{ 
+question:"Jika pemain dengan rank Hunter memiliki cashback 179, 160, 156, dan 146, berapa total cashback keempat pemain Hunter tersebut?", 
+correct:"641", 
+options:["641","631","651","661"] 
+},
 
-{ question:"Rina membaca 12 halaman buku setiap hari. Berapa halaman yang ia baca dalam 7 hari?", correct:"84", options:["84","72","96","90"] },
+{ 
+question:"Jika pemain dengan rank Rookie memiliki cashback 61, 58, 51, 49, dan 43, berapa total cashback mereka?", 
+correct:"262", 
+options:["262","252","272","282"] 
+},
 
-{ question:"Ada 30 permen dibagi sama rata kepada 5 anak. Berapa permen yang didapat setiap anak?", correct:"6", options:["6","5","4","7"] },
+{ 
+question:"Jika total cashback leaderboard adalah 4.946 dan sepuluh pemain pertama memiliki total 3.920 cashback, berapa cashback yang dimiliki pemain lain di luar 10 besar?", 
+correct:"1026", 
+options:["1026","1036","1016","1046"] 
+},
 
-{ question:"Sebuah kereta berangkat pukul 08:30 dan tiba pukul 11:00. Berapa lama perjalanan kereta?", correct:"2,5 jam", options:["2,5 jam","3 jam","1,5 jam","2 jam"] },
+{ 
+question:"Jika seorang pemain dengan 470 cashback ingin menyamai pemain dengan 643 cashback, berapa cashback tambahan yang dibutuhkan?", 
+correct:"173", 
+options:["173","163","183","153"] 
+},
 
-{ question:"Jika satu kotak berisi 24 telur, berapa telur dalam 4 kotak?", correct:"96", options:["96","88","100","92"] },
+{ 
+question:"Jika pemain dengan 822 cashback mendapatkan tambahan 200 cashback, berapa total cashback barunya?", 
+correct:"1022", 
+options:["1022","1002","1042","1012"] 
+},
 
-{ question:"Andi memiliki 10 kelereng. Ia memenangkan 15 lagi dari temannya tetapi kehilangan 5. Berapa kelereng Andi sekarang?", correct:"20", options:["20","18","22","25"] },
+{ question:"Dalam sebuah lomba, empat peserta bernama Ali, Budi, Chandra, dan Dani berdiri berjajar. Ali tidak berada di posisi paling depan maupun paling belakang. Budi berdiri tepat di belakang Chandra. Dani berada di posisi paling depan. Siapakah yang berada di posisi paling belakang?", correct:"Budi", options:["Ali","Budi","Chandra","Dani"] },
 
-{ question:"Sebuah tangga memiliki 12 anak tangga. Jika seseorang naik 3 anak tangga setiap langkah, berapa langkah yang diperlukan?", correct:"4", options:["4","3","5","6"] },
+{ question:"Di sebuah ruangan terdapat empat kotak: merah, biru, hijau, dan kuning. Hanya satu kotak yang berisi hadiah. Kotak merah berkata 'Hadiah ada di kotak biru'. Kotak biru berkata 'Hadiah tidak ada di sini'. Kotak hijau berkata 'Kotak merah berbohong'. Kotak kuning berkata 'Hadiah ada di kotak hijau'. Jika hanya satu pernyataan yang benar, di kotak mana hadiah berada?", correct:"Hijau", options:["Merah","Biru","Hijau","Kuning"] },
 
-{ question:"Jika harga 1 roti adalah 2.000 rupiah, berapa harga 8 roti?", correct:"16.000", options:["16.000","18.000","14.000","12.000"] },
+{ question:"Empat teman duduk melingkar: Rina, Sinta, Tono, dan Dika. Rina tidak duduk di sebelah Sinta. Tono duduk di antara Rina dan Dika. Siapakah yang duduk di sebelah Sinta?", correct:"Dika", options:["Rina","Tono","Dika","Tidak bisa ditentukan"] },
 
-{ question:"Seekor sapi memiliki 4 kaki. Jika ada 7 sapi di padang rumput, berapa total kaki sapi?", correct:"28", options:["28","24","30","26"] },
+{ question:"Seorang penjaga mengatakan bahwa hanya satu dari tiga orang berikut yang mengatakan kebenaran. Ali berkata: 'Budi berbohong'. Budi berkata: 'Chandra berbohong'. Chandra berkata: 'Ali dan Budi sama-sama berbohong'. Siapakah yang berkata benar?", correct:"Budi", options:["Ali","Budi","Chandra","Tidak ada"] },
 
-{ question:"Jika sebuah jam menunjukkan pukul 3:00 dan jarum menit bergerak 90 menit, jam berapa sekarang?", correct:"4:30", options:["4:30","4:00","5:00","3:30"] },
+{ question:"Di sebuah desa ada tiga rumah berwarna merah, biru, dan hijau. Andi tidak tinggal di rumah merah. Budi tidak tinggal di rumah biru. Chandra tinggal di sebelah rumah biru. Siapakah yang tinggal di rumah hijau?", correct:"Budi", options:["Andi","Budi","Chandra","Tidak bisa ditentukan"] },
 
-{ question:"Di perpustakaan ada 120 buku. Jika 35 buku dipinjam dan 10 buku dikembalikan, berapa buku sekarang di perpustakaan?", correct:"95", options:["95","90","85","100"] },
+{ question:"Empat siswa mengikuti lomba cerdas cermat: Dina, Fajar, Gita, dan Hadi. Dina mendapat nilai lebih tinggi dari Fajar. Gita mendapat nilai lebih rendah dari Hadi tetapi lebih tinggi dari Fajar. Siapakah yang kemungkinan mendapat nilai tertinggi?", correct:"Hadi", options:["Dina","Fajar","Gita","Hadi"] },
 
-{ question:"Sebuah bus memiliki 40 kursi. Jika 27 kursi terisi, berapa kursi yang masih kosong?", correct:"13", options:["13","12","14","10"] },
+{ question:"Dalam sebuah antrean terdapat lima orang. Rudi berdiri di depan Seno tetapi di belakang Tika. Budi berdiri paling belakang. Jika Tika bukan yang paling depan, siapakah yang paling depan?", correct:"Rudi", options:["Rudi","Seno","Tika","Budi"] },
 
-{ question:"Jika 3 pensil harganya 6.000 rupiah, berapa harga 9 pensil?", correct:"18.000", options:["18.000","15.000","21.000","12.000"] },
+{ question:"Empat orang memiliki profesi berbeda: dokter, guru, koki, dan pilot. Ali bukan dokter. Budi bukan guru. Chandra bukan pilot dan bukan koki. Jika Dani adalah dokter, siapakah pilotnya?", correct:"Ali", options:["Ali","Budi","Chandra","Dani"] },
 
-{ question:"Seorang pelari berlari 5 km setiap hari. Berapa jarak yang ditempuh dalam 6 hari?", correct:"30", options:["30","25","35","28"] },
+{ question:"Empat teman membawa tas berbeda warna: hitam, putih, merah, dan biru. Tas hitam bukan milik Andi. Tas merah milik orang yang duduk di sebelah Budi. Chandra tidak membawa tas biru. Jika Budi membawa tas putih, siapa yang membawa tas merah?", correct:"Andi", options:["Andi","Budi","Chandra","Dani"] },
 
-{ question:"Sebuah ember berisi 10 liter air. Jika 3 liter digunakan, berapa sisa air?", correct:"7", options:["7","6","8","5"] },
-
-{ question:"Jika 8 anak membagi 40 kue sama rata, berapa kue yang didapat setiap anak?", correct:"5", options:["5","6","4","7"] },
-
-{ question:"Sebuah toko menjual 15 baju pada hari Senin dan 20 pada hari Selasa. Berapa total baju yang terjual?", correct:"35", options:["35","30","40","25"] },
-
-{ question:"Jika sebuah mobil membutuhkan 4 liter bensin untuk 40 km, berapa bensin yang dibutuhkan untuk 80 km?", correct:"8", options:["8","6","10","12"] },
-
-{ question:"Jika umur Andi sekarang 10 tahun dan umur kakaknya 5 tahun lebih tua, berapa umur kakaknya?", correct:"15", options:["15","14","16","13"] },
-
-{ question:"Sebuah kelas memiliki 18 meja. Jika setiap meja ditempati 2 siswa, berapa jumlah siswa?", correct:"36", options:["36","30","32","40"] },
-
-{ question:"Jika satu minggu ada 7 hari, berapa hari dalam 5 minggu?", correct:"35", options:["35","30","28","40"] },
-
-{ question:"Jika 2 apel + 3 apel + 5 apel, berapa total apel?", correct:"10", options:["10","9","11","8"] },
-
-{ question:"Jika satu lusin berarti 12, berapa dua lusin?", correct:"24", options:["24","20","18","30"] },
-
-{ question:"Jika 100 dibagi 4, hasilnya?", correct:"25", options:["25","20","30","15"] },
-
-{ question:"Jika 7 x 8, hasilnya?", correct:"56", options:["56","54","48","64"] }
+{ question:"Seorang guru berkata kepada muridnya: 'Jika kamu mengatakan kebenaran, kamu akan dihukum. Jika kamu berbohong, kamu juga akan dihukum.' Murid itu kemudian mengatakan sesuatu yang membuat guru tidak bisa menghukumnya. Apa yang kemungkinan ia katakan?", correct:"Saya akan dihukum", options:["Saya akan dihukum","Saya berkata jujur","Saya berbohong","Saya tidak tahu"] }
 
 ];
 
@@ -383,7 +404,7 @@ if(activeQuiz) return;
 const channel=guild.channels.cache.get(process.env.QUIZ_CHANNEL_ID);
 if(!channel) return;
 
-const q=questions[Math.floor(Math.random()*questions.length)];
+const q = getNextQuestion();
 const shuffled=shuffle([...q.options]);
 const correctIndex=shuffled.indexOf(q.correct);
 
@@ -465,6 +486,26 @@ activeQuiz=null;
 function startAutoQuizSystem(guild){
 
 function scheduleNext(){
+
+function shuffle(array){
+for(let i=array.length-1;i>0;i--){
+const j=Math.floor(Math.random()*(i+1));
+[array[i],array[j]]=[array[j],array[i]];
+}
+return array;
+}
+
+function getNextQuestion(){
+
+if(questionPool.length === 0){
+
+questionPool = shuffle([...questions]);
+
+}
+
+return questionPool.pop();
+
+}
 
 const now=new Date();
 
