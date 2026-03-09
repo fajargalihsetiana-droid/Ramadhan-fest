@@ -39,21 +39,6 @@ function saveData(){
 fs.writeFileSync(DATA_FILE,JSON.stringify(data,null,2));
 }
 
-function getRankInfo(userId){
-const sorted = Object.entries(data)
-.sort((a,b)=>b[1].points-a[1].points);
-const rankIndex = sorted.findIndex(e=>e[0]===userId);
-const rank = rankIndex + 1;
-const firstPoints = sorted.length ? sorted[0][1].points : 0;
-const userPoints = data[userId]?.points || 0;
-const gap = firstPoints - userPoints;
-return {
-rank,
-gap
-};
-
-}
-
 function getUser(id){
 if(!data[id]) data[id]={points:0,keywordCooldowns:{}};
 if(!data[id].keywordCooldowns) data[id].keywordCooldowns={};
@@ -70,60 +55,16 @@ console.error("UNHANDLED:",error);
 
 async function logPoint(guild,userId,amount,reason){
 
-const channel = guild.channels.cache.get(process.env.HISTORY_CHANNEL_ID)
-if(!channel) return
+const channel=guild.channels.cache.get(process.env.HISTORY_CHANNEL_ID);
+if(!channel) return;
 
-let emoji = "✨"
-
-if(reason.includes("Quiz")) emoji = "🧠"
-if(reason.includes("Boss")) emoji = "🐉"
-if(reason.includes("Hadiah")) emoji = "🎁"
-if(reason.includes("Keyword")) emoji = "🌙"
-
-const embed = new EmbedBuilder()
-
-.setTitle("📜 HISTORY POIN RAMADHAN FEST")
-
-.setDescription(`
-👤 Player
-<@${userId}>
-
-${emoji} Event
-${reason}
-
-💰 Poin
-+${amount}
-`)
-
+const embed=new EmbedBuilder()
+.setTitle("📜 Update Poin Ramadhan Fest")
+.setDescription(`👤 <@${userId}>\n➕ +${amount} poin\n📌 ${reason}`)
 .setColor("Gold")
-.setTimestamp()
+.setTimestamp();
 
-channel.send({embeds:[embed]})
-
-}
-
-/* ================= RANK BALANCE ================= */
-
-function applyRankBalance(userId,baseReward){
-
-const sorted=Object.entries(data)
-.sort((a,b)=>b[1].points-a[1].points);
-
-const rankIndex=sorted.findIndex(e=>e[0]===userId);
-
-if(rankIndex===-1) return baseReward;
-
-const multipliers=[
-1.00, // rank1
-1.05, // rank2
-1.10, // rank3
-1.15, // rank4
-1.20  // rank5
-];
-
-const multi=multipliers[rankIndex]||2.0;
-
-return Math.floor(baseReward*multi);
+channel.send({embeds:[embed]});
 
 }
 
@@ -134,33 +75,21 @@ function applyGapBalance(userId,baseReward){
 const sorted=Object.entries(data)
 .sort((a,b)=>b[1].points-a[1].points);
 
-if(sorted.length<2) return baseReward;
+if(sorted.length<3) return baseReward;
 
-const gap=sorted[0][1].points-sorted[1][1].points;
+const gap=sorted[0][1].points-sorted[2][1].points;
 const rankIndex=sorted.findIndex(e=>e[0]===userId);
 
-if(gap>1200){
-if(rankIndex>=1) return Math.floor(baseReward*1.90);
+if(gap>1500){
+if(rankIndex===0) return Math.floor(baseReward*0.6);
+if(rankIndex===1) return Math.floor(baseReward*0.75);
+if(rankIndex>=2) return Math.floor(baseReward*1.4);
 }
 
-if(gap>1000){
-if(rankIndex>=1) return Math.floor(baseReward*1.75);
-}
-
-if(gap>750){
-if(rankIndex>=1) return Math.floor(baseReward*1.50);
-}
-
-if(gap>500){
-if(rankIndex>=1) return Math.floor(baseReward*1.35);
-}
-
-if(gap>250){
-if(rankIndex>=1) return Math.floor(baseReward*1.20);
-}
-
-if(gap>100){
-if(rankIndex>=1) return Math.floor(baseReward*1.10);
+if(gap>800){
+if(rankIndex===0) return Math.floor(baseReward*0.75);
+if(rankIndex===1) return Math.floor(baseReward*0.85);
+if(rankIndex>=2) return Math.floor(baseReward*1.2);
 }
 
 return baseReward;
@@ -236,22 +165,7 @@ sedekah:60*60*1000
 
 client.on("messageCreate",async message=>{
 
-if(message.author.bot) return
-
-/* ================= COMMAND HADIAH ================= */
-
-if(message.content === "!hadiah"){
-
-if(message.author.id !== OWNER_ID) return
-
-spawnHadiah(message.guild)
-
-return message.reply("🎁 Hadiah berhasil di-spawn!")
-
-}
-
-/* ================= KEYWORD SYSTEM ================= */
-
+if(message.author.bot) return;
 if(message.channel.id!==process.env.KEYWORD_CHANNEL_ID) return;
 
 const content=message.content.toLowerCase().trim();
@@ -269,7 +183,6 @@ return message.reply(`⏳ Tunggu ${remain} menit lagi.`);
 
 let reward=Math.floor(Math.random()*10)+10;
 
-reward=applyRankBalance(message.author.id,reward);
 reward=applyGapBalance(message.author.id,reward);
 
 user.points+=reward;
@@ -281,37 +194,15 @@ await updateLeaderboard(message.guild);
 
 await logPoint(message.guild,message.author.id,reward,"Keyword Ramadhan");
 
-const info = getRankInfo(message.author.id);
-
-const text = info.rank !== 1
-? `📉 **${info.gap} poin lagi untuk mengejar rank #1**`
-: `👑 **Kamu sedang memimpin leaderboard!**`;
-
-const embed = new EmbedBuilder()
-.setColor("Gold")
-.setAuthor({
-name: message.author.username,
-iconURL: message.author.displayAvatarURL()
-})
-.setDescription(
-`✨ **+${reward} poin**
-
-🏆 **Total:** ${user.points} poin
-📊 **Rank:** #${info.rank}
-
-${text}`
-);
-
-message.channel.send({embeds:[embed]});
+message.channel.send(`✨ +${reward} poin\n🏆 Total: ${user.points} poin`);
 
 });
 
 /* ================= QUIZ ================= */
 
-let activeQuiz = null;
-let questionPool = [];
+let activeQuiz=null;
 
-const questions = [
+const questions=[
 
 { 
 question:"Pada leaderboard cashback terlihat bahwa Hidupp_J0k0W111111 memiliki 1.125 cashback dan berada di rank Elite. Jika pemain di bawahnya adalah 5_atapu dengan 822 cashback, berapa selisih cashback antara keduanya?", 
@@ -395,24 +286,6 @@ options:["1022","1002","1042","1012"]
 
 ];
 
-function shuffle(array){
-for(let i=array.length-1;i>0;i--){
-const j=Math.floor(Math.random()*(i+1));
-[array[i],array[j]]=[array[j],array[i]];
-}
-return array;
-}
-
-function getNextQuestion(){
-
-if(questionPool.length === 0){
-questionPool = shuffle([...questions]);
-}
-
-return questionPool.pop();
-
-}
-
 /* ================= SEND QUIZ ================= */
 
 async function sendQuiz(guild){
@@ -422,29 +295,30 @@ if(activeQuiz) return;
 const channel=guild.channels.cache.get(process.env.QUIZ_CHANNEL_ID);
 if(!channel) return;
 
-const q = getNextQuestion();
+const q=questions[Math.floor(Math.random()*questions.length)];
 const shuffled=shuffle([...q.options]);
 const correctIndex=shuffled.indexOf(q.correct);
 
 const embed = new EmbedBuilder()
 .setTitle("🧠 QUIZ RAMADHAN FEST")
-.setDescription(`
-━━━━━━━━━━━━━━━━━━
-📢 **PERTANYAAN BARU!**
+.setDescription(
+`━━━━━━━━━━━━━━━━━━\n`+
+`📢 **PERTANYAAN BARU!**\n\n`+
 
-❓ **${q.question}**
+`❓ **${q.question}**\n\n`+
 
-🇦 **${shuffled[0]}**
-🇧 **${shuffled[1]}**
-🇨 **${shuffled[2]}**
-🇩 **${shuffled[3]}**
+`🇦 **${shuffled[0]}**\n`+
+`🇧 **${shuffled[1]}**\n`+
+`🇨 **${shuffled[2]}**\n`+
+`🇩 **${shuffled[3]}**\n\n`+
 
-━━━━━━━━━━━━━━━━━━
+`━━━━━━━━━━━━━━━━━━\n`+
 
-⏳ **Waktu menjawab: 45 menit**
-🔥 **Jawaban pertama = 2x poin!**
-`)
-
+`⏳ **Waktu menjawab: 45 menit**\n`+
+`🔥 **Jawaban pertama = 2x poin!**\n`+
+`⚡ **Rank 3+ bonus poin**\n`+
+`🏆 **Kejar leaderboard sekarang!**`
+)
 .setColor("Gold")
 .setFooter({text:"Ramadhan Fest Quiz Event"})
 .setTimestamp();
@@ -505,16 +379,16 @@ function startAutoQuizSystem(guild){
 
 function scheduleNext(){
 
-const now = new Date();
+const now=new Date();
 
-const next = new Date(now);
+const next=new Date(now);
 
 next.setMinutes(0);
 next.setSeconds(0);
 next.setMilliseconds(0);
 next.setHours(next.getHours()+1);
 
-const delay = next - now;
+const delay=next-now;
 
 setTimeout(async()=>{
 
@@ -524,7 +398,7 @@ await sendQuiz(guild);
 
 scheduleNext();
 
-}, delay);
+},delay);
 
 }
 
@@ -566,10 +440,10 @@ reward*=2;
 activeQuiz.firstWinner=interaction.user.id;
 }
 
-reward=applyRankBalance(interaction.user.id,reward);
 reward=applyGapBalance(interaction.user.id,reward);
 
 user.points+=reward;
+
 activeQuiz.winners.push({
 id:interaction.user.id,
 points:reward
@@ -689,7 +563,6 @@ if(!guild) return;
 
 startAutoQuizSystem(guild);
 startBossSchedule(guild);
-startHadiahRandom(guild);
 
 });
 
@@ -742,7 +615,7 @@ if(!leaderboard) leaderboard="Belum ada serangan"
 
 const embed=new EmbedBuilder()
 
-.setTitle("🐉 RAMADHAN BOSS MENGAMUK")
+.setTitle("🐉 RAMADHAN BOSS RAID")
 
 .setDescription(`
 HP: **${raidBoss.hp} / ${raidBoss.max}**
@@ -839,7 +712,7 @@ const sorted=Object.entries(raidPlayers)
 
 let result="🎉 **Boss Ramadhan dikalahkan!**\n\n"
 
-for(const [i,p] of sorted.slice(0,10).entries()){
+sorted.slice(0,10).forEach((p,i)=>{
 
 const user=getUser(p[0])
 
@@ -851,11 +724,9 @@ else if(i===2) reward=100
 
 user.points+=reward
 
-logPoint(guild,p[0],reward,"Boss Ramadhan")
-
 result+=`${i+1}. <@${p[0]}> — ${p[1]} dmg (+${reward} poin)\n`
 
-}
+})
 
 channel.send(result)
 
@@ -924,31 +795,20 @@ safeUpdate()
 
 function startBossSchedule(guild){
 
-let lastSpawn = null
-
 setInterval(()=>{
 
-const now = new Date()
+const now=new Date()
 
-let hour = now.getUTCHours()+7
-const minute = now.getUTCMinutes()
+let hour=now.getUTCHours()+7
+const minute=now.getUTCMinutes()
 
-if(hour >= 24) hour -= 24
+if(hour>=24) hour-=24
 
-if(minute !== 0) return
+if(hour===15 && minute<=1) spawnRaid(guild)
+if(hour===18 && minute<=1) spawnRaid(guild)
+if(hour===21 && minute<=1) spawnRaid(guild)
 
-if([9,15,21].includes(hour)){
-
-if(lastSpawn !== hour){
-
-spawnRaid(guild)
-lastSpawn = hour
-
-}
-
-}
-
-},30000)
+},60000)
 
 }
 
@@ -973,260 +833,3 @@ ephemeral:true
 }
 
 })
-
-/* =====================================================
-🎁 HADIAH RAMADHAN
-===================================================== */
-
-let hadiahActive = null
-let hadiahToday = 0
-let hadiahTarget = 7
-
-/* queue system */
-
-let hadiahQueue = []
-let missCount = {}
-let calledToday = new Set()
-let lastCalled = null
-
-function shuffleUsers(arr){
-return arr.sort(()=>Math.random()-0.5)
-}
-
-function getNextTarget(users){
-
-if(!hadiahQueue.length){
-hadiahQueue = shuffleUsers([...users])
-}
-
-for(let i=0;i<hadiahQueue.length;i++){
-
-const user = hadiahQueue[i]
-
-if(user===lastCalled) continue
-if((missCount[user]||0)>=2) continue
-
-if(!calledToday.has(user)){
-
-hadiahQueue.splice(i,1)
-
-lastCalled = user
-calledToday.add(user)
-
-return user
-
-}
-
-}
-
-for(let i=0;i<hadiahQueue.length;i++){
-
-const user = hadiahQueue[i]
-
-if(user===lastCalled) continue
-if((missCount[user]||0)>=2) continue
-
-hadiahQueue.splice(i,1)
-
-lastCalled = user
-
-return user
-
-}
-
-return null
-
-}
-
-function getRank(userId){
-
-const sorted = Object.entries(data)
-.sort((a,b)=>b[1].points-a[1].points)
-
-return sorted.findIndex(e=>e[0]===userId)+1
-
-}
-
-function getReward(rank){
-
-if(Math.random() < 0.05){
-return 500
-}
-
-if(rank===1) return Math.floor(Math.random()*20)+20
-if(rank===2) return Math.floor(Math.random()*30)+40
-if(rank===3) return Math.floor(Math.random()*40)+70
-if(rank<=5) return Math.floor(Math.random()*60)+100
-if(rank<=10) return Math.floor(Math.random()*90)+150
-
-return Math.floor(Math.random()*150)+220
-
-}
-
-async function spawnHadiah(guild){
-
-if(hadiahActive) return
-
-const channel = guild.channels.cache.get(process.env.HADIAH_CHANNEL_ID)
-if(!channel) return
-
-const members = await guild.members.fetch()
-
-const users = members
-.filter(m=>!m.user.bot)
-.map(m=>m.id)
-
-if(!users.length) return
-
-const target = getNextTarget(users)
-if(!target) return
-
-hadiahActive = {
-user:target,
-expire:Date.now()+180000
-}
-
-const embed = new EmbedBuilder()
-.setTitle("🎁 HADIAH POIN RAMADHAN")
-.setDescription(`
-🎉 Hadiah muncul!
-
-<@${target}>
-
-Ketik **ambil**
-
-⏳ Waktu claim: 3 menit
-`)
-.setColor("Gold")
-
-channel.send({
-content:`<@${target}>`,
-embeds:[embed]
-})
-
-setTimeout(()=>{
-
-if(hadiahActive){
-
-const user = hadiahActive.user
-
-missCount[user] = (missCount[user]||0)+1
-hadiahQueue.push(user)
-
-hadiahActive = null
-
-spawnHadiah(guild)
-
-}
-
-},180000)
-
-}
-
-/* ================= CLAIM ================= */
-
-client.on("messageCreate",async message=>{
-
-if(message.author.bot) return
-if(!hadiahActive) return
-
-if(message.author.id===hadiahActive.user){
-
-if(message.content.toLowerCase()==="ambil"){
-
-const rank = getRank(message.author.id)
-let reward = getReward(rank)
-
-reward = applyRankBalance(message.author.id,reward)
-reward = applyGapBalance(message.author.id,reward)
-
-const user = getUser(message.author.id)
-
-user.points += reward
-
-await logPoint(message.guild,message.author.id,reward,"Hadiah Ramadhan")
-
-saveData()
-
-await updateLeaderboard(message.guild)
-
-message.channel.send(`
-🎉 **HADIAH BERHASIL DIAMBIL!**
-
-👤 Pemenang : <@${message.author.id}>
-💰 Hadiah : **${reward} poin**
-
-🔥 Ayo Semangat Kumpulkan Poin!
-`)
-
-missCount[message.author.id] = 0
-hadiahQueue.push(message.author.id)
-
-hadiahActive = null
-
-}
-
-}
-
-})
-
-/* ================= COMMAND ================= */
-
-client.on("interactionCreate",async interaction=>{
-
-if(!interaction.isChatInputCommand()) return
-
-if(interaction.commandName==="hadiah"){
-
-if(interaction.user.id!==OWNER_ID)
-return interaction.reply({
-content:"❌ Owner only.",
-ephemeral:true
-})
-
-spawnHadiah(interaction.guild)
-
-interaction.reply({
-content:"🎁 Hadiah berhasil di-spawn!",
-ephemeral:true
-})
-
-}
-
-})
-
-/* ================= AUTO SPAWN ================= */
-
-function startHadiahRandom(guild){
-
-setInterval(()=>{
-
-const now = new Date()
-
-if(now.getHours()===0 && now.getMinutes()===0){
-
-hadiahToday = 0
-hadiahTarget = 6 + Math.floor(Math.random()*3)
-
-hadiahQueue = []
-missCount = {}
-calledToday.clear()
-lastCalled = null
-
-}
-
-if(hadiahToday < hadiahTarget){
-
-if(Math.random() < 0.15){
-
-spawnHadiah(guild)
-
-hadiahToday++
-
-}
-
-}
-
-},1800000)
-
-}
