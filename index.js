@@ -521,18 +521,16 @@ function startAutoQuizSystem(guild){
 
 function scheduleNext(){
 
-}
+const now = new Date();
 
-const now=new Date();
-
-const next=new Date(now);
+const next = new Date(now);
 
 next.setMinutes(0);
 next.setSeconds(0);
 next.setMilliseconds(0);
 next.setHours(next.getHours()+1);
 
-const delay=next-now;
+const delay = next - now;
 
 setTimeout(async()=>{
 
@@ -542,7 +540,7 @@ await sendQuiz(guild);
 
 scheduleNext();
 
-},delay);
+}, delay);
 
 }
 
