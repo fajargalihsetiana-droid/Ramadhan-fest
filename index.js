@@ -1,4 +1,20 @@
-require("dotenv").config();
+function shuffle(array){
+for(let i=array.length-1;i>0;i--){
+const j=Math.floor(Math.random()*(i+1));
+[array[i],array[j]]=[array[j],array[i]];
+}
+return array;
+}
+
+function getNextQuestion(){
+
+if(questionPool.length === 0){
+questionPool = shuffle([...questions]);
+}
+
+return questionPool.pop();
+
+}require("dotenv").config();
 const {
 Client,
 GatewayIntentBits,
@@ -395,6 +411,24 @@ options:["1022","1002","1042","1012"]
 
 ];
 
+function shuffle(array){
+for(let i=array.length-1;i>0;i--){
+const j=Math.floor(Math.random()*(i+1));
+[array[i],array[j]]=[array[j],array[i]];
+}
+return array;
+}
+
+function getNextQuestion(){
+
+if(questionPool.length === 0){
+questionPool = shuffle([...questions]);
+}
+
+return questionPool.pop();
+
+}
+
 /* ================= SEND QUIZ ================= */
 
 async function sendQuiz(guild){
@@ -486,24 +520,6 @@ activeQuiz=null;
 function startAutoQuizSystem(guild){
 
 function scheduleNext(){
-
-function shuffle(array){
-for(let i=array.length-1;i>0;i--){
-const j=Math.floor(Math.random()*(i+1));
-[array[i],array[j]]=[array[j],array[i]];
-}
-return array;
-}
-
-function getNextQuestion(){
-
-if(questionPool.length === 0){
-
-questionPool = shuffle([...questions]);
-
-}
-
-return questionPool.pop();
 
 }
 
