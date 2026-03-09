@@ -833,3 +833,354 @@ ephemeral:true
 }
 
 })
+
+/* =====================================================
+🎁 HADIAH RAMADHAN FINAL SYSTEM
+===================================================== */
+
+let hadiahActive = null
+let hadiahMessage = null
+
+let hadiahQueue = []
+let missCount = {}
+let calledToday = new Set()
+let lastCalled = null
+
+/* ================= RANDOM TEXT ================= */
+
+const hadiahQuotes = [
+"🎁 Dapet poin nih kamu <@USER>, yakin ga mau ambil?",
+"👀 <@USER> ada hadiah turun dari langit!",
+"🔥 <@USER> kamu kepilih sistem! Buruan claim!",
+"💰 Lucky moment! <@USER> dapet hadiah!",
+"😏 <@USER> berani claim hadiahnya ga?",
+"⚡ Hadiah misterius muncul untuk <@USER>!"
+]
+
+const trollQuotes = [
+"🤡 Oops <@USER>... ternyata kosong 😆",
+"🪤 <@USER> kena prank sistem!",
+"💨 Hadiahnya kabur duluan!",
+"🧻 Cuma dapet tisu... coba lagi nanti!",
+"🐟 Sistem: 'kamu hampir dapat hadiah' 🤣"
+]
+
+/* ================= PROGRESS BAR ================= */
+
+function hadiahBar(percent){
+
+const size = 20
+const filled = Math.round(size * percent)
+const empty = size - filled
+
+return "🟩".repeat(filled)+"⬛".repeat(empty)
+
+}
+
+/* ================= SHUFFLE ================= */
+
+function shuffleUsers(arr){
+return arr.sort(()=>Math.random()-0.5)
+}
+
+/* ================= TARGET ================= */
+
+function getNextTarget(users){
+
+if(!hadiahQueue.length){
+hadiahQueue = shuffleUsers([...users])
+}
+
+for(let i=0;i<hadiahQueue.length;i++){
+
+const user = hadiahQueue[i]
+
+if(user===lastCalled) continue
+if((missCount[user]||0)>=2) continue
+
+if(!calledToday.has(user)){
+
+hadiahQueue.splice(i,1)
+
+lastCalled = user
+calledToday.add(user)
+
+return user
+}
+
+}
+
+for(let i=0;i<hadiahQueue.length;i++){
+
+const user = hadiahQueue[i]
+
+if(user===lastCalled) continue
+if((missCount[user]||0)>=2) continue
+
+hadiahQueue.splice(i,1)
+
+lastCalled = user
+
+return user
+}
+
+return null
+}
+
+/* ================= RANK ================= */
+
+function getRank(userId){
+
+const sorted = Object.entries(data)
+.sort((a,b)=>b[1].points-a[1].points)
+
+return sorted.findIndex(e=>e[0]===userId)+1
+
+}
+
+/* ================= REWARD ================= */
+
+function getReward(rank){
+
+if(Math.random()<0.05) return 500
+
+if(rank===1) return Math.floor(Math.random()*20)+20
+if(rank===2) return Math.floor(Math.random()*30)+40
+if(rank===3) return Math.floor(Math.random()*40)+70
+if(rank<=5) return Math.floor(Math.random()*60)+100
+if(rank<=10) return Math.floor(Math.random()*90)+150
+
+return Math.floor(Math.random()*150)+220
+
+}
+
+/* ================= SPAWN HADIAH ================= */
+
+async function spawnHadiah(guild){
+
+if(hadiahActive) return
+
+const channel = guild.channels.cache.get(process.env.HADIAH_CHANNEL_ID)
+if(!channel) return
+
+const members = await guild.members.fetch()
+
+const users = members
+.filter(m=>!m.user.bot)
+.map(m=>m.id)
+
+if(!users.length) return
+
+/* reset jika semua sudah miss 2x */
+
+if(users.every(u => (missCount[u]||0)>=2)){
+
+hadiahQueue=[]
+missCount={}
+calledToday.clear()
+lastCalled=null
+
+}
+
+/* pilih target */
+
+const target = getNextTarget(users)
+if(!target) return
+
+/* troll chance */
+
+const isTroll = Math.random()<0.15
+
+const quote = (isTroll ? trollQuotes : hadiahQuotes)
+[Math.floor(Math.random()*6)]
+.replace("USER",target)
+
+hadiahActive = {
+user:target,
+expire:Date.now()+180000,
+troll:isTroll
+}
+
+const embed = new EmbedBuilder()
+
+.setTitle("🎁 HADIAH RAMADHAN")
+
+.setDescription(`
+${quote}
+
+━━━━━━━━━━━━━━━━━━
+
+⏳ **Waktu claim: 3 menit**
+
+${hadiahBar(1)}
+
+Klik tombol **CLAIM**
+`)
+
+.setColor(isTroll ? "Grey" : "Gold")
+
+const row = new ActionRowBuilder().addComponents(
+
+new ButtonBuilder()
+.setCustomId("claim_hadiah")
+.setLabel("🎁 CLAIM")
+.setStyle(ButtonStyle.Success)
+
+)
+
+hadiahMessage = await channel.send({
+content:`<@${target}>`,
+embeds:[embed],
+components:[row]
+})
+
+/* ================= TIMER ================= */
+
+const interval = setInterval(async()=>{
+
+if(!hadiahActive){
+clearInterval(interval)
+return
+}
+
+const remain = hadiahActive.expire - Date.now()
+
+if(remain<=0){
+
+clearInterval(interval)
+
+missCount[target] = (missCount[target]||0)+1
+hadiahQueue.push(target)
+
+await hadiahMessage.edit({components:[]})
+
+hadiahActive=null
+
+return
+}
+
+const percent = remain/180000
+
+const newEmbed = EmbedBuilder.from(embed)
+
+.setDescription(`
+${quote}
+
+━━━━━━━━━━━━━━━━━━
+
+⏳ **${Math.ceil(remain/1000)} detik**
+
+${hadiahBar(percent)}
+
+Klik tombol **CLAIM**
+`)
+
+await hadiahMessage.edit({embeds:[newEmbed]})
+
+},10000)
+
+}
+
+/* ================= CLAIM ================= */
+
+client.on("interactionCreate",async interaction=>{
+
+if(!interaction.isButton()) return
+if(interaction.customId!=="claim_hadiah") return
+if(!hadiahActive) return
+
+if(interaction.user.id!==hadiahActive.user){
+
+return interaction.reply({
+content:"❌ Hadiah ini bukan untuk kamu.",
+ephemeral:true
+})
+
+}
+
+/* troll hadiah */
+
+if(hadiahActive.troll){
+
+await interaction.update({
+content:`🤡 **PRANK!**
+
+<@${interaction.user.id}> cuma dapet angin 😆`,
+embeds:[],
+components:[]
+})
+
+hadiahActive=null
+return
+}
+
+/* hadiah normal */
+
+const rank = getRank(interaction.user.id)
+let reward = getReward(rank)
+
+reward = applyRankBalance(interaction.user.id,reward)
+reward = applyGapBalance(interaction.user.id,reward)
+
+const user = getUser(interaction.user.id)
+
+user.points += reward
+
+await logPoint(interaction.guild,interaction.user.id,reward,"Hadiah Ramadhan")
+
+saveData()
+await updateLeaderboard(interaction.guild)
+
+await interaction.update({
+content:`🎉 **HADIAH DIAMBIL!**
+
+👤 <@${interaction.user.id}>
+💰 +${reward} poin`,
+embeds:[],
+components:[]
+})
+
+missCount[interaction.user.id]=0
+hadiahQueue.push(interaction.user.id)
+
+hadiahActive=null
+
+})
+
+/* ================= AUTO SPAWN WIB ================= */
+
+function startHadiahSchedule(guild){
+
+let lastSpawnHour=null
+
+setInterval(()=>{
+
+const now = new Date()
+
+let hour = now.getUTCHours()+7
+const minute = now.getUTCMinutes()
+
+if(hour>=24) hour-=24
+
+if(hour<6 || hour>22) return
+if(minute!==0) return
+if(lastSpawnHour===hour) return
+
+spawnHadiah(guild)
+
+lastSpawnHour=hour
+
+},30000)
+
+}
+
+/* ================= AUTO START ================= */
+
+client.once("clientReady",async()=>{
+
+const guild = client.guilds.cache.get(process.env.GUILD_ID)
+if(!guild) return
+
+startHadiahSchedule(guild)
+
+})
