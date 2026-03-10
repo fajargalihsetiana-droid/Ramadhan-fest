@@ -70,8 +70,6 @@ channel.send({embeds:[embed]});
 
 /* ================= GAP BALANCE ================= */
 
-
-/* ================= LEADERBOARD ================= */
 function applyGapBalance(userId, baseReward){
 
 const sorted = Object.entries(data)
@@ -114,6 +112,9 @@ reward += 500
 return reward
 
 }
+
+/* ================= LEADERBOARD ================= */
+
 let leaderboardMessage=null;
 
 async function updateLeaderboard(guild){
