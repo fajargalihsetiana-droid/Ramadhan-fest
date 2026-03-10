@@ -849,20 +849,20 @@ ephemeral:true
 })
 
 /* =====================================================
-🎁 HADIAH RAMADHAN FINAL FULL SYSTEM
+🎁 HADIAH RAMADHAN (VERSI KETIK AMBIL)
 ===================================================== */
 
 let hadiahActive = null
-let hadiahMessage = null
+let hadiahTimeout = null
 
 /* ================= RANDOM TEXT ================= */
 
 const hadiahQuotes = [
 "🎁 Dapet poin nih kamu <@USER>, yakin ga mau ambil?",
 "👀 <@USER> ada hadiah turun dari langit!",
-"🔥 <@USER> kamu kepilih sistem! Buruan claim!",
+"🔥 <@USER> kamu kepilih sistem! Ketik **ambil**!",
 "💰 Lucky moment! <@USER> dapet hadiah!",
-"😏 <@USER> berani claim hadiahnya ga?",
+"😏 <@USER> berani ambil hadiahnya ga?",
 "⚡ Hadiah misterius muncul untuk <@USER>!"
 ]
 
@@ -873,18 +873,6 @@ const trollQuotes = [
 "🧻 Cuma dapet tisu... coba lagi nanti!",
 "🐟 Sistem: 'kamu hampir dapat hadiah' 🤣"
 ]
-
-/* ================= PROGRESS BAR ================= */
-
-function hadiahBar(percent){
-
-const size = 20
-const filled = Math.round(size * percent)
-const empty = size - filled
-
-return "🟩".repeat(filled)+"⬛".repeat(empty)
-
-}
 
 /* ================= SHUFFLE ================= */
 
@@ -933,155 +921,97 @@ const isTroll = Math.random()<0.15
 const list = isTroll ? trollQuotes : hadiahQuotes
 
 const quote = list[
-Math.floor(Math.random() * list.length)
+Math.floor(Math.random()*list.length)
 ].replace("<@USER>",`<@${target}>`)
 
-hadiahActive = {
+hadiahActive={
 user:target,
-expire:Date.now()+90000,
 troll:isTroll
 }
 
-const embed = new EmbedBuilder()
+await channel.send(
+`🎁 **HADIAH RAMADHAN**
 
-.setTitle("🎁 HADIAH RAMADHAN")
-
-.setDescription(`
 ${quote}
 
 ━━━━━━━━━━━━━━━━━━
-
 ⏳ **90 detik**
 
-${hadiahBar(1)}
-
-Klik tombol **CLAIM**
-`)
-
-.setColor(isTroll ? "Grey" : "Gold")
-
-const row = new ActionRowBuilder().addComponents(
-
-new ButtonBuilder()
-.setCustomId("claim_hadiah")
-.setLabel("🎁 CLAIM")
-.setStyle(ButtonStyle.Success)
-
+👉 <@${target}> ketik **ambil**
+`
 )
 
-hadiahMessage = await channel.send({
-content:`<@${target}>`,
-embeds:[embed],
-components:[row]
-})
+/* timer hangus */
 
-hadiahTimer(embed,quote)
-
-/* ================= TIMER ================= */
-
-async function hadiahTimer(embed,quote){
+hadiahTimeout=setTimeout(async()=>{
 
 if(!hadiahActive) return
 
-const remain = hadiahActive.expire - Date.now()
-
-if(remain<=0){
-
-await hadiahMessage.edit({
-content:`⏳ Hadiah untuk <@${hadiahActive.user}> hangus...`,
-components:[]
-})
+await channel.send(
+`⏳ Hadiah untuk <@${hadiahActive.user}> hangus...`
+)
 
 hadiahActive=null
 
-return
+},90000)
 
 }
 
-const percent = remain/90000
+/* ================= CLAIM HADIAH ================= */
 
-const newEmbed = EmbedBuilder.from(embed)
+client.on("messageCreate",async message=>{
 
-.setDescription(`
-${quote}
+if(message.author.bot) return
+if(message.channel.id !== process.env.HADIAH_CHANNEL_ID) return
 
-━━━━━━━━━━━━━━━━━━
-
-⏳ **${Math.ceil(remain/1000)} detik**
-
-${hadiahBar(percent)}
-
-Klik tombol **CLAIM**
-`)
-
-await hadiahMessage.edit({embeds:[newEmbed]})
-
-setTimeout(()=>{
-hadiahTimer(embed,quote)
-},5000)
-
-}
-
-}
-
-/* ================= CLAIM ================= */
-
-client.on("interactionCreate",async interaction=>{
-
-if(!interaction.isButton()) return
-if(interaction.customId!=="claim_hadiah") return
+if(message.content.toLowerCase()!=="ambil") return
 if(!hadiahActive) return
 
-if(interaction.user.id !== hadiahActive.user){
+if(message.author.id !== hadiahActive.user){
 
-return interaction.reply({
-content:"❌ Hadiah ini bukan untuk kamu.",
-ephemeral:true
-})
-
+return message.reply("❌ Hadiah ini bukan untuk kamu.")
 }
+
+clearTimeout(hadiahTimeout)
 
 /* troll hadiah */
 
 if(hadiahActive.troll){
 
-await interaction.update({
-content:`🤡 **PRANK!**
+await message.reply(
+`🤡 **PRANK!**
 
-<@${interaction.user.id}> cuma dapet angin 😆`,
-embeds:[],
-components:[]
-})
+<@${message.author.id}> cuma dapet angin 😆`
+)
 
 hadiahActive=null
 return
+
 }
 
 /* hadiah normal */
 
-const rank = getRank(interaction.user.id)
-let reward = getReward(rank)
+const rank=getRank(message.author.id)
+let reward=getReward(rank)
 
-reward = applyRankBalance(interaction.user.id,reward)
-reward = applyGapBalance(interaction.user.id,reward)
+reward=applyRankBalance(message.author.id,reward)
+reward=applyGapBalance(message.author.id,reward)
 
-const user = getUser(interaction.user.id)
+const user=getUser(message.author.id)
 
-user.points += reward
+user.points+=reward
 
-await logPoint(interaction.guild,interaction.user.id,reward,"Hadiah Ramadhan")
+await logPoint(message.guild,message.author.id,reward,"Hadiah Ramadhan")
 
 saveData()
-await updateLeaderboard(interaction.guild)
+await updateLeaderboard(message.guild)
 
-await interaction.update({
-content:`🎉 **HADIAH DIAMBIL!**
+await message.reply(
+`🎉 **HADIAH DIAMBIL!**
 
-👤 <@${interaction.user.id}>
-💰 +${reward} poin`,
-embeds:[],
-components:[]
-})
+👤 <@${message.author.id}>
+💰 +${reward} poin`
+)
 
 hadiahActive=null
 
@@ -1091,45 +1021,46 @@ hadiahActive=null
 
 function startHadiahSchedule(guild){
 
-let lastSpawnHour = null
+let lastSpawnHour=null
 
-setInterval(async () => {
+setInterval(async()=>{
 
-const now = new Date()
+const now=new Date()
 
-let hour = now.getUTCHours() + 7
-const minute = now.getUTCMinutes()
+let hour=now.getUTCHours()+7
+const minute=now.getUTCMinutes()
 
-if(hour >= 24) hour -= 24
+if(hour>=24) hour-=24
 
-if(hour < 6 || hour > 22) return
-if(minute !== 2) return
-if(lastSpawnHour === hour) return
+if(hour<6||hour>22) return
+if(minute!==2) return
+if(lastSpawnHour===hour) return
 
-lastSpawnHour = hour
+lastSpawnHour=hour
 
-const members = await guild.members.fetch()
+const members=await guild.members.fetch()
 
-const users = members
-.filter(m => !m.user.bot)
-.map(m => m.id)
+const users=members
+.filter(m=>!m.user.bot)
+.map(m=>m.id)
 
-const shuffled = shuffleUsers(users)
+const shuffled=shuffleUsers(users)
 
-const targets = shuffled.slice(0,10)
+const targets=shuffled.slice(0,10)
 
 for(const user of targets){
 
 await spawnHadiah(guild,user)
 
-/* tunggu hadiah selesai (claim / expire) */
+/* tunggu selesai */
+
 while(hadiahActive){
-await new Promise(r => setTimeout(r,1000))
+await new Promise(r=>setTimeout(r,1000))
 }
 
 }
 
-const channel = guild.channels.cache.get(process.env.HADIAH_CHANNEL_ID)
+const channel=guild.channels.cache.get(process.env.HADIAH_CHANNEL_ID)
 
 if(channel){
 
@@ -1140,41 +1071,41 @@ lanjut jam berikutnya.. bye 👋`
 
 }
 
-}, 60000)
+},60000)
 
 }
 
-/* ================= MANUAL SPAWN COMMAND ================= */
+/* ================= MANUAL COMMAND ================= */
 
-client.on("messageCreate", async message => {
+client.on("messageCreate",async message=>{
 
 if(message.author.bot) return
 
-if(message.content === "!hadiah"){
+if(message.content==="!hadiah"){
 
-if(message.author.id !== OWNER_ID){
+if(message.author.id!==OWNER_ID){
 return message.reply("❌ Owner only.")
 }
 
-const guild = message.guild
+const guild=message.guild
 
-const members = await guild.members.fetch()
+const members=await guild.members.fetch()
 
-const users = members
-.filter(m => !m.user.bot)
-.map(m => m.id)
+const users=members
+.filter(m=>!m.user.bot)
+.map(m=>m.id)
 
-const shuffled = shuffleUsers(users)
+const shuffled=shuffleUsers(users)
 
-const targets = shuffled.slice(0,10)
+const targets=shuffled.slice(0,10)
 
 for(const user of targets){
 
-while(hadiahActive){
-await new Promise(r => setTimeout(r,2000))
-}
-
 await spawnHadiah(guild,user)
+
+while(hadiahActive){
+await new Promise(r=>setTimeout(r,1000))
+}
 
 }
 
@@ -1186,11 +1117,13 @@ message.reply("🎁 10 hadiah berhasil di spawn!")
 
 /* ================= START ================= */
 
-client.once("clientReady", async () => {
+client.once("clientReady",async()=>{
 
-const guild = client.guilds.cache.get(process.env.GUILD_ID)
+const guild=client.guilds.cache.get(process.env.GUILD_ID)
 if(!guild) return
 
 startHadiahSchedule(guild)
 
 })
+
+
