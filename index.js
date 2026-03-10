@@ -1018,7 +1018,7 @@ await hadiahMessage.edit({embeds:[newEmbed]})
 
 setTimeout(()=>{
 hadiahTimer(embed,quote)
-},5vv000)
+},5000)
 
 }
 
@@ -1032,7 +1032,7 @@ if(!interaction.isButton()) return
 if(interaction.customId!=="claim_hadiah") return
 if(!hadiahActive) return
 
-if(interaction.user.id!==hadiahActive.user){
+if(interaction.user.id !== hadiahActive.user){
 
 return interaction.reply({
 content:"❌ Hadiah ini bukan untuk kamu.",
