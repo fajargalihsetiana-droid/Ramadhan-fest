@@ -354,7 +354,7 @@ await sendQuiz(guild)
 
 }
 
-},30000)
+},60000)
 
 }
 
@@ -771,7 +771,7 @@ lastSpawn = hour
 
 }
 
-},30000)
+},60000)
 
 }
 
@@ -879,9 +879,11 @@ if(!channel) return
 
 const isTroll = Math.random()<0.15
 
-const quote = (isTroll ? trollQuotes : hadiahQuotes)
-[Math.floor(Math.random()*5)]
-.replace("USER",target)
+const list = isTroll ? trollQuotes : hadiahQuotes
+
+const quote = list[
+Math.floor(Math.random() * list.length)
+].replace("USER",target)
 
 hadiahActive = {
 user:target,
