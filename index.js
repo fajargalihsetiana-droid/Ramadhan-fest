@@ -934,8 +934,6 @@ let hadiahActive = null
 let hadiahToday = 0
 let hadiahTarget = 7
 
-/* queue system */
-
 let hadiahQueue = []
 let missCount = {}
 let calledToday = new Set()
@@ -944,6 +942,8 @@ let lastCalled = null
 function shuffleUsers(arr){
 return arr.sort(()=>Math.random()-0.5)
 }
+
+/* ================= TARGET SYSTEM ================= */
 
 function getNextTarget(users){
 
@@ -990,6 +990,8 @@ return null
 
 }
 
+/* ================= RANK ================= */
+
 function getRank(userId){
 
 const sorted = Object.entries(data)
@@ -998,6 +1000,8 @@ const sorted = Object.entries(data)
 return sorted.findIndex(e=>e[0]===userId)+1
 
 }
+
+/* ================= REWARD ================= */
 
 function getReward(rank){
 
@@ -1014,6 +1018,8 @@ if(rank<=10) return Math.floor(Math.random()*90)+150
 return Math.floor(Math.random()*150)+220
 
 }
+
+/* ================= SPAWN HADIAH ================= */
 
 async function spawnHadiah(guild){
 
@@ -1056,9 +1062,11 @@ content:`<@${target}>`,
 embeds:[embed]
 })
 
+/* timeout hadiah */
+
 setTimeout(()=>{
 
-if(hadiahActive){
+if(!hadiahActive) return
 
 const user = hadiahActive.user
 
@@ -1067,11 +1075,7 @@ hadiahQueue.push(user)
 
 hadiahActive = null
 
-if(!hadiahActive){
 spawnHadiah(guild)
-}
-
-}
 
 },180000)
 
@@ -1083,11 +1087,18 @@ client.on("messageCreate",async message=>{
 
 if(message.author.bot) return
 if(message.channel.id !== process.env.HADIAH_CHANNEL_ID) return
-if(!hadiahActive) return
 
-if(message.author.id !== hadiahActive.user) return
+if(!hadiahActive){
+return
+}
 
-if(message.content.toLowerCase().trim() !== "ambil") return
+if(message.author.id !== hadiahActive.user){
+return
+}
+
+const text = message.content.toLowerCase().trim()
+
+if(!text.startsWith("ambil")) return
 
 const rank = getRank(message.author.id)
 let reward = getReward(rank)
@@ -1132,8 +1143,6 @@ if(message.content === "!hadiah"){
 if(message.author.id !== OWNER_ID){
 return message.reply("❌ Command ini hanya untuk owner.")
 }
-
-/* kalau hadiah masih aktif jangan spawn lagi */
 
 if(hadiahActive){
 return message.reply("⚠️ Masih ada hadiah aktif.")
@@ -1181,7 +1190,7 @@ hadiahToday++
 
 },1800000)
 
-  }
+}
 
 /* ================= START ================= */
 
@@ -1193,5 +1202,3 @@ if(!guild) return
 startHadiahRandom(guild)
 
 })
-
-
