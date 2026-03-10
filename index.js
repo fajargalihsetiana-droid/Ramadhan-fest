@@ -898,7 +898,7 @@ ${quote}
 
 ━━━━━━━━━━━━━━━━━━
 
-⏳ **180 detik**
+⏳ **90 detik**
 
 ${hadiahBar(1)}
 
@@ -963,6 +963,8 @@ await hadiahMessage.edit({embeds:[newEmbed]})
 setTimeout(()=>{
 hadiahTimer(embed,quote)
 },1000)
+
+}
 
 }
 
