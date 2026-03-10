@@ -922,7 +922,9 @@ const list = isTroll ? trollQuotes : hadiahQuotes
 
 const quote = list[
 Math.floor(Math.random()*list.length)
-].replace("<@USER>",`<@${target}>`)
+].replace("<@USER>", member)
+
+const member = await guild.members.fetch(target)
 
 hadiahActive={
 user:target,
@@ -932,6 +934,7 @@ troll:isTroll
 const embed = new EmbedBuilder()
 .setColor("Gold")
 .setTitle("🎁 HADIAH RAMADHAN")
+.setThumbnail(member.user.displayAvatarURL({dynamic:true}))
 .setDescription(`
 ${quote}
 
@@ -939,14 +942,12 @@ ${quote}
 
 ⏳ **90 detik**
 
-👉 <@${target}> ketik **ambil**
+👉 ${member} ketik **ambil**
 `)
 .setFooter({text:"Ramadhan Fest Event"})
 .setTimestamp()
 
-await channel.send({
-embeds:[embed]
-})
+await channel.send({embeds:[embed]})
 
 /* timer hangus */
 
@@ -1021,11 +1022,14 @@ await logPoint(message.guild,message.author.id,reward,"Hadiah Ramadhan")
 saveData()
 await updateLeaderboard(message.guild)
 
+const member = await message.guild.members.fetch(message.author.id)
+
 const embed = new EmbedBuilder()
 .setColor("Green")
 .setTitle("🎉 HADIAH DIAMBIL!")
+.setThumbnail(member.user.displayAvatarURL({dynamic:true}))
 .setDescription(`
-👤 <@${message.author.id}>
+👤 ${member}
 
 💰 **+${reward} poin**
 `)
