@@ -1120,26 +1120,28 @@ hadiahActive = null
 
 })
 
-/* ================= COMMAND ================= */
+/* ================= COMMAND HADIAH ================= */
 
-client.on("interactionCreate",async interaction=>{
+client.on("messageCreate", async message => {
 
-if(!interaction.isChatInputCommand()) return
+if(message.author.bot) return
+if(!message.guild) return
 
-if(interaction.commandName==="hadiah"){
+if(message.content === "!hadiah"){
 
-if(interaction.user.id!==OWNER_ID)
-return interaction.reply({
-content:"❌ Owner only.",
-ephemeral:true
-})
+if(message.author.id !== OWNER_ID){
+return message.reply("❌ Command ini hanya untuk owner.")
+}
 
-spawnHadiah(interaction.guild)
+/* kalau hadiah masih aktif jangan spawn lagi */
 
-interaction.reply({
-content:"🎁 Hadiah berhasil di-spawn!",
-ephemeral:true
-})
+if(hadiahActive){
+return message.reply("⚠️ Masih ada hadiah aktif.")
+}
+
+await spawnHadiah(message.guild)
+
+message.reply("🎁 Hadiah berhasil di-spawn!")
 
 }
 
