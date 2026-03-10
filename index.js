@@ -409,10 +409,10 @@ if(interaction.isButton() && ["0","1","2","3"].includes(interaction.customId)){
 await interaction.deferReply({ephemeral:true})
 
 if(!activeQuiz)
-return interaction.reply({content:"⚠️ Soal selesai.",ephemeral:true});
+return interaction.editreply({content:"⚠️ Soal selesai.",ephemeral:true});
 
 if(activeQuiz.answered.includes(interaction.user.id))
-return interaction.reply({content:"❌ Kamu sudah menjawab.",ephemeral:true});
+return interaction.editreply({content:"❌ Kamu sudah menjawab.",ephemeral:true});
 
 activeQuiz.answered.push(interaction.user.id);
 
@@ -451,14 +451,14 @@ await updateLeaderboard(interaction.guild);
 
 await logPoint(interaction.guild,interaction.user.id,reward,"Quiz");
 
-return interaction.reply({
+return interaction.editreply({
 content:`🔥 Benar!\n✨ +${reward} poin\n🏆 Total: ${user.points}`,
 ephemeral:true
 });
 
 }
 
-return interaction.reply({content:"❌ Salah!",ephemeral:true});
+return interaction.editreply({content:"❌ Salah!",ephemeral:true});
 
 }
 
@@ -469,7 +469,7 @@ if(!interaction.isChatInputCommand()) return;
 if(interaction.commandName==="addpoin"){
 
 if(interaction.user.id!==OWNER_ID)
-return interaction.reply({
+return interaction.editreply({
 content:"❌ Owner only.",
 ephemeral:true
 });
@@ -492,7 +492,7 @@ amount,
 "Manual add poin"
 );
 
-return interaction.reply({
+return interaction.editreply({
 content:`✅ ${amount} poin berhasil ditambahkan ke ${target}`,
 ephemeral:true
 });
