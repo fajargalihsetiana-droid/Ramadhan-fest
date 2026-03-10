@@ -198,71 +198,27 @@ message.channel.send(`✨ +${reward} poin\n🏆 Total: ${user.points} poin`);
 
 });
 
+/* ================= SHUFFLE ================= */
+
+function shuffle(array){
+
+for(let i=array.length-1;i>0;i--){
+
+const j=Math.floor(Math.random()*(i+1));
+
+[array[i],array[j]]=[array[j],array[i]];
+
+}
+
+return array;
+
+}
+
 /* ================= QUIZ ================= */
 
 let activeQuiz=null;
 
 const questions=[
-
-{ 
-question:"Pada leaderboard cashback terlihat bahwa Hidupp_J0k0W111111 memiliki 1.125 cashback dan berada di rank Elite. Jika pemain di bawahnya adalah 5_atapu dengan 822 cashback, berapa selisih cashback antara keduanya?", 
-correct:"303", 
-options:["303","283","293","313"] 
-},
-
-{ 
-question:"Jika total cashback didapat adalah 4.946 dan tiga pemain teratas memiliki 1.125, 822, dan 643 cashback, berapa total cashback yang dimiliki tiga pemain tersebut?", 
-correct:"2590", 
-options:["2590","2580","2600","2550"] 
-},
-
-{ 
-question:"Dalam leaderboard, SkylarkGw memiliki 470 cashback dan berada di rank Investor. Jika pemain tepat di atasnya memiliki 643 cashback, berapa selisih cashback mereka?", 
-correct:"173", 
-options:["173","163","183","153"] 
-},
-
-{ 
-question:"Jika total cashback yang dimiliki empat pemain teratas adalah 1.125, 822, 643, dan 470, berapa total cashback dari empat pemain tersebut?", 
-correct:"3060", 
-options:["3060","3040","3080","3000"] 
-},
-
-{ 
-question:"Dari leaderboard terlihat bahwa pemain dengan rank Grinder memiliki 257 dan 222 cashback. Berapa total cashback kedua pemain Grinder tersebut?", 
-correct:"479", 
-options:["479","469","489","459"] 
-},
-
-{ 
-question:"Jika pemain dengan rank Hunter memiliki cashback 179, 160, 156, dan 146, berapa total cashback keempat pemain Hunter tersebut?", 
-correct:"641", 
-options:["641","631","651","661"] 
-},
-
-{ 
-question:"Jika pemain dengan rank Rookie memiliki cashback 61, 58, 51, 49, dan 43, berapa total cashback mereka?", 
-correct:"262", 
-options:["262","252","272","282"] 
-},
-
-{ 
-question:"Jika total cashback leaderboard adalah 4.946 dan sepuluh pemain pertama memiliki total 3.920 cashback, berapa cashback yang dimiliki pemain lain di luar 10 besar?", 
-correct:"1026", 
-options:["1026","1036","1016","1046"] 
-},
-
-{ 
-question:"Jika seorang pemain dengan 470 cashback ingin menyamai pemain dengan 643 cashback, berapa cashback tambahan yang dibutuhkan?", 
-correct:"173", 
-options:["173","163","183","153"] 
-},
-
-{ 
-question:"Jika pemain dengan 822 cashback mendapatkan tambahan 200 cashback, berapa total cashback barunya?", 
-correct:"1022", 
-options:["1022","1002","1042","1012"] 
-},
 
 { question:"Dalam sebuah lomba, empat peserta bernama Ali, Budi, Chandra, dan Dani berdiri berjajar. Ali tidak berada di posisi paling depan maupun paling belakang. Budi berdiri tepat di belakang Chandra. Dani berada di posisi paling depan. Siapakah yang berada di posisi paling belakang?", correct:"Budi", options:["Ali","Budi","Chandra","Dani"] },
 
@@ -929,7 +885,7 @@ const quote = (isTroll ? trollQuotes : hadiahQuotes)
 
 hadiahActive = {
 user:target,
-expire:Date.now()+180000,
+expire:Date.now()+90000,
 troll:isTroll
 }
 
@@ -966,29 +922,27 @@ embeds:[embed],
 components:[row]
 })
 
+hadiahTimer(embed,quote)
+
 /* ================= TIMER ================= */
 
-const interval = setInterval(async()=>{
+async function hadiahTimer(embed,quote){
 
-if(!hadiahActive){
-clearInterval(interval)
-return
-}
+if(!hadiahActive) return
 
 const remain = hadiahActive.expire - Date.now()
 
 if(remain<=0){
-
-clearInterval(interval)
 
 await hadiahMessage.edit({components:[]})
 
 hadiahActive=null
 
 return
+
 }
 
-const percent = remain/180000
+const percent = remain/90000
 
 const newEmbed = EmbedBuilder.from(embed)
 
@@ -1006,6 +960,8 @@ Klik tombol **CLAIM**
 
 await hadiahMessage.edit({embeds:[newEmbed]})
 
+setTimeout(()=>{
+hadiahTimer(embed,quote)
 },1000)
 
 }
