@@ -384,7 +384,7 @@ const now = new Date()
 const minute = now.getMinutes()
 const hour = now.getHours()
 
-if(minute !== 0) return
+if(minute > 1) return
 
 if(lastQuizHour === hour) return
 
@@ -405,6 +405,8 @@ await sendQuiz(guild)
 client.on("interactionCreate",async interaction=>{
 
 if(interaction.isButton() && ["0","1","2","3"].includes(interaction.customId)){
+
+await interaction.deferReply({ephemeral:true})
 
 if(!activeQuiz)
 return interaction.reply({content:"⚠️ Soal selesai.",ephemeral:true});
@@ -525,7 +527,7 @@ text += `⏳ **${key.toUpperCase()}** : ${remain} menit lagi\n`;
 text += "\n━━━━━━━━━━━━━━━━━━";
 text += `\n🏆 Total Poin Kamu: **${user.points} poin**`;
 
-return interaction.reply({
+return interaction.editreply({
 content:text,
 ephemeral:true
 });
@@ -536,7 +538,7 @@ if(interaction.commandName==="soal"){
 
 await sendQuiz(interaction.guild);
 
-return interaction.reply({
+return interaction.editreply({
 content:"📢 Quiz dikirim!",
 ephemeral:true
 });
@@ -809,7 +811,7 @@ const minute = now.getUTCMinutes()
 
 if(hour>=24) hour-=24
 
-if(minute !== 1) return
+if(minute > 2) return
 
 if([9,15,21].includes(hour)){
 
@@ -920,11 +922,11 @@ const isTroll = Math.random()<0.15
 
 const list = isTroll ? trollQuotes : hadiahQuotes
 
+const member = await guild.members.fetch(target)
+
 const quote = list[
 Math.floor(Math.random()*list.length)
-].replace("<@USER>", member)
-
-const member = await guild.members.fetch(target)
+].replace("<@USER>", `<@${member.id}>`)
 
 hadiahActive={
 user:target,
@@ -1058,7 +1060,7 @@ const minute=now.getUTCMinutes()
 if(hour>=24) hour-=24
 
 if(hour<6||hour>22) return
-if(minute!==2) return
+if(minute> 3) return
 if(lastSpawnHour===hour) return
 
 lastSpawnHour=hour
