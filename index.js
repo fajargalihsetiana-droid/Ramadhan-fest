@@ -186,11 +186,9 @@ if(message.author.bot) return
 if(message.channel.id !== process.env.KEYWORD_CHANNEL_ID) return
 
 const content = message.content.toLowerCase().trim()
-
 if(!keywordCooldown[content]) return
 
 const user = getUser(message.author.id)
-
 const now = Date.now()
 
 if(now < (user.keywordCooldowns[content] || 0)){
@@ -201,9 +199,13 @@ return message.reply(`⏳ Tunggu ${remain} menit lagi.`)
 
 }
 
+/* ===== BASE REWARD ===== */
+
 let reward = Math.floor(Math.random()*50) + 80
 
 reward = applyGapBalance(message.author.id, reward)
+
+/* ===== JACKPOT ===== */
 
 if(Math.random() < 0.02){
 
@@ -216,11 +218,10 @@ message.channel.send(`
 
 }
 
-user.points += reward
+/* ===== SAVE ===== */
 
+user.points += reward
 user.keywordCooldowns[content] = now + keywordCooldown[content]
-message.channel.send(`
-🎉 **JACKPOT FARM!**
 
 saveData()
 
@@ -230,8 +231,8 @@ message.author.id,
 reward,
 "Farm"
 )
-  
-/* ===== RANK CALCULATION ===== */
+
+/* ===== RANK ===== */
 
 const sorted = Object.entries(data)
 .sort((a,b)=>b[1].points-a[1].points)
@@ -239,27 +240,20 @@ const sorted = Object.entries(data)
 const rank = sorted.findIndex(e=>e[0]===message.author.id) + 1
 
 const topPoints = sorted[0][1].points
-
 const gap = topPoints - user.points
 
-let gapText = ""
+let gapText=""
 
-if(rank === 1){
-
-gapText = "👑 Kamu sedang memimpin leaderboard!"
-
+if(rank===1){
+gapText="👑 Kamu sedang memimpin leaderboard!"
 }else{
-
-gapText = `📉 ${gap} poin lagi untuk mengejar rank #1`
-
+gapText=`📉 ${gap} poin lagi untuk mengejar rank #1`
 }
 
 /* ===== EMBED ===== */
 
-const embed = new EmbedBuilder()
-
+const embed=new EmbedBuilder()
 .setColor("Gold")
-
 .setDescription(
 `✨ **+${reward} poin**
 
@@ -268,10 +262,9 @@ const embed = new EmbedBuilder()
 
 ${gapText}`
 )
-
 .setFooter({
-text: message.author.username,
-iconURL: message.author.displayAvatarURL({dynamic:true})
+text:message.author.username,
+iconURL:message.author.displayAvatarURL({dynamic:true})
 })
 
 message.channel.send({embeds:[embed]})
@@ -279,22 +272,6 @@ message.channel.send({embeds:[embed]})
 await updateLeaderboard(message.guild)
 
 })
-
-/* ================= SHUFFLE ================= */
-
-function shuffle(array){
-
-for(let i=array.length-1;i>0;i--){
-
-const j=Math.floor(Math.random()*(i+1));
-
-[array[i],array[j]]=[array[j],array[i]];
-
-}
-
-return array;
-
-}
 
 /* ================= QUIZ ================= */
 
