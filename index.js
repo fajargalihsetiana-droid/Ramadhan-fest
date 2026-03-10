@@ -835,16 +835,11 @@ ephemeral:true
 })
 
 /* =====================================================
-🎁 HADIAH RAMADHAN FINAL SYSTEM
+🎁 HADIAH RAMADHAN FINAL FULL SYSTEM
 ===================================================== */
 
 let hadiahActive = null
 let hadiahMessage = null
-
-let hadiahQueue = []
-let missCount = {}
-let calledToday = new Set()
-let lastCalled = null
 
 /* ================= RANDOM TEXT ================= */
 
@@ -883,50 +878,6 @@ function shuffleUsers(arr){
 return arr.sort(()=>Math.random()-0.5)
 }
 
-/* ================= TARGET ================= */
-
-function getNextTarget(users){
-
-if(!hadiahQueue.length){
-hadiahQueue = shuffleUsers([...users])
-}
-
-for(let i=0;i<hadiahQueue.length;i++){
-
-const user = hadiahQueue[i]
-
-if(user===lastCalled) continue
-if((missCount[user]||0)>=2) continue
-
-if(!calledToday.has(user)){
-
-hadiahQueue.splice(i,1)
-
-lastCalled = user
-calledToday.add(user)
-
-return user
-}
-
-}
-
-for(let i=0;i<hadiahQueue.length;i++){
-
-const user = hadiahQueue[i]
-
-if(user===lastCalled) continue
-if((missCount[user]||0)>=2) continue
-
-hadiahQueue.splice(i,1)
-
-lastCalled = user
-
-return user
-}
-
-return null
-}
-
 /* ================= RANK ================= */
 
 function getRank(userId){
@@ -956,43 +907,17 @@ return Math.floor(Math.random()*150)+220
 
 /* ================= SPAWN HADIAH ================= */
 
-async function spawnHadiah(guild){
+async function spawnHadiah(guild,target){
 
 if(hadiahActive) return
 
 const channel = guild.channels.cache.get(process.env.HADIAH_CHANNEL_ID)
 if(!channel) return
 
-const members = await guild.members.fetch()
-
-const users = members
-.filter(m=>!m.user.bot)
-.map(m=>m.id)
-
-if(!users.length) return
-
-/* reset jika semua sudah miss 2x */
-
-if(users.every(u => (missCount[u]||0)>=2)){
-
-hadiahQueue=[]
-missCount={}
-calledToday.clear()
-lastCalled=null
-
-}
-
-/* pilih target */
-
-const target = getNextTarget(users)
-if(!target) return
-
-/* troll chance */
-
 const isTroll = Math.random()<0.15
 
 const quote = (isTroll ? trollQuotes : hadiahQuotes)
-[Math.floor(Math.random()*6)]
+[Math.floor(Math.random()*5)]
 .replace("USER",target)
 
 hadiahActive = {
@@ -1010,7 +935,7 @@ ${quote}
 
 ━━━━━━━━━━━━━━━━━━
 
-⏳ **Waktu claim: 3 menit**
+⏳ **180 detik**
 
 ${hadiahBar(1)}
 
@@ -1049,9 +974,6 @@ if(remain<=0){
 
 clearInterval(interval)
 
-missCount[target] = (missCount[target]||0)+1
-hadiahQueue.push(target)
-
 await hadiahMessage.edit({components:[]})
 
 hadiahActive=null
@@ -1077,7 +999,7 @@ Klik tombol **CLAIM**
 
 await hadiahMessage.edit({embeds:[newEmbed]})
 
-},10000)
+},1000)
 
 }
 
@@ -1140,20 +1062,17 @@ embeds:[],
 components:[]
 })
 
-missCount[interaction.user.id]=0
-hadiahQueue.push(interaction.user.id)
-
 hadiahActive=null
 
 })
 
-/* ================= AUTO SPAWN WIB ================= */
+/* ================= AUTO SPAWN ================= */
 
 function startHadiahSchedule(guild){
 
 let lastSpawnHour=null
 
-setInterval(()=>{
+setInterval(async()=>{
 
 const now = new Date()
 
@@ -1166,15 +1085,85 @@ if(hour<6 || hour>22) return
 if(minute!==0) return
 if(lastSpawnHour===hour) return
 
-spawnHadiah(guild)
-
 lastSpawnHour=hour
+
+const members = await guild.members.fetch()
+
+const users = members
+.filter(m=>!m.user.bot)
+.map(m=>m.id)
+
+const shuffled = shuffleUsers(users)
+
+const targets = shuffled.slice(0,10)
+
+for(const user of targets){
+
+await spawnHadiah(guild,user)
+
+await new Promise(r=>setTimeout(r,5000))
+
+}
+
+const channel = guild.channels.cache.get(process.env.HADIAH_CHANNEL_ID)
+
+if(channel){
+
+channel.send(
+`🤖 udah ya.. bot capek nyebutin satu²  
+lanjut jam berikutnya.. bye 👋`
+)
+
+}
 
 },30000)
 
 }
 
-/* ================= AUTO START ================= */
+/* ================= MANUAL SPAWN COMMAND ================= */
+
+client.on("interactionCreate", async interaction => {
+
+if(!interaction.isChatInputCommand()) return
+if(interaction.commandName !== "hadiah") return
+
+if(interaction.user.id !== OWNER_ID){
+
+return interaction.reply({
+content:"❌ Hanya owner yang bisa spawn hadiah.",
+ephemeral:true
+})
+
+}
+
+const guild = interaction.guild
+
+const members = await guild.members.fetch()
+
+const users = members
+.filter(m=>!m.user.bot)
+.map(m=>m.id)
+
+const shuffled = shuffleUsers(users)
+
+const targets = shuffled.slice(0,10)
+
+for(const user of targets){
+
+await spawnHadiah(guild,user)
+
+await new Promise(r=>setTimeout(r,4000))
+
+}
+
+await interaction.reply({
+content:"🎁 Hadiah berhasil di spawn!",
+ephemeral:true
+})
+
+})
+
+/* ================= START ================= */
 
 client.once("clientReady",async()=>{
 
