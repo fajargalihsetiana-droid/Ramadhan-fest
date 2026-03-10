@@ -1129,21 +1129,17 @@ lanjut jam berikutnya.. bye 👋`
 
 /* ================= MANUAL SPAWN COMMAND ================= */
 
-client.on("interactionCreate", async interaction => {
+client.on("messageCreate",async message=>{
 
-if(!interaction.isChatInputCommand()) return
-if(interaction.commandName !== "hadiah") return
+if(message.author.bot) return
 
-if(interaction.user.id !== OWNER_ID){
+if(message.content==="!hadiah"){
 
-return interaction.reply({
-content:"❌ Hanya owner yang bisa spawn hadiah.",
-ephemeral:true
-})
-
+if(message.author.id!==OWNER_ID){
+return message.reply("❌ Owner only.")
 }
 
-const guild = interaction.guild
+const guild = message.guild
 
 const members = await guild.members.fetch()
 
@@ -1157,16 +1153,17 @@ const targets = shuffled.slice(0,10)
 
 for(const user of targets){
 
-await spawnHadiah(guild,user)
+while(hadiahActive){
+await new Promise(r=>setTimeout(r,2000))
+}
 
-await new Promise(r=>setTimeout(r,4000))
+await spawnHadiah(guild,user)
 
 }
 
-await interaction.reply({
-content:"🎁 Hadiah berhasil di spawn!",
-ephemeral:true
-})
+message.reply("🎁 10 hadiah berhasil di spawn!")
+
+}
 
 })
 
