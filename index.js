@@ -929,17 +929,24 @@ user:target,
 troll:isTroll
 }
 
-await channel.send(
-`🎁 **HADIAH RAMADHAN**
-
+const embed = new EmbedBuilder()
+.setColor("Gold")
+.setTitle("🎁 HADIAH RAMADHAN")
+.setDescription(`
 ${quote}
 
 ━━━━━━━━━━━━━━━━━━
+
 ⏳ **90 detik**
 
 👉 <@${target}> ketik **ambil**
-`
-)
+`)
+.setFooter({text:"Ramadhan Fest Event"})
+.setTimestamp()
+
+await channel.send({
+embeds:[embed]
+})
 
 /* timer hangus */
 
@@ -947,9 +954,17 @@ hadiahTimeout=setTimeout(async()=>{
 
 if(!hadiahActive) return
 
-await channel.send(
-`⏳ Hadiah untuk <@${hadiahActive.user}> hangus...`
-)
+const embed = new EmbedBuilder()
+.setColor("Red")
+.setTitle("⏳ HADIAH HANGUS")
+.setDescription(`
+Hadiah untuk <@${hadiahActive.user}> tidak diambil.
+
+💨 Hadiah menghilang...
+`)
+.setTimestamp()
+
+await channel.send({embeds:[embed]})
 
 hadiahActive=null
 
@@ -1006,12 +1021,18 @@ await logPoint(message.guild,message.author.id,reward,"Hadiah Ramadhan")
 saveData()
 await updateLeaderboard(message.guild)
 
-await message.reply(
-`🎉 **HADIAH DIAMBIL!**
-
+const embed = new EmbedBuilder()
+.setColor("Green")
+.setTitle("🎉 HADIAH DIAMBIL!")
+.setDescription(`
 👤 <@${message.author.id}>
-💰 +${reward} poin`
-)
+
+💰 **+${reward} poin**
+`)
+.setFooter({text:"Selamat!"})
+.setTimestamp()
+
+await message.reply({embeds:[embed]})
 
 hadiahActive=null
 
