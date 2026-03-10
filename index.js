@@ -191,6 +191,13 @@ user.keywordCooldowns[content] = now + keywordCooldown[content]
 
 saveData()
 
+await logPoint(
+message.guild,
+message.author.id,
+reward,
+"Farm"
+)
+  
 /* ===== RANK CALCULATION ===== */
 
 const sorted = Object.entries(data)
@@ -261,38 +268,87 @@ return array;
 let activeQuiz=null;
 const questions=[
 
-{ question:"Jika ada 3 apel dan kamu mengambil 2 apel, berapa apel yang kamu miliki?", correct:"2", options:["1","2","3","Tidak ada"] },
+{ question:"Siapa yang memiliki cashback tertinggi di leaderboard?", correct:"Hidupp_Jokow111111", options:["Hidupp_Jokow111111","5_atapu","Aca_giofano2","SkylarkGw"] },
 
-{ question:"Seekor ayam memiliki 2 kaki. Jika ada 5 ayam, berapa total kaki ayam?", correct:"10", options:["8","10","12","15"] },
+{ question:"Siapa yang berada di posisi kedua leaderboard cashback?", correct:"5_atapu", options:["5_atapu","SkylarkGw","Aca_giofano2","mgmi_wifssrawrr"] },
 
-{ question:"Jika hari ini hari Senin, dua hari setelah besok adalah hari apa?", correct:"Kamis", options:["Rabu","Kamis","Jumat","Selasa"] },
+{ question:"Siapa yang berada tepat di bawah 5_atapu?", correct:"Aca_giofano2", options:["Aca_giofano2","SkylarkGw","mgmi_wifssrawrr","SierraG60"] },
 
-{ question:"Sebuah mobil memiliki 4 roda. Jika ada 3 mobil, berapa total roda?", correct:"12", options:["8","10","12","16"] },
+{ question:"Berapa cashback yang dimiliki SkylarkGw?", correct:"470", options:["470","450","480","420"] },
 
-{ question:"Jika 1 orang makan 1 roti dalam 1 menit, berapa roti yang dimakan 5 orang dalam 1 menit?", correct:"5", options:["1","3","5","10"] },
+{ question:"Siapa pemain dengan cashback 822?", correct:"5_atapu", options:["5_atapu","Aca_giofano2","SkylarkGw","mgmi_wifssrawrr"] },
 
-{ question:"Jika kamu punya 10 permen lalu memberi 4 kepada teman, berapa sisa permenmu?", correct:"6", options:["4","5","6","7"] },
+{ question:"Siapa pemain dengan cashback 643?", correct:"Aca_giofano2", options:["Aca_giofano2","SkylarkGw","pinxinss","nantacomel"] },
 
-{ question:"Jika sebuah jam menunjukkan pukul 03:00, berapa jam lagi menuju pukul 06:00?", correct:"3", options:["2","3","4","5"] },
+{ question:"Siapa pemain dengan cashback 257?", correct:"mgmi_wifssrawrr", options:["mgmi_wifssrawrr","SierraG60","pinxinss","nantacomel"] },
 
-{ question:"Ada 4 burung di pohon. 1 burung terbang pergi. Berapa burung yang tersisa di pohon?", correct:"3", options:["2","3","4","1"] },
+{ question:"Siapa pemain dengan cashback 222?", correct:"SierraG60", options:["SierraG60","pinxinss","nantacomel","bebe_lack10"] },
 
-{ question:"Jika kamu berlari lomba dan menyalip orang di posisi ke-2, kamu sekarang berada di posisi berapa?", correct:"2", options:["1","2","3","4"] },
+{ question:"Berapa cashback milik pinxinss?", correct:"192", options:["192","182","202","212"] },
 
-{ question:"Jika ada 10 ikan di akuarium dan 2 mati, berapa ikan yang masih ada di akuarium?", correct:"10", options:["8","10","2","0"] },
+{ question:"Siapa yang memiliki cashback 171?", correct:"nantacomel", options:["nantacomel","bebe_lack10","SkylarkGw","SierraG60"] },
 
-{ question:"Jika sebuah segitiga memiliki 3 sisi, berapa sisi yang dimiliki 2 segitiga?", correct:"6", options:["4","5","6","8"] },
+{ question:"Siapa yang memiliki cashback 160?", correct:"bebe_lack10", options:["bebe_lack10","shkayaa","ansello370","SkylarkGw"] },
 
-{ question:"Jika satu minggu ada 7 hari, berapa hari dalam 2 minggu?", correct:"14", options:["12","13","14","15"] },
+{ question:"Siapa yang memiliki cashback 156?", correct:"shkayaa", options:["shkayaa","ansello370","SierraG60","pinxinss"] },
 
-{ question:"Jika kamu memiliki 5 pensil dan membeli 5 lagi, berapa total pensilmu?", correct:"10", options:["8","9","10","11"] },
+{ question:"Siapa yang memiliki cashback 146?", correct:"ansello370", options:["ansello370","SierraG60","SkylarkGw","pinxinss"] },
 
-{ question:"Jika ada 3 kotak dan setiap kotak berisi 2 bola, berapa total bola?", correct:"6", options:["3","4","5","6"] },
+{ question:"Siapa yang memiliki cashback 116?", correct:"Slebeww2663", options:["Slebeww2663","sanitati8308","tatpungz","Moonshineus"] },
 
-{ question:"Jika kamu memotong kue menjadi 4 bagian lalu mengambil 1 bagian, berapa bagian yang tersisa?", correct:"3", options:["1","2","3","4"] }
+{ question:"Siapa yang memiliki cashback 88?", correct:"sanitati8308", options:["sanitati8308","tatpungz","Moonshineus","Macaaaaa123"] },
+
+{ question:"Siapa yang memiliki cashback 81?", correct:"tatpungz", options:["tatpungz","Moonshineus","Macaaaaa123","Wildstorm01246"] },
+
+{ question:"Siapa yang memiliki cashback 51?", correct:"Moonshineus", options:["Moonshineus","Macaaaaa123","Wildstorm01246","colmintzx"] },
+
+{ question:"Siapa yang memiliki cashback 49?", correct:"Macaaaaa123", options:["Macaaaaa123","Wildstorm01246","colmintzx","TheRosebud2014"] },
+
+{ question:"Siapa yang memiliki cashback 43?", correct:"Wildstorm01246", options:["Wildstorm01246","Moonshineus","Macaaaaa123","colmintzx"] },
+
+{ question:"Berapa total cashback yang terlihat di bagian bawah leaderboard?", correct:"4.991", options:["4.991","4.500","5.100","3.980"] },
+
+{ question:"Siapa yang memiliki rank Elite di leaderboard?", correct:"Hidupp_Jokow111111", options:["Hidupp_Jokow111111","SkylarkGw","mgmi_wifssrawrr","pinxinss"] },
+
+{ question:"Siapa yang memiliki rank Investor selain SkylarkGw?", correct:"Aca_giofano2", options:["Aca_giofano2","pinxinss","nantacomel","bebe_lack10"] },
+
+{ question:"Siapa pemain dengan rank Grinder?", correct:"mgmi_wifssrawrr", options:["mgmi_wifssrawrr","SkylarkGw","Aca_giofano2","pinxinss"] },
+
+{ question:"Siapa pemain yang memiliki cashback lebih dari 800?", correct:"5_atapu", options:["5_atapu","Aca_giofano2","SkylarkGw","mgmi_wifssrawrr"] },
+
+{ question:"Siapa pemain yang memiliki cashback lebih dari 600?", correct:"Aca_giofano2", options:["Aca_giofano2","SkylarkGw","mgmi_wifssrawrr","pinxinss"] },
+
+{ question:"Siapa pemain dengan cashback di atas 1000?", correct:"Hidupp_Jokow111111", options:["Hidupp_Jokow111111","5_atapu","Aca_giofano2","SkylarkGw"] },
+
+{ question:"Siapa pemain yang memiliki cashback di bawah 50?", correct:"Wildstorm01246", options:["Wildstorm01246","Moonshineus","Macaaaaa123","sanitati8308"] },
+
+{ question:"Siapa pemain yang berada tepat di atas pinxinss?", correct:"SierraG60", options:["SierraG60","nantacomel","bebe_lack10","SkylarkGw"] },
+
+{ question:"Siapa pemain yang berada tepat di bawah SierraG60?", correct:"pinxinss", options:["pinxinss","nantacomel","bebe_lack10","shkayaa"] },
+
+{ question:"Siapa pemain dengan cashback sekitar 170?", correct:"nantacomel", options:["nantacomel","pinxinss","bebe_lack10","shkayaa"] },
+
+{ question:"Siapa pemain dengan cashback sekitar 150?", correct:"shkayaa", options:["shkayaa","ansello370","bebe_lack10","SierraG60"] },
+
+{ question:"Siapa pemain dengan cashback sekitar 140?", correct:"ansello370", options:["ansello370","SierraG60","pinxinss","nantacomel"] },
+
+{ question:"Siapa pemain dengan cashback sekitar 110?", correct:"Slebeww2663", options:["Slebeww2663","sanitati8308","tatpungz","Moonshineus"] },
+
+{ question:"Siapa pemain dengan cashback sekitar 80?", correct:"tatpungz", options:["tatpungz","Moonshineus","Macaaaaa123","Wildstorm01246"] },
+
+{ question:"Siapa pemain dengan cashback sekitar 50?", correct:"Moonshineus", options:["Moonshineus","Macaaaaa123","Wildstorm01246","colmintzx"] },
+
+{ question:"Siapa pemain yang memiliki cashback paling kecil di daftar?", correct:"Wildstorm01246", options:["Wildstorm01246","Moonshineus","Macaaaaa123","tatpungz"] },
+
+{ question:"Siapa pemain dengan rank Hunter?", correct:"pinxinss", options:["pinxinss","SkylarkGw","Aca_giofano2","Hidupp_Jokow111111"] },
+
+{ question:"Siapa pemain yang berada di posisi ke-4 leaderboard?", correct:"SkylarkGw", options:["SkylarkGw","Aca_giofano2","mgmi_wifssrawrr","pinxinss"] },
+
+{ question:"Siapa pemain yang memiliki cashback lebih dari 200 tapi kurang dari 300?", correct:"mgmi_wifssrawrr", options:["mgmi_wifssrawrr","SierraG60","pinxinss","nantacomel"] },
+
+{ question:"Siapa pemain yang memiliki cashback lebih dari 400 tapi kurang dari 500?", correct:"SkylarkGw", options:["SkylarkGw","Aca_giofano2","5_atapu","mgmi_wifssrawrr"] }
 
 ];
-
 /* ================= SEND QUIZ ================= */
 
 async function sendQuiz(guild){
@@ -356,7 +412,12 @@ firstWinner:null
 
 setTimeout(async()=>{
 
-if(!activeQuiz) return;
+try{
+
+if(!activeQuiz){
+console.log("Quiz expired but already cleared")
+return
+}
 
 await msg.edit({components:[]});
 
@@ -376,7 +437,11 @@ channel.send(result);
 
 activeQuiz=null;
 
-},45*60*1000);
+}catch(err){
+console.error("Quiz result error:",err)
+}
+
+},45*60*1000)
 
 }
 
@@ -986,7 +1051,7 @@ Ketik **ambil**
 `)
 .setColor("Gold")
 
-channel.send({
+await channel.send({
 content:`<@${target}>`,
 embeds:[embed]
 })
@@ -1002,7 +1067,9 @@ hadiahQueue.push(user)
 
 hadiahActive = null
 
+if(!hadiahActive){
 spawnHadiah(guild)
+}
 
 }
 
@@ -1015,11 +1082,12 @@ spawnHadiah(guild)
 client.on("messageCreate",async message=>{
 
 if(message.author.bot) return
+if(message.channel.id !== process.env.HADIAH_CHANNEL_ID) return
 if(!hadiahActive) return
 
-if(message.author.id===hadiahActive.user){
+if(message.author.id !== hadiahActive.user) return
 
-if(message.content.toLowerCase()==="ambil"){
+if(message.content.toLowerCase().trim() !== "ambil") return
 
 const rank = getRank(message.author.id)
 let reward = getReward(rank)
@@ -1034,10 +1102,9 @@ user.points += reward
 await logPoint(message.guild,message.author.id,reward,"Hadiah Ramadhan")
 
 saveData()
-
 await updateLeaderboard(message.guild)
 
-message.channel.send(`
+await message.channel.send(`
 🎉 **HADIAH BERHASIL DIAMBIL!**
 
 👤 Pemenang : <@${message.author.id}>
@@ -1050,10 +1117,6 @@ missCount[message.author.id] = 0
 hadiahQueue.push(message.author.id)
 
 hadiahActive = null
-
-}
-
-}
 
 })
 
