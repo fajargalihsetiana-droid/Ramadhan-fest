@@ -706,17 +706,19 @@ const sorted=Object.entries(raidPlayers)
 
 let result="🎉 **Boss Ramadhan dikalahkan!**\n\n"
 
-sorted.slice(0,10).forEach((p,i)=>{
+for (let i = 0; i < sorted.slice(0,10).length; i++) {
 
-const user=getUser(p[0])
+const p = sorted[i]
 
-let reward=50
+const user = getUser(p[0])
+
+let reward = 50
 
 if(i===0) reward=300
 else if(i===1) reward=200
 else if(i===2) reward=100
 
-user.points+=reward
+user.points += reward
 
 await logPoint(
 guild,
@@ -725,9 +727,9 @@ reward,
 "Boss Raid Reward"
 )
 
-result+=`${i+1}. <@${p[0]}> — ${p[1]} dmg (+${reward} poin)\n`
+result += `${i+1}. <@${p[0]}> — ${p[1]} dmg (+${reward} poin)\n`
 
-})
+}
 
 channel.send(result)
 
