@@ -201,13 +201,10 @@ return message.reply(`⏳ Tunggu ${remain} menit lagi.`)
 
 }
 
-let reward = Math.floor(Math.random()*30) + 40
+let reward = Math.floor(Math.random()*50) + 80
 
 reward = applyGapBalance(message.author.id, reward)
 
-user.points += reward
-
-user.keywordCooldowns[content] = now + keywordCooldown[content]
 if(Math.random() < 0.02){
 
 reward += 500
@@ -218,6 +215,13 @@ message.channel.send(`
 `)
 
 }
+
+user.points += reward
+
+user.keywordCooldowns[content] = now + keywordCooldown[content]
+message.channel.send(`
+🎉 **JACKPOT FARM!**
+
 saveData()
 
 await logPoint(
@@ -525,7 +529,7 @@ if(parseInt(interaction.customId)===activeQuiz.correct){
 
 const user=getUser(interaction.user.id);
 
-let reward=Math.floor(Math.random()*60)+80;
+let reward=Math.floor(Math.random()*80)+120;
 
 const sorted=Object.entries(data)
 .sort((a,b)=>b[1].points-a[1].points);
