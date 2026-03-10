@@ -1064,9 +1064,11 @@ const targets = shuffled.slice(0,10)
 
 for(const user of targets){
 
-await spawnHadiah(guild,user)
+while(hadiahActive){
+  await new Promise(r => setTimeout(r,2000))
+}
 
-await new Promise(r => setTimeout(r,5000))
+await spawnHadiah(guild,user)
 
 }
 
@@ -1081,7 +1083,7 @@ lanjut jam berikutnya.. bye 👋`
 
 }
 
-}, 30000)
+}, 60000)
 
 }
 
