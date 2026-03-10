@@ -1033,28 +1033,28 @@ hadiahActive=null
 
 function startHadiahSchedule(guild){
 
-let lastSpawnHour=null
+let lastSpawnHour = null
 
-setInterval(async()=>{
+setInterval(async () => {
 
 const now = new Date()
 
-let hour = now.getUTCHours()+7
+let hour = now.getUTCHours() + 7
 const minute = now.getUTCMinutes()
 
-if(hour>=24) hour-=24
+if(hour >= 24) hour -= 24
 
-if(hour<6 || hour>22) return
-if(minute!==0) return
-if(lastSpawnHour===hour) return
+if(hour < 6 || hour > 22) return
+if(minute !== 0) return
+if(lastSpawnHour === hour) return
 
-lastSpawnHour=hour
+lastSpawnHour = hour
 
 const members = await guild.members.fetch()
 
 const users = members
-.filter(m=>!m.user.bot)
-.map(m=>m.id)
+.filter(m => !m.user.bot)
+.map(m => m.id)
 
 const shuffled = shuffleUsers(users)
 
@@ -1064,7 +1064,7 @@ for(const user of targets){
 
 await spawnHadiah(guild,user)
 
-await new Promise(r=>setTimeout(r,5000))
+await new Promise(r => setTimeout(r,5000))
 
 }
 
@@ -1079,19 +1079,19 @@ lanjut jam berikutnya.. bye 👋`
 
 }
 
-},30000)
+}, 30000)
 
 }
 
 /* ================= MANUAL SPAWN COMMAND ================= */
 
-client.on("messageCreate",async message=>{
+client.on("messageCreate", async message => {
 
 if(message.author.bot) return
 
-if(message.content==="!hadiah"){
+if(message.content === "!hadiah"){
 
-if(message.author.id!==OWNER_ID){
+if(message.author.id !== OWNER_ID){
 return message.reply("❌ Owner only.")
 }
 
@@ -1100,8 +1100,8 @@ const guild = message.guild
 const members = await guild.members.fetch()
 
 const users = members
-.filter(m=>!m.user.bot)
-.map(m=>m.id)
+.filter(m => !m.user.bot)
+.map(m => m.id)
 
 const shuffled = shuffleUsers(users)
 
@@ -1110,7 +1110,7 @@ const targets = shuffled.slice(0,10)
 for(const user of targets){
 
 while(hadiahActive){
-await new Promise(r=>setTimeout(r,2000))
+await new Promise(r => setTimeout(r,2000))
 }
 
 await spawnHadiah(guild,user)
@@ -1125,7 +1125,7 @@ message.reply("🎁 10 hadiah berhasil di spawn!")
 
 /* ================= START ================= */
 
-client.once("clientReady",async()=>{
+client.once("clientReady", async () => {
 
 const guild = client.guilds.cache.get(process.env.GUILD_ID)
 if(!guild) return
