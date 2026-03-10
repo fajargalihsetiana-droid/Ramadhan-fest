@@ -716,14 +716,6 @@ if(i===0) reward=300
 else if(i===1) reward=200
 else if(i===2) reward=100
 
-const user = getUser(p[0])
-
-let reward=50
-
-if(i===0) reward=300
-else if(i===1) reward=200
-else if(i===2) reward=100
-
 user.points+=reward
 
 await logPoint(
