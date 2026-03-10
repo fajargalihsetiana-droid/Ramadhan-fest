@@ -70,34 +70,50 @@ channel.send({embeds:[embed]});
 
 /* ================= GAP BALANCE ================= */
 
-function applyGapBalance(userId,baseReward){
-
-const sorted=Object.entries(data)
-.sort((a,b)=>b[1].points-a[1].points);
-
-if(sorted.length<3) return baseReward;
-
-const gap=sorted[0][1].points-sorted[2][1].points;
-const rankIndex=sorted.findIndex(e=>e[0]===userId);
-
-if(gap>1500){
-if(rankIndex===0) return Math.floor(baseReward*0.6);
-if(rankIndex===1) return Math.floor(baseReward*0.75);
-if(rankIndex>=2) return Math.floor(baseReward*1.4);
-}
-
-if(gap>800){
-if(rankIndex===0) return Math.floor(baseReward*0.75);
-if(rankIndex===1) return Math.floor(baseReward*0.85);
-if(rankIndex>=2) return Math.floor(baseReward*1.2);
-}
-
-return baseReward;
-
-}
 
 /* ================= LEADERBOARD ================= */
+function applyGapBalance(userId, baseReward){
 
+const sorted = Object.entries(data)
+.sort((a,b)=>b[1].points-a[1].points)
+
+if(!data[userId]) return baseReward
+
+const rankIndex = sorted.findIndex(e=>e[0]===userId)
+
+const topPoints = sorted[0][1].points
+const userPoints = data[userId].points
+
+const gap = topPoints - userPoints
+
+let multiplier = 1
+
+/* ===== RANK BALANCE (TOP 4) ===== */
+
+if(rankIndex === 0) multiplier *= 0.9
+else if(rankIndex === 1) multiplier *= 1
+else if(rankIndex === 2) multiplier *= 1.3
+else multiplier *= 1.5
+
+/* ===== GAP BALANCE ===== */
+
+if(gap > 2000) multiplier *= 1.4
+else if(gap > 1000) multiplier *= 1.2
+else if(gap < 200) multiplier *= 0.9
+
+let reward = Math.floor(baseReward * multiplier)
+
+/* ===== JACKPOT ===== */
+
+if(Math.random() < 0.03){
+
+reward += 500
+
+}
+
+return reward
+
+}
 let leaderboardMessage=null;
 
 async function updateLeaderboard(guild){
@@ -184,11 +200,20 @@ return message.reply(`⏳ Tunggu ${remain} menit lagi.`)
 
 }
 
-let reward = Math.floor(Math.random()*10) + 10
+let reward = Math.floor(Math.random()*30) + 40
 
 user.points += reward
 user.keywordCooldowns[content] = now + keywordCooldown[content]
+if(Math.random() < 0.02){
 
+reward += 500
+
+message.channel.send(`
+🎉 **JACKPOT FARM!**
+<@${message.author.id}> mendapatkan **+500 poin bonus!**
+`)
+
+}
 saveData()
 
 await logPoint(
@@ -496,7 +521,7 @@ if(parseInt(interaction.customId)===activeQuiz.correct){
 
 const user=getUser(interaction.user.id);
 
-let reward=Math.floor(Math.random()*11)+40;
+let reward=Math.floor(Math.random()*30)+40;
 
 const sorted=Object.entries(data)
 .sort((a,b)=>b[1].points-a[1].points);
@@ -790,11 +815,11 @@ const p = sorted[i]
 
 const user = getUser(p[0])
 
-let reward = 50
+let reward = 100
 
-if(i===0) reward=300
-else if(i===1) reward=200
-else if(i===2) reward=100
+if(i===0) reward=400
+else if(i===1) reward=300
+else if(i===2) reward=200
 
 user.points += reward
 
@@ -923,282 +948,5 @@ ephemeral:true
 })
 
 }
-
-})
-
-/* =====================================================
-🎁 HADIAH RAMADHAN
-===================================================== */
-
-let hadiahActive = null
-let hadiahToday = 0
-let hadiahTarget = 7
-
-let hadiahQueue = []
-let missCount = {}
-let calledToday = new Set()
-let lastCalled = null
-
-function shuffleUsers(arr){
-return arr.sort(()=>Math.random()-0.5)
-}
-
-/* ================= TARGET SYSTEM ================= */
-
-function getNextTarget(users){
-
-if(!hadiahQueue.length){
-hadiahQueue = shuffleUsers([...users])
-}
-
-for(let i=0;i<hadiahQueue.length;i++){
-
-const user = hadiahQueue[i]
-
-if(user===lastCalled) continue
-if((missCount[user]||0)>=2) continue
-
-if(!calledToday.has(user)){
-
-hadiahQueue.splice(i,1)
-
-lastCalled = user
-calledToday.add(user)
-
-return user
-
-}
-
-}
-
-for(let i=0;i<hadiahQueue.length;i++){
-
-const user = hadiahQueue[i]
-
-if(user===lastCalled) continue
-if((missCount[user]||0)>=2) continue
-
-hadiahQueue.splice(i,1)
-
-lastCalled = user
-
-return user
-
-}
-
-return null
-
-}
-
-/* ================= RANK ================= */
-
-function getRank(userId){
-
-const sorted = Object.entries(data)
-.sort((a,b)=>b[1].points-a[1].points)
-
-return sorted.findIndex(e=>e[0]===userId)+1
-
-}
-
-/* ================= REWARD ================= */
-
-function getReward(rank){
-
-if(Math.random() < 0.05){
-return 500
-}
-
-if(rank===1) return Math.floor(Math.random()*20)+20
-if(rank===2) return Math.floor(Math.random()*30)+40
-if(rank===3) return Math.floor(Math.random()*40)+70
-if(rank<=5) return Math.floor(Math.random()*60)+100
-if(rank<=10) return Math.floor(Math.random()*90)+150
-
-return Math.floor(Math.random()*150)+220
-
-}
-
-/* ================= SPAWN HADIAH ================= */
-
-async function spawnHadiah(guild){
-
-if(hadiahActive) return
-
-const channel = guild.channels.cache.get(process.env.HADIAH_CHANNEL_ID)
-if(!channel) return
-
-const members = await guild.members.fetch()
-
-const users = members
-.filter(m=>!m.user.bot)
-.map(m=>m.id)
-
-if(!users.length) return
-
-const target = getNextTarget(users)
-if(!target) return
-
-hadiahActive = {
-user:target,
-expire:Date.now()+180000
-}
-
-const embed = new EmbedBuilder()
-.setTitle("🎁 HADIAH POIN RAMADHAN")
-.setDescription(`
-🎉 Hadiah muncul!
-
-<@${target}>
-
-Ketik **ambil**
-
-⏳ Waktu claim: 3 menit
-`)
-.setColor("Gold")
-
-await channel.send({
-content:`<@${target}>`,
-embeds:[embed]
-})
-
-/* timeout hadiah */
-
-setTimeout(()=>{
-
-if(!hadiahActive) return
-
-const user = hadiahActive.user
-
-missCount[user] = (missCount[user]||0)+1
-hadiahQueue.push(user)
-
-hadiahActive = null
-
-spawnHadiah(guild)
-
-},180000)
-
-}
-
-/* ================= CLAIM ================= */
-
-client.on("messageCreate",async message=>{
-
-if(message.author.bot) return
-if(message.channel.id !== process.env.HADIAH_CHANNEL_ID) return
-
-if(!hadiahActive){
-return
-}
-
-if(message.author.id !== hadiahActive.user){
-return
-}
-
-const text = message.content.toLowerCase().trim()
-
-if(!text.startsWith("ambil")) return
-
-const rank = getRank(message.author.id)
-let reward = getReward(rank)
-
-reward = applyRankBalance(message.author.id,reward)
-reward = applyGapBalance(message.author.id,reward)
-
-const user = getUser(message.author.id)
-
-user.points += reward
-
-await logPoint(message.guild,message.author.id,reward,"Hadiah Ramadhan")
-
-saveData()
-await updateLeaderboard(message.guild)
-
-await message.channel.send(`
-🎉 **HADIAH BERHASIL DIAMBIL!**
-
-👤 Pemenang : <@${message.author.id}>
-💰 Hadiah : **${reward} poin**
-
-🔥 Ayo Semangat Kumpulkan Poin!
-`)
-
-missCount[message.author.id] = 0
-hadiahQueue.push(message.author.id)
-
-hadiahActive = null
-
-})
-
-/* ================= COMMAND HADIAH ================= */
-
-client.on("messageCreate", async message => {
-
-if(message.author.bot) return
-if(!message.guild) return
-
-if(message.content === "!hadiah"){
-
-if(message.author.id !== OWNER_ID){
-return message.reply("❌ Command ini hanya untuk owner.")
-}
-
-if(hadiahActive){
-return message.reply("⚠️ Masih ada hadiah aktif.")
-}
-
-await spawnHadiah(message.guild)
-
-message.reply("🎁 Hadiah berhasil di-spawn!")
-
-}
-
-})
-
-/* ================= AUTO SPAWN ================= */
-
-function startHadiahRandom(guild){
-
-setInterval(()=>{
-
-const now = new Date()
-
-if(now.getHours()===0 && now.getMinutes()===0){
-
-hadiahToday = 0
-hadiahTarget = 6 + Math.floor(Math.random()*3)
-
-hadiahQueue = []
-missCount = {}
-calledToday.clear()
-lastCalled = null
-
-}
-
-if(hadiahToday < hadiahTarget){
-
-if(Math.random() < 0.15){
-
-spawnHadiah(guild)
-
-hadiahToday++
-
-}
-
-}
-
-},1800000)
-
-}
-
-/* ================= START ================= */
-
-client.once("clientReady",async()=>{
-
-const guild=client.guilds.cache.get(process.env.GUILD_ID)
-if(!guild) return
-
-startHadiahRandom(guild)
 
 })
