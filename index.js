@@ -259,28 +259,37 @@ return array;
 /* ================= QUIZ ================= */
 
 let activeQuiz=null;
-
 const questions=[
 
-{ question:"Dalam sebuah lomba, empat peserta bernama Ali, Budi, Chandra, dan Dani berdiri berjajar. Ali tidak berada di posisi paling depan maupun paling belakang. Budi berdiri tepat di belakang Chandra. Dani berada di posisi paling depan. Siapakah yang berada di posisi paling belakang?", correct:"Budi", options:["Ali","Budi","Chandra","Dani"] },
+{ question:"Jika ada 3 apel dan kamu mengambil 2 apel, berapa apel yang kamu miliki?", correct:"2", options:["1","2","3","Tidak ada"] },
 
-{ question:"Di sebuah ruangan terdapat empat kotak: merah, biru, hijau, dan kuning. Hanya satu kotak yang berisi hadiah. Kotak merah berkata 'Hadiah ada di kotak biru'. Kotak biru berkata 'Hadiah tidak ada di sini'. Kotak hijau berkata 'Kotak merah berbohong'. Kotak kuning berkata 'Hadiah ada di kotak hijau'. Jika hanya satu pernyataan yang benar, di kotak mana hadiah berada?", correct:"Hijau", options:["Merah","Biru","Hijau","Kuning"] },
+{ question:"Seekor ayam memiliki 2 kaki. Jika ada 5 ayam, berapa total kaki ayam?", correct:"10", options:["8","10","12","15"] },
 
-{ question:"Empat teman duduk melingkar: Rina, Sinta, Tono, dan Dika. Rina tidak duduk di sebelah Sinta. Tono duduk di antara Rina dan Dika. Siapakah yang duduk di sebelah Sinta?", correct:"Dika", options:["Rina","Tono","Dika","Tidak bisa ditentukan"] },
+{ question:"Jika hari ini hari Senin, dua hari setelah besok adalah hari apa?", correct:"Kamis", options:["Rabu","Kamis","Jumat","Selasa"] },
 
-{ question:"Seorang penjaga mengatakan bahwa hanya satu dari tiga orang berikut yang mengatakan kebenaran. Ali berkata: 'Budi berbohong'. Budi berkata: 'Chandra berbohong'. Chandra berkata: 'Ali dan Budi sama-sama berbohong'. Siapakah yang berkata benar?", correct:"Budi", options:["Ali","Budi","Chandra","Tidak ada"] },
+{ question:"Sebuah mobil memiliki 4 roda. Jika ada 3 mobil, berapa total roda?", correct:"12", options:["8","10","12","16"] },
 
-{ question:"Di sebuah desa ada tiga rumah berwarna merah, biru, dan hijau. Andi tidak tinggal di rumah merah. Budi tidak tinggal di rumah biru. Chandra tinggal di sebelah rumah biru. Siapakah yang tinggal di rumah hijau?", correct:"Budi", options:["Andi","Budi","Chandra","Tidak bisa ditentukan"] },
+{ question:"Jika 1 orang makan 1 roti dalam 1 menit, berapa roti yang dimakan 5 orang dalam 1 menit?", correct:"5", options:["1","3","5","10"] },
 
-{ question:"Empat siswa mengikuti lomba cerdas cermat: Dina, Fajar, Gita, dan Hadi. Dina mendapat nilai lebih tinggi dari Fajar. Gita mendapat nilai lebih rendah dari Hadi tetapi lebih tinggi dari Fajar. Siapakah yang kemungkinan mendapat nilai tertinggi?", correct:"Hadi", options:["Dina","Fajar","Gita","Hadi"] },
+{ question:"Jika kamu punya 10 permen lalu memberi 4 kepada teman, berapa sisa permenmu?", correct:"6", options:["4","5","6","7"] },
 
-{ question:"Dalam sebuah antrean terdapat lima orang. Rudi berdiri di depan Seno tetapi di belakang Tika. Budi berdiri paling belakang. Jika Tika bukan yang paling depan, siapakah yang paling depan?", correct:"Rudi", options:["Rudi","Seno","Tika","Budi"] },
+{ question:"Jika sebuah jam menunjukkan pukul 03:00, berapa jam lagi menuju pukul 06:00?", correct:"3", options:["2","3","4","5"] },
 
-{ question:"Empat orang memiliki profesi berbeda: dokter, guru, koki, dan pilot. Ali bukan dokter. Budi bukan guru. Chandra bukan pilot dan bukan koki. Jika Dani adalah dokter, siapakah pilotnya?", correct:"Ali", options:["Ali","Budi","Chandra","Dani"] },
+{ question:"Ada 4 burung di pohon. 1 burung terbang pergi. Berapa burung yang tersisa di pohon?", correct:"3", options:["2","3","4","1"] },
 
-{ question:"Empat teman membawa tas berbeda warna: hitam, putih, merah, dan biru. Tas hitam bukan milik Andi. Tas merah milik orang yang duduk di sebelah Budi. Chandra tidak membawa tas biru. Jika Budi membawa tas putih, siapa yang membawa tas merah?", correct:"Andi", options:["Andi","Budi","Chandra","Dani"] },
+{ question:"Jika kamu berlari lomba dan menyalip orang di posisi ke-2, kamu sekarang berada di posisi berapa?", correct:"2", options:["1","2","3","4"] },
 
-{ question:"Seorang guru berkata kepada muridnya: 'Jika kamu mengatakan kebenaran, kamu akan dihukum. Jika kamu berbohong, kamu juga akan dihukum.' Murid itu kemudian mengatakan sesuatu yang membuat guru tidak bisa menghukumnya. Apa yang kemungkinan ia katakan?", correct:"Saya akan dihukum", options:["Saya akan dihukum","Saya berkata jujur","Saya berbohong","Saya tidak tahu"] }
+{ question:"Jika ada 10 ikan di akuarium dan 2 mati, berapa ikan yang masih ada di akuarium?", correct:"10", options:["8","10","2","0"] },
+
+{ question:"Jika sebuah segitiga memiliki 3 sisi, berapa sisi yang dimiliki 2 segitiga?", correct:"6", options:["4","5","6","8"] },
+
+{ question:"Jika satu minggu ada 7 hari, berapa hari dalam 2 minggu?", correct:"14", options:["12","13","14","15"] },
+
+{ question:"Jika kamu memiliki 5 pensil dan membeli 5 lagi, berapa total pensilmu?", correct:"10", options:["8","9","10","11"] },
+
+{ question:"Jika ada 3 kotak dan setiap kotak berisi 2 bola, berapa total bola?", correct:"6", options:["3","4","5","6"] },
+
+{ question:"Jika kamu memotong kue menjadi 4 bagian lalu mengambil 1 bagian, berapa bagian yang tersisa?", correct:"3", options:["1","2","3","4"] }
 
 ];
 
@@ -409,10 +418,12 @@ if(interaction.isButton() && ["0","1","2","3"].includes(interaction.customId)){
 await interaction.deferReply({ephemeral:true})
 
 if(!activeQuiz)
-return interaction.editreply({content:"⚠️ Soal selesai.",ephemeral:true});
+return interaction.editReply({
+content:"⚠️ Soal selesai."
+});
 
 if(activeQuiz.answered.includes(interaction.user.id))
-return interaction.editreply({content:"❌ Kamu sudah menjawab.",ephemeral:true});
+return interaction.editReply({content:"❌ Kamu sudah menjawab.",ephemeral:true});
 
 activeQuiz.answered.push(interaction.user.id);
 
@@ -451,14 +462,14 @@ await updateLeaderboard(interaction.guild);
 
 await logPoint(interaction.guild,interaction.user.id,reward,"Quiz");
 
-return interaction.editreply({
+return interaction.editReply({
 content:`🔥 Benar!\n✨ +${reward} poin\n🏆 Total: ${user.points}`,
 ephemeral:true
 });
 
 }
 
-return interaction.editreply({content:"❌ Salah!",ephemeral:true});
+return interaction.editReply({content:"❌ Salah!",ephemeral:true});
 
 }
 
@@ -469,7 +480,7 @@ if(!interaction.isChatInputCommand()) return;
 if(interaction.commandName==="addpoin"){
 
 if(interaction.user.id!==OWNER_ID)
-return interaction.editreply({
+return interaction.reply({
 content:"❌ Owner only.",
 ephemeral:true
 });
@@ -492,7 +503,7 @@ amount,
 "Manual add poin"
 );
 
-return interaction.editreply({
+return interaction.reply({
 content:`✅ ${amount} poin berhasil ditambahkan ke ${target}`,
 ephemeral:true
 });
@@ -527,7 +538,7 @@ text += `⏳ **${key.toUpperCase()}** : ${remain} menit lagi\n`;
 text += "\n━━━━━━━━━━━━━━━━━━";
 text += `\n🏆 Total Poin Kamu: **${user.points} poin**`;
 
-return interaction.editreply({
+return interaction.reply({
 content:text,
 ephemeral:true
 });
@@ -538,7 +549,7 @@ if(interaction.commandName==="soal"){
 
 await sendQuiz(interaction.guild);
 
-return interaction.editreply({
+return interaction.reply({
 content:"📢 Quiz dikirim!",
 ephemeral:true
 });
