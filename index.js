@@ -937,7 +937,7 @@ const member = await guild.members.fetch(target)
 
 const quote = list[
 Math.floor(Math.random()*list.length)
-].replace("<@USER>", `<@${member.id}>`)
+].replace("<@USER>", `@${member}`)
 
 hadiahActive={
 user:target,
@@ -955,7 +955,7 @@ ${quote}
 
 ⏳ **90 detik**
 
-👉 ${member} ketik **ambil**
+👉 ${member.displayName} ketik **ambil**
 `)
 .setFooter({text:"Ramadhan Fest Event"})
 .setTimestamp()
