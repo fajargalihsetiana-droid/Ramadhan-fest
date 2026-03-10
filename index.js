@@ -163,40 +163,82 @@ tadarus:50*60*1000,
 sedekah:60*60*1000
 };
 
-client.on("messageCreate",async message=>{
+client.on("messageCreate", async message => {
 
-if(message.author.bot) return;
-if(message.channel.id!==process.env.KEYWORD_CHANNEL_ID) return;
+if(message.author.bot) return
+if(message.channel.id !== process.env.KEYWORD_CHANNEL_ID) return
 
-const content=message.content.toLowerCase().trim();
-if(!keywordCooldown[content]) return;
+const content = message.content.toLowerCase().trim()
 
-const user=getUser(message.author.id);
-const now=Date.now();
+if(!keywordCooldown[content]) return
 
-if(now<(user.keywordCooldowns[content]||0)){
+const user = getUser(message.author.id)
 
-const remain=Math.ceil((user.keywordCooldowns[content]-now)/60000);
-return message.reply(`⏳ Tunggu ${remain} menit lagi.`);
+const now = Date.now()
+
+if(now < (user.keywordCooldowns[content] || 0)){
+
+const remain = Math.ceil((user.keywordCooldowns[content] - now) / 60000)
+
+return message.reply(`⏳ Tunggu ${remain} menit lagi.`)
 
 }
 
-let reward=Math.floor(Math.random()*10)+10;
+let reward = Math.floor(Math.random()*10) + 10
 
-reward=applyGapBalance(message.author.id,reward);
+user.points += reward
+user.keywordCooldowns[content] = now + keywordCooldown[content]
 
-user.points+=reward;
-user.keywordCooldowns[content]=now+keywordCooldown[content];
+saveData()
 
-saveData();
+/* ===== RANK CALCULATION ===== */
 
-await updateLeaderboard(message.guild);
+const sorted = Object.entries(data)
+.sort((a,b)=>b[1].points-a[1].points)
 
-await logPoint(message.guild,message.author.id,reward,"Keyword Ramadhan");
+const rank = sorted.findIndex(e=>e[0]===message.author.id) + 1
 
-message.channel.send(`✨ +${reward} poin\n🏆 Total: ${user.points} poin`);
+const topPoints = sorted[0][1].points
 
-});
+const gap = topPoints - user.points
+
+let gapText = ""
+
+if(rank === 1){
+
+gapText = "👑 Kamu sedang memimpin leaderboard!"
+
+}else{
+
+gapText = `📉 ${gap} poin lagi untuk mengejar rank #1`
+
+}
+
+/* ===== EMBED ===== */
+
+const embed = new EmbedBuilder()
+
+.setColor("Gold")
+
+.setDescription(
+`✨ **+${reward} poin**
+
+🏆 **Total: ${user.points} poin**
+📊 **Rank: #${rank}**
+
+${gapText}`
+)
+
+.setFooter({
+text: message.author.username,
+iconURL: message.author.displayAvatarURL({dynamic:true})
+})
+
+message.channel.send({embeds:[embed]})
+
+await updateLeaderboard(message.guild)
+
+})
 
 /* ================= SHUFFLE ================= */
 
@@ -674,7 +716,22 @@ if(i===0) reward=300
 else if(i===1) reward=200
 else if(i===2) reward=100
 
+const user = getUser(p[0])
+
+let reward=50
+
+if(i===0) reward=300
+else if(i===1) reward=200
+else if(i===2) reward=100
+
 user.points+=reward
+
+await logPoint(
+guild,
+p[0],
+reward,
+"Boss Raid Reward"
+)
 
 result+=`${i+1}. <@${p[0]}> — ${p[1]} dmg (+${reward} poin)\n`
 
@@ -758,7 +815,7 @@ const minute = now.getUTCMinutes()
 
 if(hour>=24) hour-=24
 
-if(minute !== 0) return
+if(minute !== 1) return
 
 if([9,15,21].includes(hour)){
 
@@ -883,7 +940,7 @@ const list = isTroll ? trollQuotes : hadiahQuotes
 
 const quote = list[
 Math.floor(Math.random() * list.length)
-].replace("USER",target)
+].replace("<@USER>",`<@${target}>`)
 
 hadiahActive = {
 user:target,
@@ -936,7 +993,10 @@ const remain = hadiahActive.expire - Date.now()
 
 if(remain<=0){
 
-await hadiahMessage.edit({components:[]})
+await hadiahMessage.edit({
+content:`⏳ Hadiah untuk <@${hadiahActive.user}> hangus...`,
+components:[]
+})
 
 hadiahActive=null
 
@@ -964,7 +1024,7 @@ await hadiahMessage.edit({embeds:[newEmbed]})
 
 setTimeout(()=>{
 hadiahTimer(embed,quote)
-},1000)
+},5vv000)
 
 }
 
@@ -1049,7 +1109,7 @@ const minute = now.getUTCMinutes()
 if(hour >= 24) hour -= 24
 
 if(hour < 6 || hour > 22) return
-if(minute !== 0) return
+if(minute !== 2) return
 if(lastSpawnHour === hour) return
 
 lastSpawnHour = hour
@@ -1066,11 +1126,12 @@ const targets = shuffled.slice(0,10)
 
 for(const user of targets){
 
-while(hadiahActive){
-  await new Promise(r => setTimeout(r,2000))
-}
-
 await spawnHadiah(guild,user)
+
+/* tunggu hadiah selesai (claim / expire) */
+while(hadiahActive){
+await new Promise(r => setTimeout(r,1000))
+}
 
 }
 
