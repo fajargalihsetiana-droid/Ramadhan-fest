@@ -377,32 +377,28 @@ activeQuiz=null;
 
 function startAutoQuizSystem(guild){
 
-function scheduleNext(){
+let lastQuizHour = null
 
-const now=new Date();
+setInterval(async()=>{
 
-const next=new Date(now);
+const now = new Date()
 
-next.setMinutes(0);
-next.setSeconds(0);
-next.setMilliseconds(0);
-next.setHours(next.getHours()+1);
+const minute = now.getMinutes()
+const hour = now.getHours()
 
-const delay=next-now;
+if(minute !== 0) return
 
-setTimeout(async()=>{
+if(lastQuizHour === hour) return
+
+lastQuizHour = hour
 
 if(!activeQuiz){
-await sendQuiz(guild);
-}
 
-scheduleNext();
-
-},delay);
+await sendQuiz(guild)
 
 }
 
-scheduleNext();
+},30000)
 
 }
 
@@ -795,20 +791,31 @@ safeUpdate()
 
 function startBossSchedule(guild){
 
+let lastSpawn = null
+
 setInterval(()=>{
 
-const now=new Date()
+const now = new Date()
 
-let hour=now.getUTCHours()+7
-const minute=now.getUTCMinutes()
+let hour = now.getUTCHours()+7
+const minute = now.getUTCMinutes()
 
 if(hour>=24) hour-=24
 
-if(hour===15 && minute<=1) spawnRaid(guild)
-if(hour===18 && minute<=1) spawnRaid(guild)
-if(hour===21 && minute<=1) spawnRaid(guild)
+if(minute !== 0) return
 
-},60000)
+if([9,15,21].includes(hour)){
+
+if(lastSpawn !== hour){
+
+spawnRaid(guild)
+lastSpawn = hour
+
+}
+
+}
+
+},30000)
 
 }
 
