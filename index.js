@@ -103,8 +103,6 @@ else if(gap < 2000) multiplier *= 2
 else if(gap < 4000) multiplier *= 3
 else multiplier *= 1.5
 
-}
-
 let reward = Math.floor(baseReward * multiplier)
 
 return reward
