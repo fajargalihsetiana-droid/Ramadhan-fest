@@ -95,15 +95,17 @@ else multiplier *= 1.5
 
 /* ===== GAP BALANCE ===== */
 
-/* ===== GAP BALANCE ===== */
+if(rankIndex !== 0){
 
-if(gap < 100) multiplier *= 0.7
-else if(gap < 300) multiplier *= 0.8
-else if(gap < 600) multiplier *= 0.9
-else if(gap < 1000) multiplier *= 1
-else if(gap < 2000) multiplier *= 1.15
-else if(gap < 4000) multiplier *= 1.3
+if(gap < 100) multiplier *= 0.9
+else if(gap < 300) multiplier *= 1
+else if(gap < 600) multiplier *= 1.2
+else if(gap < 1000) multiplier *= 1.3
+else if(gap < 2000) multiplier *= 2
+else if(gap < 4000) multiplier *= 3
 else multiplier *= 1.5
+
+}
 
 let reward = Math.floor(baseReward * multiplier)
 
@@ -212,7 +214,7 @@ let reward=Math.floor(Math.random()*40)+90
 
 reward = applyGapBalance(message.author.id,reward)
 
-if(Math.random()<0.02){
+if(Math.random()<0.05){
 reward+=500
 message.channel.send(`🎉 JACKPOT +500 poin`)
 }
