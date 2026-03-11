@@ -824,4 +824,96 @@ if(!raidBoss) return
 
 const now=Date.now()
 
-if(attackCo
+if(attackCooldown[interaction.user.id] && now<attackCooldown[interaction.user.id]){
+
+const wait=Math.ceil((attackCooldown[interaction.user.id]-now)/1000)
+
+return interaction.reply({
+content:`⏳ Tunggu ${wait} detik sebelum menyerang lagi`,
+ephemeral:true
+})
+
+}
+
+attackCooldown[interaction.user.id]=now+3000
+
+await interaction.deferUpdate()
+
+const dmg=Math.floor(Math.random()*50)+30
+
+raidBoss.hp-=dmg
+
+if(!raidPlayers[interaction.user.id])
+raidPlayers[interaction.user.id]=0
+
+raidPlayers[interaction.user.id]+=dmg
+
+if(raidBoss.hp<=0){
+
+raidBoss.hp=0
+
+await updateRaid()
+
+await raidDead(interaction.guild)
+
+return
+
+}
+
+safeUpdate()
+
+})
+
+/* ================= AUTO SPAWN ================= */
+
+function startBossSchedule(guild){
+
+let lastSpawn = null
+
+setInterval(()=>{
+
+const now = new Date()
+
+let hour = now.getUTCHours()+7
+const minute = now.getUTCMinutes()
+
+if(hour>=24) hour-=24
+
+if(minute > 2) return
+
+if([9,15,21].includes(hour)){
+
+if(lastSpawn !== hour){
+
+spawnRaid(guild)
+lastSpawn = hour
+
+}
+
+}
+
+},60000)
+
+}
+
+/* ================= MANUAL COMMAND ================= */
+
+client.on("interactionCreate",async interaction=>{
+
+if(!interaction.isChatInputCommand()) return
+
+if(interaction.commandName==="spawnboss"){
+
+if(interaction.user.id!==OWNER_ID)
+return interaction.reply({content:"Owner only.",ephemeral:true})
+
+spawnRaid(interaction.guild)
+
+interaction.reply({
+content:"🐉 Boss berhasil di-spawn!",
+ephemeral:true
+})
+
+}
+
+})
