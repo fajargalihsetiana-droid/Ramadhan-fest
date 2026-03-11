@@ -1,4 +1,4 @@
-require("dotenv").config();
+2require("dotenv").config();
 const {
 Client,
 GatewayIntentBits,
@@ -95,9 +95,15 @@ else multiplier *= 1.5
 
 /* ===== GAP BALANCE ===== */
 
-if(gap > 2000) multiplier *= 1.4
-else if(gap > 1000) multiplier *= 1.2
-else if(gap < 200) multiplier *= 0.9
+/* ===== GAP BALANCE ===== */
+
+if(gap < 100) multiplier *= 0.7
+else if(gap < 300) multiplier *= 0.8
+else if(gap < 600) multiplier *= 0.9
+else if(gap < 1000) multiplier *= 1
+else if(gap < 2000) multiplier *= 1.15
+else if(gap < 4000) multiplier *= 1.3
+else multiplier *= 1.5
 
 let reward = Math.floor(baseReward * multiplier)
 
@@ -271,85 +277,35 @@ await updateLeaderboard(message.guild)
 let activeQuiz=null;
 const questions=[
 
-{ question:"Siapa yang memiliki cashback tertinggi di leaderboard?", correct:"Hidupp_Jokow111111", options:["Hidupp_Jokow111111","5_atapu","Aca_giofano2","SkylarkGw"] },
+{ question:"Di bulan Ramadhan, umat Islam menahan lapar dan haus sejak terbit fajar hingga terbenam matahari. Ibadah ini disebut apa?", correct:"Puasa", options:["Puasa","Zakat","Haji","Sedekah"] },
 
-{ question:"Siapa yang berada di posisi kedua leaderboard cashback?", correct:"5_atapu", options:["5_atapu","SkylarkGw","Aca_giofano2","mgmi_wifssrawrr"] },
+{ question:"Setelah seharian berpuasa, umat Islam biasanya membatalkan puasa saat matahari terbenam. Kegiatan ini disebut apa?", correct:"Berbuka puasa", options:["Tarawih","Berbuka puasa","Tadarus","Sahur"] },
 
-{ question:"Siapa yang berada tepat di bawah 5_atapu?", correct:"Aca_giofano2", options:["Aca_giofano2","SkylarkGw","mgmi_wifssrawrr","SierraG60"] },
+{ question:"Makan sebelum waktu subuh untuk mempersiapkan puasa disebut apa?", correct:"Sahur", options:["Sahur","Buka","Tarawih","Sedekah"] },
 
-{ question:"Berapa cashback yang dimiliki SkylarkGw?", correct:"470", options:["470","450","480","420"] },
+{ question:"Sholat sunnah yang biasanya dilakukan pada malam hari di bulan Ramadhan disebut apa?", correct:"Tarawih", options:["Tarawih","Tahajud","Dhuha","Witir"] },
 
-{ question:"Siapa pemain dengan cashback 822?", correct:"5_atapu", options:["5_atapu","Aca_giofano2","SkylarkGw","mgmi_wifssrawrr"] },
+{ question:"Membaca Al-Qur'an selama bulan Ramadhan sering disebut dengan kegiatan apa?", correct:"Tadarus", options:["Tadarus","Tilawah","Kajian","Dzikir"] },
 
-{ question:"Siapa pemain dengan cashback 643?", correct:"Aca_giofano2", options:["Aca_giofano2","SkylarkGw","pinxinss","nantacomel"] },
+{ question:"Malam yang dipercaya lebih baik dari seribu bulan di bulan Ramadhan disebut malam apa?", correct:"Lailatul Qadar", options:["Lailatul Qadar","Malam Nisfu Syaban","Malam Jumat","Malam Isra"] },
 
-{ question:"Siapa pemain dengan cashback 257?", correct:"mgmi_wifssrawrr", options:["mgmi_wifssrawrr","SierraG60","pinxinss","nantacomel"] },
+{ question:"Hari raya yang dirayakan setelah selesai menjalankan puasa Ramadhan disebut apa?", correct:"Idul Fitri", options:["Idul Fitri","Idul Adha","Maulid Nabi","Isra Mi'raj"] },
 
-{ question:"Siapa pemain dengan cashback 222?", correct:"SierraG60", options:["SierraG60","pinxinss","nantacomel","bebe_lack10"] },
+{ question:"Kegiatan berbagi kepada orang yang membutuhkan dalam Islam disebut apa?", correct:"Sedekah", options:["Sedekah","Puasa","Sholat","Zakat"] },
 
-{ question:"Berapa cashback milik pinxinss?", correct:"192", options:["192","182","202","212"] },
+{ question:"Sholat yang dilakukan setelah sholat Isya di bulan Ramadhan disebut apa?", correct:"Tarawih", options:["Tarawih","Tahajud","Witir","Dhuha"] },
 
-{ question:"Siapa yang memiliki cashback 171?", correct:"nantacomel", options:["nantacomel","bebe_lack10","SkylarkGw","SierraG60"] },
+{ question:"Waktu imsak biasanya menandakan apa dalam puasa?", correct:"Batas akhir sahur", options:["Waktu berbuka","Batas akhir sahur","Waktu sholat dzuhur","Waktu tarawih"] },
 
-{ question:"Siapa yang memiliki cashback 160?", correct:"bebe_lack10", options:["bebe_lack10","shkayaa","ansello370","SkylarkGw"] },
+{ question:"Bulan Ramadhan adalah bulan ke berapa dalam kalender Hijriyah?", correct:"9", options:["7","8","9","10"] },
 
-{ question:"Siapa yang memiliki cashback 156?", correct:"shkayaa", options:["shkayaa","ansello370","SierraG60","pinxinss"] },
+{ question:"Selain menahan lapar dan haus, puasa juga mengajarkan umat Islam untuk menahan apa?", correct:"Hawa nafsu", options:["Tidur","Hawa nafsu","Belajar","Olahraga"] },
 
-{ question:"Siapa yang memiliki cashback 146?", correct:"ansello370", options:["ansello370","SierraG60","SkylarkGw","pinxinss"] },
+{ question:"Tradisi membangunkan orang sahur di beberapa daerah biasanya dilakukan dengan apa?", correct:"Bedug atau kentongan", options:["Bedug atau kentongan","Peluit","Radio","Bel sekolah"] },
 
-{ question:"Siapa yang memiliki cashback 116?", correct:"Slebeww2663", options:["Slebeww2663","sanitati8308","tatpungz","Moonshineus"] },
+{ question:"Salah satu amalan yang dianjurkan saat Ramadhan adalah memperbanyak apa?", correct:"Ibadah", options:["Ibadah","Tidur","Liburan","Game"] },
 
-{ question:"Siapa yang memiliki cashback 88?", correct:"sanitati8308", options:["sanitati8308","tatpungz","Moonshineus","Macaaaaa123"] },
-
-{ question:"Siapa yang memiliki cashback 81?", correct:"tatpungz", options:["tatpungz","Moonshineus","Macaaaaa123","Wildstorm01246"] },
-
-{ question:"Siapa yang memiliki cashback 51?", correct:"Moonshineus", options:["Moonshineus","Macaaaaa123","Wildstorm01246","colmintzx"] },
-
-{ question:"Siapa yang memiliki cashback 49?", correct:"Macaaaaa123", options:["Macaaaaa123","Wildstorm01246","colmintzx","TheRosebud2014"] },
-
-{ question:"Siapa yang memiliki cashback 43?", correct:"Wildstorm01246", options:["Wildstorm01246","Moonshineus","Macaaaaa123","colmintzx"] },
-
-{ question:"Berapa total cashback yang terlihat di bagian bawah leaderboard?", correct:"4.991", options:["4.991","4.500","5.100","3.980"] },
-
-{ question:"Siapa yang memiliki rank Elite di leaderboard?", correct:"Hidupp_Jokow111111", options:["Hidupp_Jokow111111","SkylarkGw","mgmi_wifssrawrr","pinxinss"] },
-
-{ question:"Siapa yang memiliki rank Investor selain SkylarkGw?", correct:"Aca_giofano2", options:["Aca_giofano2","pinxinss","nantacomel","bebe_lack10"] },
-
-{ question:"Siapa pemain dengan rank Grinder?", correct:"mgmi_wifssrawrr", options:["mgmi_wifssrawrr","SkylarkGw","Aca_giofano2","pinxinss"] },
-
-{ question:"Siapa pemain yang memiliki cashback lebih dari 800?", correct:"5_atapu", options:["5_atapu","Aca_giofano2","SkylarkGw","mgmi_wifssrawrr"] },
-
-{ question:"Siapa pemain yang memiliki cashback lebih dari 600?", correct:"Aca_giofano2", options:["Aca_giofano2","SkylarkGw","mgmi_wifssrawrr","pinxinss"] },
-
-{ question:"Siapa pemain dengan cashback di atas 1000?", correct:"Hidupp_Jokow111111", options:["Hidupp_Jokow111111","5_atapu","Aca_giofano2","SkylarkGw"] },
-
-{ question:"Siapa pemain yang memiliki cashback di bawah 50?", correct:"Wildstorm01246", options:["Wildstorm01246","Moonshineus","Macaaaaa123","sanitati8308"] },
-
-{ question:"Siapa pemain yang berada tepat di atas pinxinss?", correct:"SierraG60", options:["SierraG60","nantacomel","bebe_lack10","SkylarkGw"] },
-
-{ question:"Siapa pemain yang berada tepat di bawah SierraG60?", correct:"pinxinss", options:["pinxinss","nantacomel","bebe_lack10","shkayaa"] },
-
-{ question:"Siapa pemain dengan cashback sekitar 170?", correct:"nantacomel", options:["nantacomel","pinxinss","bebe_lack10","shkayaa"] },
-
-{ question:"Siapa pemain dengan cashback sekitar 150?", correct:"shkayaa", options:["shkayaa","ansello370","bebe_lack10","SierraG60"] },
-
-{ question:"Siapa pemain dengan cashback sekitar 140?", correct:"ansello370", options:["ansello370","SierraG60","pinxinss","nantacomel"] },
-
-{ question:"Siapa pemain dengan cashback sekitar 110?", correct:"Slebeww2663", options:["Slebeww2663","sanitati8308","tatpungz","Moonshineus"] },
-
-{ question:"Siapa pemain dengan cashback sekitar 80?", correct:"tatpungz", options:["tatpungz","Moonshineus","Macaaaaa123","Wildstorm01246"] },
-
-{ question:"Siapa pemain dengan cashback sekitar 50?", correct:"Moonshineus", options:["Moonshineus","Macaaaaa123","Wildstorm01246","colmintzx"] },
-
-{ question:"Siapa pemain yang memiliki cashback paling kecil di daftar?", correct:"Wildstorm01246", options:["Wildstorm01246","Moonshineus","Macaaaaa123","tatpungz"] },
-
-{ question:"Siapa pemain dengan rank Hunter?", correct:"pinxinss", options:["pinxinss","SkylarkGw","Aca_giofano2","Hidupp_Jokow111111"] },
-
-{ question:"Siapa pemain yang berada di posisi ke-4 leaderboard?", correct:"SkylarkGw", options:["SkylarkGw","Aca_giofano2","mgmi_wifssrawrr","pinxinss"] },
-
-{ question:"Siapa pemain yang memiliki cashback lebih dari 200 tapi kurang dari 300?", correct:"mgmi_wifssrawrr", options:["mgmi_wifssrawrr","SierraG60","pinxinss","nantacomel"] },
-
-{ question:"Siapa pemain yang memiliki cashback lebih dari 400 tapi kurang dari 500?", correct:"SkylarkGw", options:["SkylarkGw","Aca_giofano2","5_atapu","mgmi_wifssrawrr"] }
+{ question:"Saat Ramadhan banyak orang berbagi makanan untuk berbuka bersama. Tradisi ini sering disebut apa?", correct:"Buka bersama", options:["Buka bersama","Sahur bersama","Tarawih bersama","Tadarus bersama"] }
 
 ];
 /* ================= SEND QUIZ ================= */
@@ -382,7 +338,6 @@ const embed = new EmbedBuilder()
 
 `⏳ **Waktu menjawab: 45 menit**\n`+
 `🔥 **Jawaban pertama = 2x poin!**\n`+
-`⚡ **Rank 3+ bonus poin**\n`+
 `🏆 **Kejar leaderboard sekarang!**`
 )
 .setColor("Gold")
@@ -499,23 +454,12 @@ if(parseInt(interaction.customId)===activeQuiz.correct){
 
 const user=getUser(interaction.user.id);
 
-let reward=Math.floor(Math.random()*80)+120;
-
-const sorted=Object.entries(data)
-.sort((a,b)=>b[1].points-a[1].points);
-
-const rankIndex=sorted.findIndex(e=>e[0]===interaction.user.id);
-
-if(rankIndex>=2){
-reward=Math.floor(reward*1.7);
-}
+let reward = 150;
 
 if(!activeQuiz.firstWinner){
 reward*=2;
 activeQuiz.firstWinner=interaction.user.id;
 }
-
-reward=applyGapBalance(interaction.user.id,reward);
 
 user.points+=reward;
 
