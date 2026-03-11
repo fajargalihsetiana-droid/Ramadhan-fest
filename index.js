@@ -204,6 +204,8 @@ return message.reply(`⏳ Tunggu ${remain} menit lagi.`)
 
 let reward=Math.floor(Math.random()*40)+90
 
+reward = applyGapBalance(message.author.id,reward)
+
 if(Math.random()<0.02){
 reward+=500
 message.channel.send(`🎉 JACKPOT +500 poin`)
