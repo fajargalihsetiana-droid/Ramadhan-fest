@@ -1240,3 +1240,144 @@ Farm, Quiz, dan Boss sudah aktif kembali!
 }
 
 })
+
+/* =====================================================
+🌙 RAMADHAN FEST COUNTDOWN FINAL
+===================================================== */
+
+const LEBARAN_DATE = new Date("2026-03-20T00:00:00+07:00")
+
+function getCountdownText(){
+
+const now = new Date()
+
+const diff = LEBARAN_DATE - now
+
+const days = Math.ceil(diff / (1000*60*60*24))
+
+if(days > 7){
+
+return `🌙 **RAMADHAN FEST COUNTDOWN**
+
+Sisa **${days} hari** menuju Lebaran
+dan penutupan **Ramadhan Fest!**
+
+🏆 Leaderboard masih bisa berubah
+⚔️ Boss masih bisa dikalahkan
+🧠 Quiz masih bisa dimenangkan
+
+Ayo kejar posisi terbaik!`
+}
+
+if(days <= 7 && days > 3){
+
+return `🔥 **FINAL WEEK RAMADHAN FEST**
+
+Sisa **${days} hari** menuju penutupan event!
+
+Leaderboard masih bisa berubah
+Boss semakin brutal
+Quiz semakin menentukan!
+
+Jangan sampai kehilangan posisi!`
+}
+
+if(days <= 3 && days > 1){
+
+return `⚡ **FINAL COUNTDOWN**
+
+Hanya **${days} hari lagi** menuju penutupan Ramadhan Fest!
+
+Setiap poin sangat berarti sekarang!
+
+⚔️ Raid Boss
+🧠 Quiz
+🌾 Farm
+
+Semua masih bisa mengubah leaderboard!`
+}
+
+if(days === 1){
+
+return `👑 **HARI TERAKHIR RAMADHAN FEST**
+
+Ini kesempatan terakhir
+untuk mengubah leaderboard!
+
+Boss terakhir akan segera muncul...
+
+Jangan sampai menyesal!`
+}
+
+if(days <= 0){
+
+return `🎉 **RAMADHAN FEST RESMI BERAKHIR**
+
+Selamat kepada para juara!
+
+Terima kasih kepada semua
+yang telah berpartisipasi dalam event ini.
+
+Sampai jumpa di event berikutnya!`
+}
+
+}
+
+/* ================= AUTO 00:00 WIB ================= */
+
+function startCountdown(guild){
+
+let lastDay = null
+
+setInterval(()=>{
+
+const now = new Date()
+
+let hour = now.getUTCHours() + 7
+const minute = now.getUTCMinutes()
+
+if(hour >= 24) hour -= 24
+
+if(hour !== 0 || minute !== 0) return
+
+const today = now.getDate()
+
+if(lastDay === today) return
+
+lastDay = today
+
+const channel = guild.channels.cache.get(process.env.LEADERBOARD_CHANNEL_ID)
+
+if(!channel) return
+
+channel.send(getCountdownText())
+
+},60000)
+
+}
+
+/* ================= COMMAND MANUAL ================= */
+
+client.on("messageCreate",async message=>{
+
+if(message.author.bot) return
+
+if(message.content === "!countdown"){
+
+message.channel.send(getCountdownText())
+
+}
+
+})
+
+/* ================= START SYSTEM ================= */
+
+client.on("clientReady",()=>{
+
+const guild = client.guilds.cache.get(process.env.GUILD_ID)
+
+if(!guild) return
+
+startCountdown(guild)
+
+})
