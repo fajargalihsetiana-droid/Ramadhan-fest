@@ -1381,3 +1381,62 @@ if(!guild) return
 startCountdown(guild)
 
 })
+
+/* =====================================================
+📢 RAMADHAN FEST ANNOUNCEMENT SYSTEM
+===================================================== */
+
+client.on("messageCreate", async message => {
+
+if(message.author.bot) return
+
+if(!message.content.startsWith("!announce")) return
+
+if(message.author.id !== OWNER_ID)
+return message.reply("❌ Hanya owner yang bisa menggunakan command ini.")
+
+const args = message.content.split(" ")
+
+if(!args[1]) 
+return message.reply("Gunakan format:\n`!announce #channel pesan`")
+
+/* ===== CHANNEL TUJUAN ===== */
+
+const channel = message.mentions.channels.first()
+
+if(!channel)
+return message.reply("Tag channel tujuan.\nContoh: `!announce #general pesan`")
+
+/* ===== AMBIL PESAN ===== */
+
+const text = message.content
+.replace("!announce","")
+.replace(`<#${channel.id}>`,"")
+.trim()
+
+if(!text) 
+return message.reply("Tulis pesan pengumuman.")
+
+/* ===== EMBED ===== */
+
+const embed = new EmbedBuilder()
+
+.setTitle("📢 PENGUMUMAN RAMADHAN FEST")
+
+.setDescription(text)
+
+.setColor("Gold")
+
+.setFooter({
+text:"Ramadhan Fest Official System"
+})
+
+.setTimestamp()
+
+/* ===== KIRIM ===== */
+
+channel.send({embeds:[embed]})
+
+message.react("✅")
+
+})
