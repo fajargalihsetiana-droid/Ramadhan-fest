@@ -665,7 +665,7 @@ let raidMessage=null
 let raidPlayers={}
 let attackCooldown={}
 
-const RAID_HP=4000
+const RAID_HP=8000
 
 let updatePending=false
 
@@ -1436,6 +1436,48 @@ text:"Ramadhan Fest Official System"
 /* ===== KIRIM ===== */
 
 channel.send({embeds:[embed]})
+
+message.react("✅")
+
+})
+
+/* =====================================================
+📢 RAMADHAN FEST FORWARD IMAGE ANNOUNCEMENT
+===================================================== */
+
+client.on("messageCreate", async message => {
+
+if(message.author.bot) return
+if(!message.content.startsWith("!send")) return
+
+if(message.author.id !== OWNER_ID)
+return message.reply("❌ Owner only.")
+
+const channel = message.mentions.channels.first()
+
+if(!channel)
+return message.reply("Format:\n!send #channel pesan")
+
+/* ambil pesan */
+
+const text = message.content
+.replace("!send","")
+.replace(`<#${channel.id}>`,"")
+.trim()
+
+/* ambil gambar */
+
+const attachment = message.attachments.first()
+
+if(!attachment)
+return message.reply("Lampirkan gambar.")
+
+/* kirim */
+
+channel.send({
+content:text,
+files:[attachment.url]
+})
 
 message.react("✅")
 
