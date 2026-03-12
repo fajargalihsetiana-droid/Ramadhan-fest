@@ -939,3 +939,256 @@ ephemeral:true
 }
 
 })
+
+/* =====================================================
+🌙 RAMADHAN FEST LIBUR SYSTEM FINAL
+===================================================== */
+
+let eventPaused = false
+let pauseEnd = 0
+
+let voteActive = false
+let voteYes = []
+let voteNo = []
+let lastVoteTime = 0
+
+/* ================= FORMAT WAKTU ================= */
+
+function formatTime(ms){
+
+const totalMinutes = Math.ceil(ms/60000)
+
+const hours = Math.floor(totalMinutes/60)
+const minutes = totalMinutes % 60
+
+return `${hours} jam ${minutes} menit`
+
+}
+
+/* ================= CEK EVENT LIBUR ================= */
+
+function isEventPaused(){
+
+if(!eventPaused) return false
+
+if(Date.now() > pauseEnd){
+
+eventPaused = false
+return false
+
+}
+
+return true
+
+}
+
+/* ================= BLOCK QUIZ ================= */
+
+const originalSendQuiz = sendQuiz
+
+sendQuiz = async function(guild){
+
+if(isEventPaused()) return
+
+return originalSendQuiz(guild)
+
+}
+
+/* ================= BLOCK BOSS ================= */
+
+const originalSpawnRaid = spawnRaid
+
+spawnRaid = async function(guild){
+
+if(isEventPaused()) return
+
+return originalSpawnRaid(guild)
+
+}
+
+/* ================= BLOCK FARM ================= */
+
+client.on("messageCreate",async message=>{
+
+if(message.author.bot) return
+
+if(!isEventPaused()) return
+
+if(message.channel.id !== process.env.KEYWORD_CHANNEL_ID) return
+
+const remain = pauseEnd - Date.now()
+
+message.reply(`🌙 Ramadhan Fest sedang libur\nEvent kembali aktif dalam: **${formatTime(remain)}**`)
+
+})
+
+/* ================= COMMAND VOTE ================= */
+
+client.on("messageCreate",async message=>{
+
+if(message.author.bot) return
+
+if(message.content !== "!votelibur") return
+
+const now = Date.now()
+
+/* ===== COOLDOWN 1 JAM ===== */
+
+if(now - lastVoteTime < 3600000){
+
+const remain = 3600000-(now-lastVoteTime)
+
+return message.reply(`⏳ Voting baru bisa dibuat lagi dalam **${formatTime(remain)}**`)
+
+}
+
+if(voteActive){
+
+return message.reply("⚠️ Voting sedang berlangsung.")
+
+}
+
+voteActive = true
+voteYes = []
+voteNo = []
+
+const embed = new EmbedBuilder()
+
+.setTitle("📊 VOTING LIBUR RAMADHAN FEST")
+
+.setDescription(`
+
+Apakah **Ramadhan Fest diliburkan sementara?**
+
+👍 Setuju
+👎 Tidak
+
+📌 Minimal vote **5 orang**
+⏳ Voting berlangsung **2 menit**
+
+`)
+
+.setColor("Gold")
+
+const row = new ActionRowBuilder().addComponents(
+
+new ButtonBuilder()
+.setCustomId("vote_yes")
+.setLabel("👍 Setuju")
+.setStyle(ButtonStyle.Success),
+
+new ButtonBuilder()
+.setCustomId("vote_no")
+.setLabel("👎 Tidak")
+.setStyle(ButtonStyle.Danger)
+
+)
+
+const msg = await message.channel.send({
+
+embeds:[embed],
+components:[row]
+
+})
+
+/* ================= TIMER VOTE ================= */
+
+setTimeout(async()=>{
+
+const yes = voteYes.length
+const no = voteNo.length
+const total = yes + no
+
+let result = `📊 **HASIL VOTING**\n\n`
+
+result += `👍 Setuju: ${yes}\n`
+result += `👎 Tidak: ${no}\n`
+result += `👥 Total vote: ${total}\n\n`
+
+if(total < 5){
+
+result += "❌ Voting tidak valid.\nMinimal **5 orang** harus vote."
+
+}else{
+
+if(yes > no){
+
+eventPaused = true
+pauseEnd = Date.now() + 86400000
+
+result += "🌙 **Ramadhan Fest diliburkan selama 24 jam.**"
+
+}else{
+
+result += "🎮 Event tetap berjalan."
+
+}
+
+}
+
+message.channel.send(result)
+
+voteActive = false
+lastVoteTime = Date.now()
+
+await msg.edit({components:[]})
+
+},120000)
+
+})
+
+/* ================= BUTTON INTERACTION ================= */
+
+client.on("interactionCreate",async interaction=>{
+
+if(!interaction.isButton()) return
+
+if(interaction.customId === "vote_yes"){
+
+if(voteYes.includes(interaction.user.id) || voteNo.includes(interaction.user.id)){
+
+return interaction.reply({
+
+content:"Kamu sudah vote.",
+ephemeral:true
+
+})
+
+}
+
+voteYes.push(interaction.user.id)
+
+return interaction.reply({
+
+content:"👍 Vote setuju tercatat.",
+ephemeral:true
+
+})
+
+}
+
+if(interaction.customId === "vote_no"){
+
+if(voteYes.includes(interaction.user.id) || voteNo.includes(interaction.user.id)){
+
+return interaction.reply({
+
+content:"Kamu sudah vote.",
+ephemeral:true
+
+})
+
+}
+
+voteNo.push(interaction.user.id)
+
+return interaction.reply({
+
+content:"👎 Vote tidak tercatat.",
+ephemeral:true
+
+})
+
+}
+
+})
