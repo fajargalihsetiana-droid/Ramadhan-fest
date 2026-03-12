@@ -187,6 +187,8 @@ sedekah:60*60*1000
 
 client.on("messageCreate", async message => {
 
+if(isEventPaused()) return
+
 if(message.author.bot) return
 if(message.channel.id !== process.env.KEYWORD_CHANNEL_ID) return
 
