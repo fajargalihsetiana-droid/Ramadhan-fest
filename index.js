@@ -1192,3 +1192,49 @@ ephemeral:true
 }
 
 })
+
+/* =====================================================
+👑 OWNER CONTROL RAMADHAN FEST
+===================================================== */
+
+client.on("messageCreate", async message => {
+
+if(message.author.bot) return
+
+/* ===== PAKSA LIBUR ===== */
+
+if(message.content === "!liburkan"){
+
+if(message.author.id !== OWNER_ID)
+return message.reply("❌ Hanya owner yang bisa menggunakan command ini.")
+
+eventPaused = true
+pauseEnd = Date.now() + 86400000
+
+return message.channel.send(`
+🌙 **Ramadhan Fest diliburkan oleh Owner**
+
+Event akan kembali aktif dalam **24 jam**.
+`)
+
+}
+
+/* ===== BUKA LIBUR ===== */
+
+if(message.content === "!bukalibur"){
+
+if(message.author.id !== OWNER_ID)
+return message.reply("❌ Hanya owner yang bisa menggunakan command ini.")
+
+eventPaused = false
+pauseEnd = 0
+
+return message.channel.send(`
+🎉 **Ramadhan Fest kembali dibuka oleh Owner**
+
+Farm, Quiz, dan Boss sudah aktif kembali!
+`)
+
+}
+
+})
