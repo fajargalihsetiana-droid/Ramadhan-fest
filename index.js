@@ -277,86 +277,36 @@ await updateLeaderboard(message.guild)
 
 let activeQuiz=null;
 const questions=[
+ 
+{ question:"Bulan suci bagi umat Islam disebut...", correct:"Ramadhan", options:["Ramadhan","Syawal","Muharram","Rajab"] },
 
-{ question:"Jika semua kucing adalah hewan dan beberapa hewan adalah liar, maka kesimpulan yang paling tepat adalah...", correct:"Beberapa kucing mungkin liar", options:["Semua kucing liar","Tidak ada kucing liar","Beberapa kucing mungkin liar","Semua hewan kucing"] },
+{ question:"Kitab suci umat Islam adalah...", correct:"Al-Qur'an", options:["Al-Qur'an","Taurat","Zabur","Injil"] },
 
-{ question:"Jika 3 orang dapat menyelesaikan pekerjaan dalam 3 hari, maka 1 orang akan menyelesaikan pekerjaan itu dalam...", correct:"9 hari", options:["3 hari","6 hari","9 hari","12 hari"] },
+{ question:"Nabi terakhir dalam Islam adalah...", correct:"Nabi Muhammad SAW", options:["Nabi Isa","Nabi Musa","Nabi Muhammad SAW","Nabi Ibrahim"] },
 
-{ question:"Jika hari ini hari Rabu, maka 10 hari lagi adalah hari...", correct:"Sabtu", options:["Jumat","Sabtu","Minggu","Senin"] },
+{ question:"Shalat wajib dalam sehari dilakukan sebanyak...", correct:"5 kali", options:["3 kali","4 kali","5 kali","6 kali"] },
 
-{ question:"Jika semua bunga mawar adalah bunga dan sebagian bunga berwarna merah, maka...", correct:"Sebagian mawar mungkin merah", options:["Semua mawar merah","Tidak ada mawar merah","Sebagian mawar mungkin merah","Semua bunga mawar"] },
+{ question:"Puasa Ramadhan diwajibkan bagi umat Islam pada bulan...", correct:"Ramadhan", options:["Syaban","Ramadhan","Syawal","Dzulhijjah"] },
 
-{ question:"Jika kamu menyalip pelari di posisi kedua dalam lomba, posisi kamu sekarang adalah...", correct:"Kedua", options:["Pertama","Kedua","Ketiga","Terakhir"] },
+{ question:"Kota kelahiran Nabi Muhammad SAW adalah...", correct:"Mekkah", options:["Madinah","Mekkah","Thaif","Jerusalem"] },
 
-{ question:"Jika semua dokter adalah sarjana dan sebagian sarjana adalah peneliti, maka...", correct:"Dokter mungkin peneliti", options:["Semua dokter peneliti","Tidak ada dokter peneliti","Dokter mungkin peneliti","Semua peneliti dokter"] },
+{ question:"Masjid pertama yang dibangun Nabi Muhammad di Madinah adalah...", correct:"Masjid Quba", options:["Masjid Quba","Masjid Nabawi","Masjidil Haram","Masjid Aqsa"] },
 
-{ question:"Jika 5 mesin membuat 5 barang dalam 5 menit, maka 100 mesin membuat 100 barang dalam...", correct:"5 menit", options:["5 menit","10 menit","50 menit","100 menit"] },
+{ question:"Hari raya setelah bulan Ramadhan disebut...", correct:"Idul Fitri", options:["Idul Fitri","Idul Adha","Maulid Nabi","Isra Mi'raj"] },
 
-{ question:"Jika kamu memiliki 10 ikan dan 5 tenggelam, berapa ikan yang tersisa?", correct:"10", options:["5","10","0","15"] },
+{ question:"Malaikat yang menyampaikan wahyu kepada Nabi adalah...", correct:"Jibril", options:["Jibril","Mikail","Israfil","Izrail"] },
 
-{ question:"Jika semua burung punya sayap dan ayam adalah burung, maka...", correct:"Ayam punya sayap", options:["Ayam tidak punya sayap","Ayam punya sayap","Semua sayap ayam","Ayam bukan burung"] },
+{ question:"Ibadah haji dilakukan di kota...", correct:"Mekkah", options:["Madinah","Mekkah","Baghdad","Kairo"] },
 
-{ question:"Jika 1 kg besi dan 1 kg kapas ditimbang, mana yang lebih berat?", correct:"Sama", options:["Besi","Kapas","Sama","Tidak bisa ditentukan"] },
+{ question:"Surah pertama dalam Al-Qur'an adalah...", correct:"Al-Fatihah", options:["Al-Fatihah","Al-Baqarah","An-Nas","Al-Ikhlas"] },
 
-{ question:"Jika sebuah kereta listrik berjalan ke utara, ke mana arah asapnya?", correct:"Tidak ada asap", options:["Utara","Selatan","Barat","Tidak ada asap"] },
+{ question:"Puasa Ramadhan dimulai saat waktu...", correct:"Subuh", options:["Subuh","Dzuhur","Ashar","Maghrib"] },
 
-{ question:"Jika kamu meminum obat setiap 30 menit sebanyak 3 kali, berapa waktu yang dibutuhkan sampai obat habis?", correct:"1 jam", options:["30 menit","1 jam","1.5 jam","2 jam"] },
+{ question:"Puasa Ramadhan berakhir saat waktu...", correct:"Maghrib", options:["Subuh","Dzuhur","Ashar","Maghrib"] },
 
-{ question:"Jika 2 ayah dan 2 anak pergi memancing dan mereka hanya menangkap 3 ikan tetapi masing-masing mendapat 1 ikan, bagaimana bisa?", correct:"Ada kakek, ayah, dan anak", options:["Ada 4 orang","Ada kakek, ayah, dan anak","Ikan dibagi","Tidak mungkin"] },
+{ question:"Kitab Al-Qur'an diturunkan pertama kali di malam...", correct:"Lailatul Qadar", options:["Lailatul Qadar","Isra Mi'raj","Nuzulul Quran","Idul Fitri"] },
 
-{ question:"Jika semua guru adalah pekerja dan sebagian pekerja rajin, maka...", correct:"Guru mungkin rajin", options:["Semua guru rajin","Tidak ada guru rajin","Guru mungkin rajin","Semua pekerja guru"] },
-
-{ question:"Jika 8 × 0 + 5 = ?", correct:"5", options:["0","5","8","40"] },
-
-{ question:"Jika semua mobil punya roda dan sepeda punya roda, maka...", correct:"Tidak bisa disimpulkan sepeda mobil", options:["Sepeda mobil","Mobil sepeda","Tidak bisa disimpulkan sepeda mobil","Semua roda mobil"] },
-
-{ question:"Jika kamu berada di posisi terakhir lomba dan menyalip satu orang, posisi kamu sekarang adalah...", correct:"Kedua dari belakang", options:["Terakhir","Pertama","Kedua dari belakang","Kedua"] },
-
-{ question:"Jika 4 orang membutuhkan 4 hari untuk membangun tembok, maka 2 orang membutuhkan...", correct:"8 hari", options:["2 hari","4 hari","6 hari","8 hari"] },
-
-{ question:"Jika semua mahasiswa belajar dan sebagian yang belajar rajin, maka...", correct:"Mahasiswa mungkin rajin", options:["Semua mahasiswa rajin","Tidak ada mahasiswa rajin","Mahasiswa mungkin rajin","Semua rajin mahasiswa"] },
-
-{ question:"Jika hari ini Jumat, maka 7 hari lagi adalah hari...", correct:"Jumat", options:["Kamis","Jumat","Sabtu","Minggu"] },
-
-{ question:"Jika harga 1 buku 10 ribu dan kamu membeli 5 buku lalu mendapat diskon 10 ribu, berapa yang harus dibayar?", correct:"40000", options:["30000","40000","45000","50000"] },
-
-{ question:"Jika semua ikan hidup di air dan paus hidup di air, maka...", correct:"Tidak pasti paus ikan", options:["Paus ikan","Ikan paus","Tidak pasti paus ikan","Semua paus ikan"] },
-
-{ question:"Jika 9 + 9 ÷ 3 = ?", correct:"12", options:["6","9","12","18"] },
-
-{ question:"Jika kamu memiliki 20 apel dan memakan 5 apel, berapa apel yang kamu miliki?", correct:"15", options:["5","10","15","20"] },
-
-{ question:"Jika semua buku adalah benda dan sebagian benda berat, maka...", correct:"Buku mungkin berat", options:["Semua buku berat","Tidak ada buku berat","Buku mungkin berat","Semua benda buku"] },
-
-{ question:"Jika 100 ÷ 10 × 2 = ?", correct:"20", options:["5","10","20","40"] },
-
-{ question:"Jika semua polisi adalah pegawai dan sebagian pegawai disiplin, maka...", correct:"Polisi mungkin disiplin", options:["Semua polisi disiplin","Tidak ada polisi disiplin","Polisi mungkin disiplin","Semua disiplin polisi"] },
-
-{ question:"Jika sebuah mobil menempuh 60 km dalam 1 jam, berapa jarak dalam 30 menit?", correct:"30 km", options:["20 km","25 km","30 km","40 km"] },
-
-{ question:"Jika 2 + 2 × 2 = ?", correct:"6", options:["4","6","8","12"] },
-
-{ question:"Jika semua dokter bekerja di rumah sakit dan sebagian pekerja rumah sakit rajin, maka...", correct:"Dokter mungkin rajin", options:["Semua dokter rajin","Tidak ada dokter rajin","Dokter mungkin rajin","Semua rajin dokter"] },
-
-{ question:"Jika kamu berjalan 3 km ke utara lalu 3 km ke selatan, kamu sekarang berada di...", correct:"Tempat awal", options:["Utara","Selatan","Tempat awal","Barat"] },
-
-{ question:"Jika 6 × 6 ÷ 3 = ?", correct:"12", options:["6","12","18","36"] },
-
-{ question:"Jika semua siswa belajar dan sebagian yang belajar pintar, maka...", correct:"Siswa mungkin pintar", options:["Semua siswa pintar","Tidak ada siswa pintar","Siswa mungkin pintar","Semua pintar siswa"] },
-
-{ question:"Jika kamu punya uang 100 ribu dan membeli barang 75 ribu, berapa sisa uang?", correct:"25000", options:["20000","25000","30000","35000"] },
-
-{ question:"Jika 10 + 10 × 0 = ?", correct:"10", options:["0","10","20","100"] },
-
-{ question:"Jika semua kendaraan memiliki roda dan sepeda motor memiliki roda, maka...", correct:"Motor adalah kendaraan", options:["Motor bukan kendaraan","Motor kendaraan","Semua kendaraan motor","Tidak ada motor"] },
-
-{ question:"Jika 7 + 3 × 2 = ?", correct:"13", options:["10","13","14","20"] },
-
-{ question:"Jika semua burung bisa bertelur dan ayam adalah burung, maka...", correct:"Ayam bertelur", options:["Ayam tidak bertelur","Ayam bertelur","Semua telur ayam","Ayam bukan burung"] },
-
-{ question:"Jika sebuah pekerjaan selesai dalam 10 hari oleh 5 orang, maka 1 orang akan menyelesaikan dalam...", correct:"50 hari", options:["10 hari","20 hari","40 hari","50 hari"] },
-
-{ question:"Jika 8 + 2 × 5 = ?", correct:"18", options:["10","16","18","50"] }
+{ question:"Masjid paling suci bagi umat Islam adalah...", correct:"Masjidil Haram", options:["Masjidil Haram","Masjid Nabawi","Masjid Quba","Masjid Aqsa"] }
 
 ];
 /* ================= SEND QUIZ ================= */
@@ -651,6 +601,7 @@ if(!guild) return;
 
 startAutoQuizSystem(guild);
 startBossSchedule(guild);
+startCountdown(guild);
 
 });
 
@@ -1367,18 +1318,6 @@ if(message.content === "!countdown"){
 message.channel.send(getCountdownText())
 
 }
-
-})
-
-/* ================= START SYSTEM ================= */
-
-client.on("clientReady",()=>{
-
-const guild = client.guilds.cache.get(process.env.GUILD_ID)
-
-if(!guild) return
-
-startCountdown(guild)
 
 })
 
