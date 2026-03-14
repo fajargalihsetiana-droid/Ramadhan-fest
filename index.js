@@ -278,35 +278,87 @@ await updateLeaderboard(message.guild)
 let activeQuiz=null;
 const questions=[
  
-{ question:"Bulan suci bagi umat Islam disebut...", correct:"Ramadhan", options:["Ramadhan","Syawal","Muharram","Rajab"] },
+{ question:"Dalam sebuah rapat, ide Anda ditolak mentah-mentah oleh atasan karena dianggap tidak relevan. Sikap Anda adalah...", correct:"Menerima argumen atasan dan mencoba memperbaiki ide tersebut agar lebih relevan", options:["Kecewa dan memilih diam sepanjang sisa rapat","Menerima argumen atasan dan mencoba memperbaiki ide tersebut agar lebih relevan","Tetap bersikukuh bahwa ide Anda adalah yang terbaik","Langsung keluar dari ruangan karena merasa tidak dihargai"] },
 
-{ question:"Kitab suci umat Islam adalah...", correct:"Al-Qur'an", options:["Al-Qur'an","Taurat","Zabur","Injil"] },
+{ question:"Seorang rekan kerja menitipkan pekerjaannya kepada Anda karena ia ingin pergi berbelanja. Anda sendiri sedang sibuk. Apa yang Anda lakukan?", correct:"Menolaknya dengan sopan karena Anda harus menyelesaikan tanggung jawab sendiri", options:["Menerimanya agar dianggap teman yang baik","Menolaknya dengan sopan karena Anda harus menyelesaikan tanggung jawab sendiri","Melaporkannya langsung ke atasan agar ia ditegur","Membantunya setelah jam kerja selesai dengan imbalan"] },
 
-{ question:"Nabi terakhir dalam Islam adalah...", correct:"Nabi Muhammad SAW", options:["Nabi Isa","Nabi Musa","Nabi Muhammad SAW","Nabi Ibrahim"] },
+{ question:"Semua mamalia menyusui anaknya. Semua lumba-lumba adalah mamalia. Kesimpulan yang tepat adalah...", correct:"Semua lumba-lumba menyusui anaknya", options:["Sebagian lumba-lumba menyusui anaknya","Semua lumba-lumba menyusui anaknya","Lumba-lumba bukan merupakan mamalia","Hanya lumba-lumba yang menyusui anaknya"] },
 
-{ question:"Shalat wajib dalam sehari dilakukan sebanyak...", correct:"5 kali", options:["3 kali","4 kali","5 kali","6 kali"] },
+{ question:"Jika 'MATA' adalah '26-1-20-1', maka 'BUKU' adalah...", correct:"2-21-11-21", options:["2-15-11-21","2-21-11-15","2-21-11-21","3-21-11-21"] },
 
-{ question:"Puasa Ramadhan diwajibkan bagi umat Islam pada bulan...", correct:"Ramadhan", options:["Syaban","Ramadhan","Syawal","Dzulhijjah"] },
+{ question:"Lembaga yang berwenang memutus pembubaran partai politik menurut UUD 1945 adalah...", correct:"Mahkamah Konstitusi", options:["Mahkamah Agung","Komisi Yudisial","DPR","Mahkamah Konstitusi"] },
 
-{ question:"Kota kelahiran Nabi Muhammad SAW adalah...", correct:"Mekkah", options:["Madinah","Mekkah","Thaif","Jerusalem"] },
+{ question:"Pancasila sebagai 'Lembaga Tertinggi Negara' merupakan fungsi Pancasila sebagai...", correct:"Sumber dari segala sumber hukum", options:["Dasar Negara","Pandangan Hidup","Sumber dari segala sumber hukum","Kepribadian Bangsa"] },
 
-{ question:"Masjid pertama yang dibangun Nabi Muhammad di Madinah adalah...", correct:"Masjid Quba", options:["Masjid Quba","Masjid Nabawi","Masjidil Haram","Masjid Aqsa"] },
+{ question:"Anda ditugaskan ke daerah terpencil yang tidak memiliki akses internet. Sikap Anda...", correct:"Menerima tugas tersebut sebagai tantangan untuk beradaptasi dan mengabdi", options:["Meminta pindah tugas ke kota besar","Menerima tugas tersebut sebagai tantangan untuk beradaptasi dan mengabdi","Protes karena internet adalah kebutuhan pokok kerja","Menjalankan tugas dengan setengah hati"] },
 
-{ question:"Hari raya setelah bulan Ramadhan disebut...", correct:"Idul Fitri", options:["Idul Fitri","Idul Adha","Maulid Nabi","Isra Mi'raj"] },
+{ question:"Hasil dari 12,5% dari 512 adalah...", correct:"64", options:["48","64","72","86"] },
 
-{ question:"Malaikat yang menyampaikan wahyu kepada Nabi adalah...", correct:"Jibril", options:["Jibril","Mikail","Israfil","Izrail"] },
+{ question:"Deret angka: 2, 4, 8, 14, 22, ... Angka selanjutnya adalah...", correct:"32", options:["30","32","34","36"] },
 
-{ question:"Ibadah haji dilakukan di kota...", correct:"Mekkah", options:["Madinah","Mekkah","Baghdad","Kairo"] },
+{ question:"Tokoh yang memimpin perlawanan dalam Pertempuran 10 November di Surabaya adalah...", correct:"Bung Tomo", options:["Jenderal Sudirman","Bung Tomo","Moh. Hatta","Ir. Soekarno"] },
 
-{ question:"Surah pertama dalam Al-Qur'an adalah...", correct:"Al-Fatihah", options:["Al-Fatihah","Al-Baqarah","An-Nas","Al-Ikhlas"] },
+{ question:"Sikap yang menunjukkan nilai sila kedua Pancasila dalam kehidupan sehari-hari adalah...", correct:"Menggalang dana untuk korban bencana alam tanpa membeda-bedakan", options:["Menghargai pendapat orang lain saat rapat","Menggalang dana untuk korban bencana alam tanpa membeda-bedakan","Melakukan musyawarah mufakat","Beribadah tepat waktu"] },
 
-{ question:"Puasa Ramadhan dimulai saat waktu...", correct:"Subuh", options:["Subuh","Dzuhur","Ashar","Maghrib"] },
+{ question:"Suatu pekerjaan dapat diselesaikan oleh 10 orang dalam 12 hari. Jika ingin selesai dalam 8 hari, berapa orang tambahan yang diperlukan?", correct:"5 orang", options:["3 orang","5 orang","15 orang","2 orang"] },
 
-{ question:"Puasa Ramadhan berakhir saat waktu...", correct:"Maghrib", options:["Subuh","Dzuhur","Ashar","Maghrib"] },
+{ question:"Andi lebih tua dari Budi. Cici lebih muda dari Budi. Dedi lebih tua dari Cici tapi lebih muda dari Budi. Siapa yang paling muda?", correct:"Cici", options:["Andi","Budi","Cici","Dedi"] },
 
-{ question:"Kitab Al-Qur'an diturunkan pertama kali di malam...", correct:"Lailatul Qadar", options:["Lailatul Qadar","Isra Mi'raj","Nuzulul Quran","Idul Fitri"] },
+{ question:"BPUPKI dibentuk pada tanggal...", correct:"1 Maret 1945", options:["1 Maret 1945","29 Mei 1945","1 Juni 1945","17 Agustus 1945"] },
 
-{ question:"Masjid paling suci bagi umat Islam adalah...", correct:"Masjidil Haram", options:["Masjidil Haram","Masjid Nabawi","Masjid Quba","Masjid Aqsa"] }
+{ question:"Pengamalan sila ke-4 Pancasila paling tepat digambarkan oleh...", correct:"Mengutamakan musyawarah dalam mengambil keputusan untuk kepentingan bersama", options:["Membantu orang tua menyeberang jalan","Berdoa sebelum belajar","Cinta produk dalam negeri","Mengutamakan musyawarah dalam mengambil keputusan untuk kepentingan bersama"] },
+
+{ question:"Anda menemukan dompet tergeletak di koridor kantor yang sepi. Apa tindakan Anda?", correct:"Menyerahkannya ke bagian keamanan atau HRD tanpa mengambil isinya", options:["Mengambil isinya lalu membuang dompetnya","Menunggu pemiliknya datang di tempat tersebut sampai jam pulang","Menyerahkannya ke bagian keamanan atau HRD tanpa mengambil isinya","Membiarkannya saja karena bukan urusan Anda"] },
+
+{ question:"Sinonim dari kata 'EKSODUS' adalah...", correct:"Pengungsian", options:["Pemasukan","Pengungsian","Perjalanan","Pemukiman"] },
+
+{ question:"Antonim dari kata 'PROGRESIF' adalah...", correct:"Statis", options:["Aktif","Modern","Statis","Cepat"] },
+
+{ question:"Sebuah bus berangkat pukul 08.00 dengan kecepatan 60 km/jam. Jika jarak tujuan 180 km, pukul berapa bus sampai?", correct:"11.00", options:["10.00","10.30","11.00","11.30"] },
+
+{ question:"Sumpah Pemuda dibacakan pada tanggal...", correct:"28 Oktober 1928", options:["20 Mei 1908","17 Agustus 1945","28 Oktober 1928","10 November 1945"] },
+
+{ question:"Amandemen UUD 1945 telah dilakukan sebanyak...", correct:"4 kali", options:["2 kali","3 kali","4 kali","5 kali"] },
+
+{ question:"Dalam mengerjakan tugas kelompok, rekan Anda malas-malasan. Sikap Anda...", correct:"Menegurnya dengan baik dan membagi ulang tugas agar ia berkontribusi", options:["Mengerjakan semuanya sendiri agar cepat selesai","Menghapusnya dari daftar anggota kelompok","Menegurnya dengan baik dan membagi ulang tugas agar ia berkontribusi","Ikut-ikutan malas agar adil"] },
+
+{ question:"Negara yang tidak termasuk pendiri ASEAN adalah...", correct:"Vietnam", options:["Indonesia","Filipina","Thailand","Vietnam"] },
+
+{ question:"Lambang negara Garuda Pancasila dirancang oleh...", correct:"Sultan Hamid II", options:["Muh. Yamin","Ir. Soekarno","Sultan Hamid II","Mr. Soepomo"] },
+
+{ question:"Jika hari ini adalah hari Rabu, maka 100 hari lagi adalah hari...", correct:"Jumat", options:["Kamis","Jumat","Sabtu","Minggu"] },
+
+{ question:"Nilai dari 0,75 + 1/4 + 25% adalah...", correct:"1,25", options:["1,00","1,25","1,50","1,75"] },
+
+{ question:"Bhinneka Tunggal Ika diambil dari kitab Sutasoma karangan...", correct:"Mpu Tantular", options:["Mpu Prapanca","Mpu Tantular","Mpu Sedah","Mpu Panuluh"] },
+
+{ question:"Analogi: GURU : SEKOLAH = ... : ...", correct:"Penebang : Hutan", options:["Obat : Apotek","Penebang : Hutan","Supir : Mobil","Pasien : Rumah Sakit"] },
+
+{ question:"Siapakah yang mengetik naskah proklamasi Indonesia?", correct:"Sayuti Melik", options:["Laksamana Maeda","Sukarni","Sayuti Melik","B.M. Diah"] },
+
+{ question:"Mana yang bukan merupakan pahlawan revolusi?", correct:"Pangeran Diponegoro", options:["Ahmad Yani","D.I. Panjaitan","Pangeran Diponegoro","Pierre Tendean"] },
+
+{ question:"Ibu kota negara Kalimantan Timur yang baru (IKN) bernama...", correct:"Nusantara", options:["Penajam","Nusantara","Balikpapan","Samarinda"] },
+
+{ question:"Hasil dari (25 x 4) + (50 : 2) adalah...", correct:"125", options:["100","125","150","175"] },
+
+{ question:"Hak DPR untuk melakukan penyelidikan terhadap kebijakan pemerintah disebut hak...", correct:"Angket", options:["Interpelasi","Angket","Menyatakan Pendapat","Imunitas"] },
+
+{ question:"Sikap mencintai tanah air dan bangsa secara berlebihan disebut...", correct:"Chauvinisme", options:["Patriotisme","Nasionalisme","Chauvinisme","Etnosentrisme"] },
+
+{ question:"Jika x = 2 dan y = 5, maka nilai dari x^2 + 2xy + y^2 adalah...", correct:"49", options:["25","36","49","64"] },
+
+{ question:"Semboyan 'Ing Ngarsa Sung Tuladha' dikemukakan oleh...", correct:"Ki Hajar Dewantara", options:["Raden Ajen Kartini","Ki Hajar Dewantara","Dr. Sutomo","HOS Cokroaminoto"] },
+
+{ question:"Negara Indonesia adalah negara hukum. Hal ini tertuang dalam UUD 1945 pasal...", correct:"Pasal 1 ayat 3", options:["Pasal 1 ayat 1","Pasal 1 ayat 2","Pasal 1 ayat 3","Pasal 2 ayat 1"] },
+
+{ question:"Petani : Cangkul = ... : ...", correct:"Penjahit : Jarum", options:["Nelayan : Laut","Penjahit : Jarum","Guru : Murid","Dokter : Obat"] },
+
+{ question:"Angka yang tepat untuk mengisi titik-titik: 1, 3, 6, 10, ...", correct:"15", options:["12","14","15","18"] },
+
+{ question:"Sila yang menjadi payung bagi sila-sila lainnya adalah sila ke...", correct:"1", options:["1","2","3","5"] },
+
+{ question:"Badan yang menggantikan BPUPKI adalah...", correct:"PPKI", options:["KNIP","PPKI","DPRD","MPR"] }
 
 ];
 /* ================= SEND QUIZ ================= */
