@@ -86,22 +86,26 @@ const gap = topPoints - userPoints
 
 let multiplier = 1
 
-/* ===== RANK BALANCE (TOP 4) ===== */
+/* ===== RANK BALANCE ===== */
 
-if(rankIndex === 0) multiplier *= 1.5
-else if(rankIndex === 1) multiplier *= 1.6
-else if(rankIndex === 2) multiplier *= 1.7
-else multiplier *= 3
+if(rankIndex === 0) multiplier *= 1
+else if(rankIndex === 1) multiplier *= 1.1
+else if(rankIndex === 2) multiplier *= 1.2
+else if(rankIndex <= 5) multiplier *= 1.3
+else multiplier *= 1.35
 
-/* ===== GAP BALANCE ===== */
+/* ===== GAP BALANCE (rank 2 kebawah) ===== */
 
-if(gap < 100) multiplier *= 1
-else if(gap < 300) multiplier *= 1.2
-else if(gap < 600) multiplier *= 1.3
-else if(gap < 1000) multiplier *= 1.4
-else if(gap < 2000) multiplier *= 2
-else if(gap < 4000) multiplier *= 3
-else multiplier *= 1.5
+if(rankIndex !== 0){
+
+if(gap < 200) multiplier *= 1
+else if(gap < 500) multiplier *= 1.1
+else if(gap < 1000) multiplier *= 1.15
+else if(gap < 2000) multiplier *= 1.2
+else if(gap < 4000) multiplier *= 1.25
+else multiplier *= 1.3
+
+}
 
 
 /* ===== FINAL REWARD ===== */
