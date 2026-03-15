@@ -663,7 +663,9 @@ startCountdown(guild);
 
 });
 
+setTimeout(() => {
 client.login(process.env.TOKEN);
+}, 5000);
 
 /* =====================================================
 🐉 RAMADHAN BOSS RAID PRO
