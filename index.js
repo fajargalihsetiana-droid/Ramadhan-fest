@@ -88,12 +88,14 @@ let multiplier = 1
 
 /* ===== RANK BALANCE (TOP 4) ===== */
 
-if(rankIndex === 0) multiplier *= 1
-else if(rankIndex === 1) multiplier *= 1
-else if(rankIndex === 2) multiplier *= 1.3
-else multiplier *= 1.5
+if(rankIndex === 0) multiplier *= 1.5
+else if(rankIndex === 1) multiplier *= 1.6
+else if(rankIndex === 2) multiplier *= 1.7
+else multiplier *= 3
 
 /* ===== GAP BALANCE ===== */
+
+if(rankIndex !== 0){
 
 if(gap < 100) multiplier *= 1
 else if(gap < 300) multiplier *= 1.2
