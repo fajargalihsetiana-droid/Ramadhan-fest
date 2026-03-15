@@ -285,17 +285,9 @@ await updateLeaderboard(message.guild)
 let activeQuiz=null;
 const questions=[
  
-{ question:"Dalam sebuah rapat, ide Anda ditolak mentah-mentah oleh atasan karena dianggap tidak relevan. Sikap Anda adalah...", correct:"Menerima argumen atasan dan mencoba memperbaiki ide tersebut agar lebih relevan", options:["Kecewa dan memilih diam sepanjang sisa rapat","Menerima argumen atasan dan mencoba memperbaiki ide tersebut agar lebih relevan","Tetap bersikukuh bahwa ide Anda adalah yang terbaik","Langsung keluar dari ruangan karena merasa tidak dihargai"] },
-
 { question:"Seorang rekan kerja menitipkan pekerjaannya kepada Anda karena ia ingin pergi berbelanja. Anda sendiri sedang sibuk. Apa yang Anda lakukan?", correct:"Menolaknya dengan sopan karena Anda harus menyelesaikan tanggung jawab sendiri", options:["Menerimanya agar dianggap teman yang baik","Menolaknya dengan sopan karena Anda harus menyelesaikan tanggung jawab sendiri","Melaporkannya langsung ke atasan agar ia ditegur","Membantunya setelah jam kerja selesai dengan imbalan"] },
 
 { question:"Semua mamalia menyusui anaknya. Semua lumba-lumba adalah mamalia. Kesimpulan yang tepat adalah...", correct:"Semua lumba-lumba menyusui anaknya", options:["Sebagian lumba-lumba menyusui anaknya","Semua lumba-lumba menyusui anaknya","Lumba-lumba bukan merupakan mamalia","Hanya lumba-lumba yang menyusui anaknya"] },
-
-{ question:"Jika 'MATA' adalah '26-1-20-1', maka 'BUKU' adalah...", correct:"2-21-11-21", options:["2-15-11-21","2-21-11-15","2-21-11-21","3-21-11-21"] },
-
-{ question:"Lembaga yang berwenang memutus pembubaran partai politik menurut UUD 1945 adalah...", correct:"Mahkamah Konstitusi", options:["Mahkamah Agung","Komisi Yudisial","DPR","Mahkamah Konstitusi"] },
-
-{ question:"Pancasila sebagai 'Lembaga Tertinggi Negara' merupakan fungsi Pancasila sebagai...", correct:"Sumber dari segala sumber hukum", options:["Dasar Negara","Pandangan Hidup","Sumber dari segala sumber hukum","Kepribadian Bangsa"] },
 
 { question:"Anda ditugaskan ke daerah terpencil yang tidak memiliki akses internet. Sikap Anda...", correct:"Menerima tugas tersebut sebagai tantangan untuk beradaptasi dan mengabdi", options:["Meminta pindah tugas ke kota besar","Menerima tugas tersebut sebagai tantangan untuk beradaptasi dan mengabdi","Protes karena internet adalah kebutuhan pokok kerja","Menjalankan tugas dengan setengah hati"] },
 
@@ -307,15 +299,9 @@ const questions=[
 
 { question:"Sikap yang menunjukkan nilai sila kedua Pancasila dalam kehidupan sehari-hari adalah...", correct:"Menggalang dana untuk korban bencana alam tanpa membeda-bedakan", options:["Menghargai pendapat orang lain saat rapat","Menggalang dana untuk korban bencana alam tanpa membeda-bedakan","Melakukan musyawarah mufakat","Beribadah tepat waktu"] },
 
-{ question:"Suatu pekerjaan dapat diselesaikan oleh 10 orang dalam 12 hari. Jika ingin selesai dalam 8 hari, berapa orang tambahan yang diperlukan?", correct:"5 orang", options:["3 orang","5 orang","15 orang","2 orang"] },
-
-{ question:"Andi lebih tua dari Budi. Cici lebih muda dari Budi. Dedi lebih tua dari Cici tapi lebih muda dari Budi. Siapa yang paling muda?", correct:"Cici", options:["Andi","Budi","Cici","Dedi"] },
-
 { question:"BPUPKI dibentuk pada tanggal...", correct:"1 Maret 1945", options:["1 Maret 1945","29 Mei 1945","1 Juni 1945","17 Agustus 1945"] },
 
 { question:"Pengamalan sila ke-4 Pancasila paling tepat digambarkan oleh...", correct:"Mengutamakan musyawarah dalam mengambil keputusan untuk kepentingan bersama", options:["Membantu orang tua menyeberang jalan","Berdoa sebelum belajar","Cinta produk dalam negeri","Mengutamakan musyawarah dalam mengambil keputusan untuk kepentingan bersama"] },
-
-{ question:"Anda menemukan dompet tergeletak di koridor kantor yang sepi. Apa tindakan Anda?", correct:"Menyerahkannya ke bagian keamanan atau HRD tanpa mengambil isinya", options:["Mengambil isinya lalu membuang dompetnya","Menunggu pemiliknya datang di tempat tersebut sampai jam pulang","Menyerahkannya ke bagian keamanan atau HRD tanpa mengambil isinya","Membiarkannya saja karena bukan urusan Anda"] },
 
 { question:"Sinonim dari kata 'EKSODUS' adalah...", correct:"Pengungsian", options:["Pemasukan","Pengungsian","Perjalanan","Pemukiman"] },
 
@@ -348,8 +334,6 @@ const questions=[
 { question:"Ibu kota negara Kalimantan Timur yang baru (IKN) bernama...", correct:"Nusantara", options:["Penajam","Nusantara","Balikpapan","Samarinda"] },
 
 { question:"Hasil dari (25 x 4) + (50 : 2) adalah...", correct:"125", options:["100","125","150","175"] },
-
-{ question:"Hak DPR untuk melakukan penyelidikan terhadap kebijakan pemerintah disebut hak...", correct:"Angket", options:["Interpelasi","Angket","Menyatakan Pendapat","Imunitas"] },
 
 { question:"Sikap mencintai tanah air dan bangsa secara berlebihan disebut...", correct:"Chauvinisme", options:["Patriotisme","Nasionalisme","Chauvinisme","Etnosentrisme"] },
 
@@ -532,7 +516,7 @@ if(parseInt(interaction.customId)===activeQuiz.correct){
 
 const user=getUser(interaction.user.id);
 
-let reward = 150;
+let reward = 175;
 
 if(!activeQuiz.firstWinner){
 reward*=2;
@@ -677,7 +661,7 @@ let raidMessage=null
 let raidPlayers={}
 let attackCooldown={}
 
-const RAID_HP=8000
+const RAID_HP=10000
 
 let updatePending=false
 
@@ -818,11 +802,11 @@ const p = sorted[i]
 
 const user = getUser(p[0])
 
-let reward = 100
+let reward = 250
 
-if(i===0) reward=400
-else if(i===1) reward=300
-else if(i===2) reward=200
+if(i===0) reward=1000
+else if(i===1) reward=750
+else if(i===2) reward=500
 
 user.points += reward
 
