@@ -218,7 +218,6 @@ return message.reply(`⏳ Tunggu ${remain} menit lagi.`)
 let reward=Math.floor(Math.random()*40)+90
 
 reward = applyGapBalance(message.author.id,reward)
-reward = Math.max(reward,100)
 
 if(Math.random()<0.05){
 reward+=500
