@@ -90,20 +90,20 @@ let multiplier = 1
 
 if(rankIndex === 0) multiplier *= 1
 else if(rankIndex === 1) multiplier *= 1.1
-else if(rankIndex === 2) multiplier *= 1.2
-else if(rankIndex <= 5) multiplier *= 1.3
-else multiplier *= 1.35
+else if(rankIndex === 2) multiplier *= 1.6
+else if(rankIndex <= 5) multiplier *= 1.7
+else multiplier *= 3
 
 /* ===== GAP BALANCE (rank 2 kebawah) ===== */
 
 if(rankIndex !== 0){
 
-if(gap < 200) multiplier *= 1
+if(gap < 300) multiplier *= 1
 else if(gap < 500) multiplier *= 1.1
-else if(gap < 1000) multiplier *= 1.15
-else if(gap < 2000) multiplier *= 1.2
-else if(gap < 4000) multiplier *= 1.25
-else multiplier *= 1.3
+else if(gap < 1000) multiplier *= 1.5
+else if(gap < 2000) multiplier *= 1.6
+else if(gap < 4000) multiplier *= 1.7
+else multiplier *= 2
 
 }
 
