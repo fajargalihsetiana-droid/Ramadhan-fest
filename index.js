@@ -93,7 +93,7 @@ else if(rankIndex === 1) multiplier *= 1.6
 else if(rankIndex === 2) multiplier *= 1.7
 else multiplier *= 3
 
-/* ===== GAP BALANCE ===== */
+/* ===== GAP BALANCE (HANYA RANK 2 KEBAWAH) ===== */
 
 if(rankIndex !== 0){
 
@@ -105,11 +105,13 @@ else if(gap < 2000) multiplier *= 2
 else if(gap < 4000) multiplier *= 3
 else multiplier *= 1.5
 
+}
+
+/* ===== FINAL REWARD ===== */
+
 let reward = Math.floor(baseReward * multiplier)
 
 return reward
-
-}
 
 /* ===== shuffle ===== */
 function shuffle(array){
