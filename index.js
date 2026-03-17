@@ -101,9 +101,9 @@ if(rankIndex !== 0){
 if(gap < 500) multiplier *= 1
 else if(gap < 700) multiplier *= 1.1
 else if(gap < 1000) multiplier *= 1.5
-else if(gap < 2000) multiplier *= 1.6
-else if(gap < 4000) multiplier *= 1.7
-else multiplier *= 2
+else if(gap < 2000) multiplier *= 2
+else if(gap < 4000) multiplier *= 3
+else multiplier *= 4
 
 }
 
